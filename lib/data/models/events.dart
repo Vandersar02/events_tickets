@@ -16,7 +16,6 @@ class Event {
   });
 }
 
-// Liste principale d'événements
 final List<Event> events = [
   Event(
     date: DateTime.parse("2023-06-01 23:00:00"),
@@ -47,7 +46,6 @@ final List<Event> events = [
   ),
 ];
 
-// Liste des événements populaires, référencée pour éviter la répétition
 final List<Event> popularEvents = [
   events[0],
   events[1],
