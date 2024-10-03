@@ -1,4 +1,4 @@
-import 'package:events_ticket/presentation/widgets/custom_appbar.dart';
+import 'package:events_ticket/presentation/widgets/custom_appBar.dart';
 import 'package:flutter/material.dart';
 import 'package:events_ticket/data/models/events.dart';
 import 'components/event_card.dart';
@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  "Events",
+                  "Upcoming Events",
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                       color: Colors.black, fontWeight: FontWeight.bold),
                 ),
@@ -64,8 +64,8 @@ class HomePage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  "Recent Events",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  "Nearest events",
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                       color: Colors.black, fontWeight: FontWeight.bold),
                 ),
               ),
