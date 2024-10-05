@@ -1,5 +1,6 @@
 import 'package:events_ticket/presentation/screens/auth/login_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/signup_screen.dart';
+import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,7 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String signup = '/signup';
+  static const String entryPoint = '/';
   static const String eventList = '/events';
   static const String eventDetails = '/event-details';
   static const String ticket = '/ticket';
@@ -21,7 +23,9 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case signup:
         return MaterialPageRoute(builder: (_) => SignUpScreen());
-      // case eventList:+
+      case entryPoint:
+        return MaterialPageRoute(builder: (_) => EntryPoint());
+      // case eventList:
       //   return MaterialPageRoute(builder: (_) => EventListScreen());
       // case eventDetails:
       //   var eventId = settings.arguments as String;
