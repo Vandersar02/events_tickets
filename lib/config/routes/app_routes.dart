@@ -1,7 +1,7 @@
 import 'package:events_ticket/presentation/screens/auth/login_screen.dart';
-import 'package:events_ticket/presentation/screens/auth/signup_screen.dart';
+import 'package:events_ticket/presentation/screens/auth/signUp_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
-import 'package:events_ticket/presentation/screens/onboding/onboarding_screen.dart';
+import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
 // Classe contenant les routes de l'application

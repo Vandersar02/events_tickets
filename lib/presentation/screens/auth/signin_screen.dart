@@ -1,4 +1,4 @@
-import 'package:events_ticket/presentation/screens/auth/signup_screen.dart';
+import 'package:events_ticket/presentation/screens/auth/signUp_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

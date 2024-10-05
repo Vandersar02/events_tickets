@@ -6,7 +6,6 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-// Fonction principale qui exécute l'application
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,13 +23,12 @@ void main() async {
   // Lancement de l'application avec un fournisseur de changement de thème
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeProvider(), // Fournisseur du thème
+      create: (context) => ThemeProvider(),
       child: const MyApp(),
     ),
   );
 }
 
-// Classe principale de l'application qui définit le widget racine
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -46,10 +44,8 @@ class MyApp extends StatelessWidget {
       themeMode:
           themeProvider.themeMode, // Gestion dynamique du mode clair/sombre
       debugShowCheckedModeBanner: false,
-      onGenerateRoute: AppRoutes
-          .generateRoute, // Génération des routes en fonction de leur nom
-      initialRoute: AppRoutes
-          .onboarding, // Route initiale vers l'écran d'accueil (onboarding)
+      onGenerateRoute: AppRoutes.generateRoute,
+      initialRoute: AppRoutes.onboarding,
     );
   }
 }

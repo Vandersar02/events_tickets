@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'signup_screen.dart';
+import 'signUp_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
@@ -10,10 +10,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // setState(() {
-    //   rememberMe = val;
-    // });
-
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
