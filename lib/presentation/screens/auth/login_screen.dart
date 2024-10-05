@@ -6,14 +6,12 @@ import 'signup_screen.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
     super.key,
-    // required this.isShowLoading,
   });
-  // final bool isShowLoading;
 
   @override
   Widget build(BuildContext context) {
     // setState(() {
-    //   isShowLoading = true;
+    //   rememberMe = val;
     // });
 
     return Scaffold(
@@ -112,9 +110,7 @@ class LoginScreen extends StatelessWidget {
                       Switch(
                           value: true,
                           onChanged: (val) {
-                            // setState(() {
-                            //   rememberMe = val;
-                            // });
+                            // Gestion du changement de valeur de la case à cocher
                           }),
                       const Text("Remember Me"),
                     ],
