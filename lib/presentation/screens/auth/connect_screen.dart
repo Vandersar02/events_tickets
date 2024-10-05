@@ -22,7 +22,7 @@ class LoginScreen extends StatelessWidget {
               const WelcomeText(
                 title: "Welcome to",
                 text:
-                    "Enter your Phone number or Email \naddress for sign in. Enjoy your food :)",
+                    "Enter your Email address for sign in. \nAccess to exclusive events :)",
               ),
               const SignInForm(),
               const SizedBox(height: 16),

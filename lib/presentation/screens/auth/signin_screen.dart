@@ -43,7 +43,7 @@ class SignUpScreen extends StatelessWidget {
                         style: const TextStyle(color: Color(0xFF22A45D)),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // Navigate to Sign In Screen
+                            Navigator.pushNamed(context, '/login');
                           },
                       ),
                     ],
@@ -68,10 +68,10 @@ class SignUpScreen extends StatelessWidget {
               // Facebook
               SocialButton(
                 press: () {},
-                text: "Connect with Facebook",
+                text: "Connect with Apple",
                 color: const Color(0xFF395998),
                 icon: SvgPicture.asset(
-                  'assets/icons/facebook.svg',
+                  'assets/icons/apple_box.svg',
                   colorFilter: const ColorFilter.mode(
                     Color(0xFF395998),
                     BlendMode.srcIn,
@@ -86,7 +86,7 @@ class SignUpScreen extends StatelessWidget {
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
                 icon: SvgPicture.asset(
-                  'assets/icons/google.svg',
+                  'assets/icons/google_box.svg',
                 ),
               ),
               const SizedBox(height: 16),
@@ -283,7 +283,9 @@ class _SignUpFormState extends State<SignUpForm> {
           const SizedBox(height: 16),
           // Sign Up Button
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22A45D),
               foregroundColor: Colors.white,

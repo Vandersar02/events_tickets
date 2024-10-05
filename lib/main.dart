@@ -41,8 +41,7 @@ class MyApp extends StatelessWidget {
       title: 'Event Ticket',
       theme: ThemeData.light(), // Thème clair par défaut
       darkTheme: ThemeData.dark(), // Thème sombre
-      themeMode:
-          themeProvider.themeMode, // Gestion dynamique du mode clair/sombre
+      themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       onGenerateRoute: AppRoutes.generateRoute,
       initialRoute: AppRoutes.onboarding,
