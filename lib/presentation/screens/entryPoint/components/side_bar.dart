@@ -48,7 +48,7 @@ class _SideBarState extends State<SideBar> {
                     menu: menu,
                     selectedMenu: selectedSideMenu,
                     press: () {
-                      RiveUtils.chnageSMIBoolState(menu.rive.status!);
+                      RiveUtils.changeSMIBoolState(menu.rive.status!);
                       setState(() {
                         selectedSideMenu = menu;
                       });
@@ -72,7 +72,7 @@ class _SideBarState extends State<SideBar> {
                     menu: menu,
                     selectedMenu: selectedSideMenu,
                     press: () {
-                      RiveUtils.chnageSMIBoolState(menu.rive.status!);
+                      RiveUtils.changeSMIBoolState(menu.rive.status!);
                       setState(() {
                         selectedSideMenu = menu;
                       });

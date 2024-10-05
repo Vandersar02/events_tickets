@@ -8,19 +8,17 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtenir la largeur de l'écran
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Calculer dynamiquement le nombre de colonnes en fonction de la largeur de l'écran
     int getCrossAxisCount() {
       if (screenWidth >= 1200) {
-        return 4; // 4 colonnes pour les grands écrans
+        return 4;
       } else if (screenWidth >= 1000) {
-        return 3; // 3 colonnes pour les écrans moyens
+        return 3;
       } else if (screenWidth >= 600) {
-        return 2; // 2 colonnes pour les tablettes
+        return 2;
       } else {
-        return 1; // 1 colonne pour les petits écrans (téléphones)
+        return 1;
       }
     }
 

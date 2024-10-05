@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
-  static const String signup = '/signup';
+  static const String signUp = '/signUp';
   static const String entryPoint = '/';
   static const String eventList = '/events';
   static const String eventDetails = '/event-details';
@@ -18,13 +18,13 @@ class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case onboarding:
-        return MaterialPageRoute(builder: (_) => OnboardingScreen());
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case login:
-        return MaterialPageRoute(builder: (_) => LoginScreen());
-      case signup:
-        return MaterialPageRoute(builder: (_) => SignUpScreen());
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case signUp:
+        return MaterialPageRoute(builder: (_) => const SignUpScreen());
       case entryPoint:
-        return MaterialPageRoute(builder: (_) => EntryPoint());
+        return MaterialPageRoute(builder: (_) => const EntryPoint());
       // case eventList:
       //   return MaterialPageRoute(builder: (_) => EventListScreen());
       // case eventDetails:
@@ -38,7 +38,7 @@ class AppRoutes {
       //   var postId = settings.arguments as String;
       //   return MaterialPageRoute(builder: (_) => PostDetailScreen(postId: postId));
       default:
-        return MaterialPageRoute(builder: (_) => LoginScreen());
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
     }
   }
 }
