@@ -1,4 +1,3 @@
-import 'package:events_ticket/presentation/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -80,12 +79,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                    );
+                    Navigator.pushNamed(context, '/login');
                   },
                   child: const Text(
                     "Skip",
@@ -113,15 +107,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 CustomArrowButton(
                   onPressed: () {
                     if (currentPage == onboardingData.length - 1) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/login');
                     } else {
                       _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 100),
                         curve: Curves.easeIn,
                       );
                     }

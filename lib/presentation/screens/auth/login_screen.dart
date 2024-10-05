@@ -1,4 +1,4 @@
-import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
+// import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,7 +19,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               // Title
               const Text(
-                'EventHub',
+                'Event Ticket',
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.bold,
@@ -102,7 +102,13 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Switch(value: true, onChanged: (val) {}),
+                      Switch(
+                          value: true,
+                          onChanged: (val) {
+                            // setState(() {
+                            //   rememberMe = val;
+                            // });
+                          }),
                       const Text("Remember Me"),
                     ],
                   ),
@@ -139,11 +145,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 label: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const EntryPoint()),
-                      );
+                      Navigator.pushNamed(context, '/');
                     },
                     child: const Text("SIGN IN")),
               ),
