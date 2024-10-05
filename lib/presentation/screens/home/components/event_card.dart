@@ -69,7 +69,6 @@ class EventCard extends StatelessWidget {
                   const Spacer(),
                   Row(
                     children: [
-                      // Affichage de l'icône "gratuit" si l'événement est gratuit
                       if (isFree)
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -87,7 +86,6 @@ class EventCard extends StatelessWidget {
                           ),
                         ),
                       const SizedBox(width: 10),
-                      // Nombre de participants
                       Text(
                         '$attendeesCount Going',
                         style: const TextStyle(
@@ -101,7 +99,6 @@ class EventCard extends StatelessWidget {
               ),
             ),
           ),
-          // Affichage de l'icône correspondant à l'événement (par ex: un calendrier)
           SvgPicture.asset(iconSrc),
         ],
       ),
