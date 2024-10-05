@@ -1,5 +1,5 @@
-import 'package:events_ticket/presentation/screens/auth/login_screen.dart';
-import 'package:events_ticket/presentation/screens/auth/signUp_screen.dart';
+import 'package:events_ticket/presentation/screens/auth/connect_screen.dart';
+import 'package:events_ticket/presentation/screens/auth/signin_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';

@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class SignInScreen extends StatelessWidget {
                         style: const TextStyle(color: Color(0xFF22A45D)),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // Navigate to Sign Up Screen
+                            Navigator.pushNamed(context, '/signUp');
                           },
                       )
                     ],
