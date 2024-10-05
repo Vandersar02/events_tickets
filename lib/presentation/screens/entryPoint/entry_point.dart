@@ -167,7 +167,7 @@ class _EntryPointState extends State<EntryPoint>
                     return BtmNavItem(
                       navBar: navBar,
                       press: () {
-                        RiveUtils.chnageSMIBoolState(navBar.rive.status!);
+                        RiveUtils.changeSMIBoolState(navBar.rive.status!);
                         _onNavItemTapped(index);
                       },
                       riveOnInit: (artboard) {
