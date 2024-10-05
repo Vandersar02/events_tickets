@@ -1,9 +1,69 @@
+import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _authRepository = AuthRepository();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  String _errorMessage = '';
+
+  // Fonction d'inscription
+  Future<void> _signUp() async {
+    try {
+      User? user = await _authRepository.signUpWithEmail(
+        _emailController.text,
+        _passwordController.text,
+        _nameController.text,
+      );
+      if (user != null) {
+        Navigator.pushReplacementNamed(
+            context, '/events'); // Rediriger vers l'écran des événements
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  // Fonction de connexion avec Google
+  Future<void> _signInWithGoogle() async {
+    try {
+      User? user = await _authRepository.signInWithGoogle();
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/events');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  // Fonction de connexion avec Apple
+  Future<void> _signInWithApple() async {
+    try {
+      User? user = await _authRepository.signInWithApple();
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/events');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +84,18 @@ class LoginScreen extends StatelessWidget {
                 text:
                     "Enter your Email address for sign in. \nAccess to exclusive events :)",
               ),
-              const SignInForm(),
+              SignInForm(
+                emailController: _emailController,
+                passwordController: _passwordController,
+                onSignIn: _signUp,
+              ),
               const SizedBox(height: 16),
               Center(
-                  child: Text("Or",
-                      style: TextStyle(
-                          color: const Color(0xFF010F07).withOpacity(0.7)))),
+                child: Text("Or",
+                    style: TextStyle(
+                        color: const Color(0xFF010F07).withOpacity(0.7))),
+              ),
               const SizedBox(height: 16 * 1.5),
-
               Center(
                 child: Text.rich(
                   TextSpan(
@@ -55,7 +119,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Facebook
+              // Facebook Button (Dummy for now)
               SocialButton(
                 press: () {},
                 text: "Connect with Facebook",
@@ -70,14 +134,12 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Google
+              // Google Button
               SocialButton(
-                press: () {},
+                press: _signInWithGoogle,
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
-                icon: SvgPicture.string(
-                  googleIcon,
-                ),
+                icon: SvgPicture.string(googleIcon),
               ),
               const SizedBox(height: 16),
             ],
@@ -114,7 +176,16 @@ class WelcomeText extends StatelessWidget {
 }
 
 class SignInForm extends StatefulWidget {
-  const SignInForm({super.key});
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final VoidCallback onSignIn;
+
+  const SignInForm({
+    super.key,
+    required this.emailController,
+    required this.passwordController,
+    required this.onSignIn,
+  });
 
   @override
   State<SignInForm> createState() => _SignInFormState();
@@ -122,7 +193,6 @@ class SignInForm extends StatefulWidget {
 
 class _SignInFormState extends State<SignInForm> {
   final _formKey = GlobalKey<FormState>();
-
   bool _obscureText = true;
 
   @override
@@ -131,8 +201,9 @@ class _SignInFormState extends State<SignInForm> {
       key: _formKey,
       child: Column(
         children: [
+          // Email Field
           TextFormField(
-            onSaved: (value) {},
+            controller: widget.emailController,
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
@@ -149,8 +220,8 @@ class _SignInFormState extends State<SignInForm> {
 
           // Password Field
           TextFormField(
+            controller: widget.passwordController,
             obscureText: _obscureText,
-            onSaved: (value) {},
             decoration: InputDecoration(
               hintText: "Password",
               border: const UnderlineInputBorder(
@@ -191,6 +262,7 @@ class _SignInFormState extends State<SignInForm> {
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
+                widget.onSignIn();
               }
             },
             style: ElevatedButton.styleFrom(

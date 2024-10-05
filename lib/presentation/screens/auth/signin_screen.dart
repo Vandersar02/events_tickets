@@ -1,9 +1,46 @@
+import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _authRepository = AuthRepository();
+  final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _obscureText = true;
+  String _errorMessage = '';
+
+  Future<void> _signUp() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        User? user = await _authRepository.signUpWithEmail(
+          _emailController.text,
+          _passwordController.text,
+          _fullNameController.text,
+        );
+        if (user != null) {
+          // Naviguer vers la page d'événements après l'inscription réussie
+          Navigator.pushReplacementNamed(context, '/events');
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +62,7 @@ class SignUpScreen extends StatelessWidget {
               ),
 
               // Sign Up Form
-              const SignUpForm(),
+              _buildSignUpForm(),
               const SizedBox(height: 16),
 
               // Already have account
@@ -36,7 +73,7 @@ class SignUpScreen extends StatelessWidget {
                         .textTheme
                         .bodySmall!
                         .copyWith(fontWeight: FontWeight.w500),
-                    text: "Already have account? ",
+                    text: "Already have an account? ",
                     children: <TextSpan>[
                       TextSpan(
                         text: "Sign In",
@@ -60,12 +97,15 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Center(
-                  child: Text("Or",
-                      style: TextStyle(
-                          color: const Color(0xFF010F07).withOpacity(0.7)))),
+                child: Text(
+                  "Or",
+                  style: TextStyle(
+                      color: const Color(0xFF010F07).withOpacity(0.7)),
+                ),
+              ),
               const SizedBox(height: 16),
 
-              // Facebook
+              // Social Buttons (Apple and Google)
               SocialButton(
                 press: () {},
                 text: "Connect with Apple",
@@ -80,7 +120,6 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Google
               SocialButton(
                 press: () {},
                 text: "Connect with Google",
@@ -93,6 +132,156 @@ class SignUpScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSignUpForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          // Full Name Field
+          TextFormField(
+            controller: _fullNameController,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your full name';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              hintText: "Full Name",
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Email Field
+          TextFormField(
+            controller: _emailController,
+            textInputAction: TextInputAction.next,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              hintText: "Email Address",
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Password Field
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscureText,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              } else if (value.length < 6) {
+                return 'Password must be at least 6 characters';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: "Password",
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              suffixIcon: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+                child: _obscureText
+                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
+                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Confirm Password Field
+          TextFormField(
+            controller: _confirmPasswordController,
+            obscureText: _obscureText,
+            textInputAction: TextInputAction.done,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please confirm your password';
+              } else if (value != _passwordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: "Confirm Password",
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+              ),
+              suffixIcon: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+                child: _obscureText
+                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
+                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Display error message if any
+          if (_errorMessage.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                _errorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+
+          // Sign Up Button
+          ElevatedButton(
+            onPressed: _signUp,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF22A45D),
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text("Sign Up"),
+          ),
+        ],
       ),
     );
   }
@@ -173,130 +362,6 @@ class SocialButton extends StatelessWidget {
             const Spacer(flex: 3),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
-
-  @override
-  State<SignUpForm> createState() => _SignUpFormState();
-}
-
-class _SignUpFormState extends State<SignUpForm> {
-  final _formKey = GlobalKey<FormState>();
-
-  bool _obscureText = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Full Name Field
-          TextFormField(
-            onSaved: (value) {},
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              hintText: "Full Name",
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Email Field
-          TextFormField(
-            onSaved: (value) {},
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: "Email Address",
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Password Field
-          TextFormField(
-            obscureText: _obscureText,
-            textInputAction: TextInputAction.next,
-            onChanged: (value) {},
-            onSaved: (value) {},
-            decoration: InputDecoration(
-              hintText: "Password",
-              border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
-                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Confirm Password Field
-          TextFormField(
-            obscureText: _obscureText,
-            decoration: InputDecoration(
-              hintText: "Confirm Password",
-              border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
-                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Sign Up Button
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF22A45D),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text("Sign Up"),
-          ),
-        ],
       ),
     );
   }
