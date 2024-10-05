@@ -1,3 +1,4 @@
+import 'package:events_ticket/config/routes/app_routes.dart';
 import 'package:events_ticket/data/providers/theme_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -38,7 +39,9 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(),
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
-      home: const OnboardingScreen(),
+      onGenerateRoute: AppRoutes.generateRoute,
+      initialRoute: AppRoutes.onboarding,
+      // home: const OnboardingScreen(),
     );
   }
 }

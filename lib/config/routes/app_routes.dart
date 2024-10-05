@@ -1,8 +1,10 @@
 import 'package:events_ticket/presentation/screens/auth/login_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/signup_screen.dart';
+import 'package:events_ticket/presentation/screens/onboding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String eventList = '/events';
@@ -13,11 +15,13 @@ class AppRoutes {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case onboarding:
+        return MaterialPageRoute(builder: (_) => OnboardingScreen());
       case login:
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case signup:
         return MaterialPageRoute(builder: (_) => SignUpScreen());
-      // case eventList:
+      // case eventList:+
       //   return MaterialPageRoute(builder: (_) => EventListScreen());
       // case eventDetails:
       //   var eventId = settings.arguments as String;
