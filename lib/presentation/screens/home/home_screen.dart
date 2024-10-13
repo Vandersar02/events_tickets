@@ -69,32 +69,32 @@ class HomePage extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.builder(
-                  shrinkWrap: true, // Limite la hauteur du GridView
-                  physics:
-                      const NeverScrollableScrollPhysics(), // Désactive le scroll du GridView pour permettre au SingleChildScrollView de gérer le défilement
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: getCrossAxisCount(), // Colonnes dynamiques
-                    crossAxisSpacing:
-                        20.0, // Espacement horizontal entre les éléments
-                    mainAxisSpacing:
-                        20.0, // Espacement vertical entre les éléments
-                    childAspectRatio:
-                        2.0, // Ajuste le rapport d'aspect des cartes
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 400,
                   ),
-                  itemCount: popularEvents
-                      .length, // Utiliser la liste d'événements récents ou populaires
-                  itemBuilder: (context, index) {
-                    final event = popularEvents[index];
-                    return EventCard(
-                      title: event.title,
-                      date: event.date,
-                      location: event.location,
-                      imageUrl: event.imageUrl,
-                      isFree: event.isFree,
-                      attendeesCount: event.attendeesCount,
-                    );
-                  },
+                  child: GridView.builder(
+                    shrinkWrap: true, // Limite la hauteur du GridView
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: getCrossAxisCount(),
+                      crossAxisSpacing: 20.0,
+                      mainAxisSpacing: 20.0,
+                      childAspectRatio: 2.0,
+                    ),
+                    itemCount: popularEvents.length,
+                    itemBuilder: (context, index) {
+                      final event = popularEvents[index];
+                      return EventCard(
+                        title: event.title,
+                        date: event.date,
+                        location: event.location,
+                        imageUrl: event.imageUrl,
+                        isFree: event.isFree,
+                        attendeesCount: event.attendeesCount,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
