@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
