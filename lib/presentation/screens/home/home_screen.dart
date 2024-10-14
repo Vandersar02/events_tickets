@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
@@ -71,19 +71,14 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
                   shrinkWrap: true, // Limite la hauteur du GridView
-                  physics:
-                      const NeverScrollableScrollPhysics(), // Désactive le scroll du GridView pour permettre au SingleChildScrollView de gérer le défilement
+                  physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: getCrossAxisCount(), // Colonnes dynamiques
-                    crossAxisSpacing:
-                        20.0, // Espacement horizontal entre les éléments
-                    mainAxisSpacing:
-                        20.0, // Espacement vertical entre les éléments
-                    childAspectRatio:
-                        2.0, // Ajuste le rapport d'aspect des cartes
+                    crossAxisCount: getCrossAxisCount(),
+                    crossAxisSpacing: 20.0,
+                    mainAxisSpacing: 20.0,
+                    childAspectRatio: 2.0,
                   ),
-                  itemCount: popularEvents
-                      .length, // Utiliser la liste d'événements récents ou populaires
+                  itemCount: popularEvents.length,
                   itemBuilder: (context, index) {
                     final event = popularEvents[index];
                     return EventCard(

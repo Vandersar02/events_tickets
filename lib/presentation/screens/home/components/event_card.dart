@@ -86,12 +86,16 @@ class EventCard extends StatelessWidget {
                           ),
                         ),
                       const SizedBox(width: 10),
-                      Text(
-                        '$attendeesCount Going',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            '$attendeesCount Going',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -101,6 +105,32 @@ class EventCard extends StatelessWidget {
           ),
           SvgPicture.asset(iconSrc),
         ],
+      ),
+    );
+  }
+}
+
+class RoundedCounter extends StatelessWidget {
+  final int total;
+
+  const RoundedCounter({super.key, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      width: 52,
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF2E2F45)
+            : const Color(0xFFEBFAF3),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          "$total+",
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
       ),
     );
   }
