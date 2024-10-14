@@ -47,6 +47,7 @@ class EventCard extends StatelessWidget {
                   //   borderRadius: BorderRadius.circular(8),
                   //   child: Image.asset(imageUrl),
                   // ),
+
                   Text(
                     title,
                     maxLines: 2,
