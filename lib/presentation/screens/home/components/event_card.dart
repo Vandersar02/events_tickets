@@ -43,6 +43,10 @@ class EventCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(8),
+                  //   child: Image.asset(imageUrl),
+                  // ),
                   Text(
                     title,
                     maxLines: 2,
@@ -66,7 +70,7 @@ class EventCard extends StatelessWidget {
                       fontSize: 14,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       if (isFree)
