@@ -119,32 +119,39 @@ Widget eventCard({
 }
 
 class UpcomingTab extends StatelessWidget {
-  const UpcomingTab({super.key});
+  const UpcomingTab({
+    super.key,
+    this.events = const [],
+  });
+  final List<dynamic> events; // Empty list to simulate no tickets
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(15),
-      children: [
-        eventCard(
-          imageUrl: 'assets/images/event2.jpg',
-          title: 'National Music Festival',
-          date: 'Mon, Dec 24 • 18:00 - 23:00 PM',
-          location: 'Grand Park, New York',
-          status: 'Paid',
-          buttonText: 'View E-Ticket',
-          onPressed: () {},
-        ),
-        eventCard(
-          imageUrl: 'assets/images/event2.jpg',
-          title: 'Art & Mural Workshop',
-          date: 'Wed, Dec 27 • 14:00 - 16:00 PM',
-          location: 'Central Art, Washington',
-          status: 'Paid',
-          buttonText: 'View E-Ticket',
-          onPressed: () {},
-        ),
-      ],
-    );
+    return events.isEmpty
+        ? const EmptyTicketsView() // Show empty tickets view when no events
+        : ListView(
+            padding: const EdgeInsets.all(15),
+            children: [
+              eventCard(
+                imageUrl: 'assets/images/event2.jpg',
+                title: 'National Music Festival',
+                date: 'Mon, Dec 24 • 18:00 - 23:00 PM',
+                location: 'Grand Park, New York',
+                status: 'Paid',
+                buttonText: 'View E-Ticket',
+                onPressed: () {},
+              ),
+              eventCard(
+                imageUrl: 'assets/images/event2.jpg',
+                title: 'Art & Mural Workshop',
+                date: 'Wed, Dec 27 • 14:00 - 16:00 PM',
+                location: 'Central Art, Washington',
+                status: 'Paid',
+                buttonText: 'View E-Ticket',
+                onPressed: () {},
+              ),
+            ],
+          );
   }
 }
 
@@ -202,6 +209,60 @@ class CancelledTab extends StatelessWidget {
           status: 'Cancelled',
           buttonText: 'View E-Ticket',
           onPressed: () {},
+        ),
+      ],
+    );
+  }
+}
+
+class EmptyTicketsView extends StatelessWidget {
+  const EmptyTicketsView({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Image.asset(
+            'assets/images/empty.jpg', // Make sure the image path is correct
+            height: 200, // Set image size as needed
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'Empty Tickets',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            "Looks like you don't have a ticket yet. Start searching for events now by clicking the button below.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        const SizedBox(height: 30),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/');
+          },
+          style: ElevatedButton.styleFrom(
+            // primary: Colors.purple, // Customize the button color
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          ),
+          child: const Text(
+            'Find Events',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
