@@ -1,69 +1,176 @@
+import 'package:events_ticket/presentation/widgets/custom_appBar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-class SocialScreen extends StatefulWidget {
+class SocialScreen extends StatelessWidget {
   const SocialScreen({super.key});
 
   @override
-  State<SocialScreen> createState() => _SocialScreenState();
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      appBar: CustomAppBar(),
+      body: SafeArea(
+        bottom: false,
+        child: SocialBody(),
+      ),
+    );
+  }
 }
 
-class _SocialScreenState extends State<SocialScreen> {
-  bool isShowSignInDialog = false;
-
-  @override
-  void initState() {
-    super.initState();
-    initialization();
-  }
-
-  void initialization() async {
-    await Future.delayed(const Duration(seconds: 1));
-    await Future.delayed(const Duration(seconds: 1));
-    await Future.delayed(const Duration(seconds: 1));
-    FlutterNativeSplash.remove();
-  }
-
+class SocialBody extends StatelessWidget {
+  const SocialBody({super.key});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    return const SingleChildScrollView(
+      child: Column(
         children: [
-          Positioned(
-            width: MediaQuery.of(context).size.width * 1.7,
-            left: 100,
-            bottom: 100,
-            child: Image.asset(
-              "assets/backgrounds/Spline.png",
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Events Ticket",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 8),
-                  child: Text(
-                    "Sign in to continue",
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          StoriesSection(),
+          Divider(),
+          FeedSection(),
         ],
       ),
+    );
+  }
+}
+
+class StoriesSection extends StatelessWidget {
+  const StoriesSection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10, // Number of stories
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: const AssetImage('assets/images/event2.jpg'),
+                ),
+                const SizedBox(height: 4),
+                Text('User $index'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class FeedSection extends StatelessWidget {
+  const FeedSection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 5, // Number of posts
+      itemBuilder: (context, index) {
+        return const PostWidget();
+      },
+    );
+  }
+}
+
+class PostWidget extends StatelessWidget {
+  const PostWidget({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Post Header
+        const ListTile(
+          leading: CircleAvatar(
+            backgroundImage: AssetImage('assets/images/event2.jpg'),
+          ),
+          title: Text('username'),
+          subtitle: Text('Location'),
+          trailing: Icon(Icons.more_vert),
+        ),
+
+        // Post Image
+        Container(
+          height: 300,
+          color: Colors.grey[300],
+          child: Image.asset(
+            'assets/images/event2.jpg',
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        // Post Actions
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.comment_outlined),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.bookmark_border),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+
+        // Likes and Caption
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Liked by user1 and 123 others',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(color: Colors.black),
+                  children: [
+                    TextSpan(
+                      text: 'username ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'Here is the caption of the post...'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'View all 10 comments',
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '2 hours ago',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

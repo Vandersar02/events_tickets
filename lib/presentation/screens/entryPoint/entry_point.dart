@@ -1,11 +1,12 @@
-import 'dart:math';
-import 'package:events_ticket/data/models/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
+import 'dart:math';
+import 'package:events_ticket/data/models/menu.dart';
+import 'package:events_ticket/core/utils/rive_utils.dart';
 import 'package:events_ticket/core/constants/constants.dart';
+import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
 import 'package:events_ticket/presentation/screens/home/home_screen.dart';
 import 'package:events_ticket/presentation/screens/social/social_screen.dart';
-import 'package:events_ticket/core/utils/rive_utils.dart';
 
 import 'components/btm_nav_item.dart';
 import 'components/menu_btn.dart';
@@ -22,13 +23,13 @@ class _EntryPointState extends State<EntryPoint>
     with SingleTickerProviderStateMixin {
   bool isSideBarOpen = false;
 
-  Menu selectedBottonNav = bottomNavItems.first;
+  Menu selectedButtonNav = bottomNavItems.first;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     const HomePage(),
     const SocialScreen(),
-    //const TicketsPage(),
+    const TicketsPage(),
     //const CalendarPage(),
     //const ChatPage(),
   ];
@@ -64,7 +65,7 @@ class _EntryPointState extends State<EntryPoint>
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      selectedBottonNav = bottomNavItems[index];
+      selectedButtonNav = bottomNavItems[index];
     });
   }
 
@@ -174,7 +175,7 @@ class _EntryPointState extends State<EntryPoint>
                         navBar.rive.status = RiveUtils.getRiveInput(artboard,
                             stateMachineName: navBar.rive.stateMachineName);
                       },
-                      selectedNav: selectedBottonNav,
+                      selectedNav: selectedButtonNav,
                     );
                   },
                 ),
