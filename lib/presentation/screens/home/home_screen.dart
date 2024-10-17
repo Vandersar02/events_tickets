@@ -1,4 +1,4 @@
-import 'package:events_ticket/presentation/widgets/custom_appBar.dart';
+import 'package:events_ticket/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:events_ticket/data/models/events.dart';
 import 'components/event_card.dart';

@@ -6,7 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   // Définition de la hauteur préférée de l'AppBar
   @override
-  Size get preferredSize => const Size.fromHeight(200);
+  Size get preferredSize => const Size.fromHeight(150);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       padding: const EdgeInsets.symmetric(
-          horizontal: 20, vertical: 15), // Espacement interne
+          horizontal: 20, vertical: 10), // Espacement interne
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
@@ -76,8 +76,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
 
-            const SizedBox(
-                height: 15), // Espacement avant la barre de recherche
+            const Spacer(), // Espacement avant la barre de recherche
 
             // Barre de recherche
             Row(

@@ -1,4 +1,3 @@
-import 'package:events_ticket/presentation/widgets/custom_appBar.dart';
 import 'package:flutter/material.dart';
 
 class SocialScreen extends StatelessWidget {
@@ -6,9 +5,16 @@ class SocialScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: CustomAppBar(),
-      body: SafeArea(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Social network'),
+          ],
+        ),
+      ),
+      body: const SafeArea(
         bottom: false,
         child: SocialBody(),
       ),
