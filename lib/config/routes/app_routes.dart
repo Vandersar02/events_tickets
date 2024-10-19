@@ -2,6 +2,7 @@ import 'package:events_ticket/presentation/screens/auth/connect_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/signIn_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:events_ticket/presentation/widgets/qr_code_generator.dart';
 import 'package:flutter/material.dart';
 
 // Classe contenant les routes de l'application
@@ -16,6 +17,12 @@ class AppRoutes {
   static const String ticket = '/ticket';
   static const String socialFeed = '/social';
   static const String postDetails = '/post-details';
+  static const String profile = '/profile';
+  static const String settings = '/settings';
+  static const String checkout = '/checkout';
+  static const String payment = '/payment';
+  static const String orderDetails = '/order-details';
+  static const String address = '/address';
 
   // Méthode qui génère une route en fonction du nom donné
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -43,8 +50,10 @@ class AppRoutes {
       // case eventDetails:
       //   var eventId = settings.arguments as String;
       //   return MaterialPageRoute(builder: (_) => EventDetailsScreen(eventId: eventId)); // Route pour les détails d'un événement
-      // case ticket:
-      //   return MaterialPageRoute(builder: (_) => TicketScreen()); // Route pour l'écran du ticket
+      case ticket:
+        return MaterialPageRoute(
+            builder: (_) =>
+                const TicketQRCodePage()); // Route pour l'écran du ticket
       // case socialFeed:
       //   return MaterialPageRoute(builder: (_) => SocialFeedScreen()); // Route pour le fil d'actualité social
       // case postDetails:

@@ -142,7 +142,9 @@ class UpcomingTab extends StatelessWidget {
           location: 'Grand Park, New York',
           status: 'Paid',
           buttonText: 'View E-Ticket',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/ticket');
+          },
         ),
         eventCard(
           imageUrl: 'assets/images/event2.jpg',
