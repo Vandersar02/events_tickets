@@ -1,3 +1,19 @@
+// class EventData {
+//   final String name;
+//   final String location;
+//   final DateTime date;
+//   final int ticketsAvailable;
+//   final int ticketsSold;
+
+//   EventData({
+//     required this.name,
+//     required this.location,
+//     required this.date,
+//     required this.ticketsAvailable,
+//     this.ticketsSold = 0,
+//   });
+// }
+
 class Event {
   final DateTime date;
   final String title, location, imageUrl;

@@ -127,31 +127,34 @@ class UpcomingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return events.isEmpty
-        ? const EmptyTicketsView() // Show empty tickets view when no events
-        : ListView(
-            padding: const EdgeInsets.all(15),
-            children: [
-              eventCard(
-                imageUrl: 'assets/images/event2.jpg',
-                title: 'National Music Festival',
-                date: 'Mon, Dec 24 • 18:00 - 23:00 PM',
-                location: 'Grand Park, New York',
-                status: 'Paid',
-                buttonText: 'View E-Ticket',
-                onPressed: () {},
-              ),
-              eventCard(
-                imageUrl: 'assets/images/event2.jpg',
-                title: 'Art & Mural Workshop',
-                date: 'Wed, Dec 27 • 14:00 - 16:00 PM',
-                location: 'Central Art, Washington',
-                status: 'Paid',
-                buttonText: 'View E-Ticket',
-                onPressed: () {},
-              ),
-            ],
-          );
+    return
+        // events.isEmpty
+        //     ? const EmptyTicketsView() // Show empty tickets view when no events
+        //     :
+
+        ListView(
+      padding: const EdgeInsets.all(15),
+      children: [
+        eventCard(
+          imageUrl: 'assets/images/event2.jpg',
+          title: 'National Music Festival',
+          date: 'Mon, Dec 24 • 18:00 - 23:00 PM',
+          location: 'Grand Park, New York',
+          status: 'Paid',
+          buttonText: 'View E-Ticket',
+          onPressed: () {},
+        ),
+        eventCard(
+          imageUrl: 'assets/images/event2.jpg',
+          title: 'Art & Mural Workshop',
+          date: 'Wed, Dec 27 • 14:00 - 16:00 PM',
+          location: 'Central Art, Washington',
+          status: 'Paid',
+          buttonText: 'View E-Ticket',
+          onPressed: () {},
+        ),
+      ],
+    );
   }
 }
 
