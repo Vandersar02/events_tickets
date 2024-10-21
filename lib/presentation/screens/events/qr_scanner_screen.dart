@@ -4,6 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'dart:convert';
 
+const secretKey = "mySuperSecretKey1234567890123456";
+
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
 
@@ -14,7 +16,6 @@ class QRScannerScreen extends StatefulWidget {
 class QRScannerScreenState extends State<QRScannerScreen> {
   MobileScannerController controller = MobileScannerController();
   String? qrCodeData;
-  String secretKey = "mySuperSecretKey1234567890123456";
   bool isValid = false;
   @override
   void initState() {
@@ -170,5 +171,44 @@ bool decryptAndVerifyQrData(String? encryptedData, String secretKey) {
   } catch (e) {
     // If decryption or verification fails, return false
     return false;
+  }
+}
+
+// Function to decrypt and verify the signed data
+String? decryptAndVerifyQrDataReal(String encryptedData, String secretKey) {
+  try {
+    // Step 1: Decrypt the encrypted data
+    final key = encrypt.Key.fromUtf8(secretKey);
+    final iv = encrypt.IV
+        .fromLength(16); // Initialization Vector (must match encryption)
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    // Decrypt the data
+    final decrypted = encrypter.decrypt64(encryptedData, iv: iv);
+
+    // Step 2: Separate the ticketData and the signature
+    final parts = decrypted.split("|signature=");
+    if (parts.length != 2) {
+      return null; // Invalid data format
+    }
+    final ticketData = parts[0];
+    final providedSignature = parts[1];
+
+    // Step 3: Recalculate the signature
+    var bytes =
+        utf8.encode(ticketData + secretKey); // Combine data and secret key
+    var recalculatedSignature =
+        sha256.convert(bytes).toString(); // Generate SHA-256 hash
+
+    // Step 4: Verify if the recalculated signature matches the provided signature
+    if (providedSignature == recalculatedSignature) {
+      return ticketData; // Data is valid and not tampered with
+    } else {
+      return null; // Signature mismatch, data might be corrupted or tampered
+    }
+  } catch (e) {
+    // Handle any errors during decryption or verification
+    print("Decryption or verification failed: $e");
+    return null;
   }
 }
