@@ -103,6 +103,7 @@ class PostWidget extends StatelessWidget {
         // Post Image
         Container(
           height: 300,
+          width: double.infinity,
           color: Colors.grey[300],
           child: Image.asset(
             'assets/images/event2.jpg',
@@ -116,25 +117,25 @@ class PostWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () {},
+              ),
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.favorite_border),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.comment_outlined),
+                    icon: const Icon(Icons.comment_bank_outlined),
                     onPressed: () {},
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: () {},
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border_sharp),
+                    onPressed: () {},
+                  ),
                 ],
-              ),
-              IconButton(
-                icon: const Icon(Icons.bookmark_border),
-                onPressed: () {},
               ),
             ],
           ),
