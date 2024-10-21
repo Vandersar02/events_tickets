@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "438000097602",
+    "firebase_url": "https://eventtickets-377db-default-rtdb.firebaseio.com",
     "project_id": "eventtickets-377db",
     "storage_bucket": "eventtickets-377db.appspot.com"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.example.events_ticket"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "438000097602-qfvihn854hs5g253l1hh5c2eb43qutvs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBHHQ9iArVZzdncdvgtFTxO1BPijYCgQTE"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "438000097602-qfvihn854hs5g253l1hh5c2eb43qutvs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "438000097602-rc9fb5j8icks4dfkacf24gt8enm9p4kk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eventsTicket"
+              }
+            }
+          ]
         }
       }
     }

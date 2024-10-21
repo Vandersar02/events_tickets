@@ -24,9 +24,12 @@ class QRScannerScreenState extends State<QRScannerScreen> {
     controller.barcodes.listen((barcodeCapture) {
       final barcode = barcodeCapture.barcodes.first;
       setState(() {
-        qrCodeData = barcode.rawValue;
+        qrCodeData = decryptAndVerifyQrDataReal(barcode.rawValue, secretKey);
 
-        isValid = decryptAndVerifyQrData(qrCodeData, secretKey);
+        isValid =
+            decryptAndVerifyQrDataReal(barcode.rawValue, secretKey) == null
+                ? false
+                : true;
       });
     });
   }
@@ -100,7 +103,7 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                 if (qrCodeData != null)
                   Text(
                     isValid
-                        ? "QR Code is valid!"
+                        ? '$qrCodeData data is valid.'
                         : "QR Code is invalid or tampered with.",
                     style: TextStyle(
                         fontSize: 18,
@@ -175,7 +178,7 @@ bool decryptAndVerifyQrData(String? encryptedData, String secretKey) {
 }
 
 // Function to decrypt and verify the signed data
-String? decryptAndVerifyQrDataReal(String encryptedData, String secretKey) {
+String? decryptAndVerifyQrDataReal(String? encryptedData, String secretKey) {
   try {
     // Step 1: Decrypt the encrypted data
     final key = encrypt.Key.fromUtf8(secretKey);
@@ -184,7 +187,7 @@ String? decryptAndVerifyQrDataReal(String encryptedData, String secretKey) {
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
     // Decrypt the data
-    final decrypted = encrypter.decrypt64(encryptedData, iv: iv);
+    final decrypted = encrypter.decrypt64((encryptedData).toString(), iv: iv);
 
     // Step 2: Separate the ticketData and the signature
     final parts = decrypted.split("|signature=");

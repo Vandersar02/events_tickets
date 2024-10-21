@@ -8,7 +8,7 @@ import 'package:events_ticket/core/constants/constants.dart';
 import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
 import 'package:events_ticket/presentation/screens/home/home_screen.dart';
 import 'package:events_ticket/presentation/screens/social/social_screen.dart';
-import 'package:events_ticket/presentation/screens/events/chat_screen.dart';
+import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
 
 import 'components/btm_nav_item.dart';
 import 'components/menu_btn.dart';

@@ -29,8 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _nameController.text,
       );
       if (user != null) {
-        Navigator.pushReplacementNamed(
-            context, '/events'); // Rediriger vers l'écran des événements
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -44,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       User? user = await _authRepository.signInWithGoogle();
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/events');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -58,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       User? user = await _authRepository.signInWithApple();
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/events');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -123,8 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Facebook Button (Dummy for now)
               SocialButton(
-                press: () {},
-                text: "Connect with Facebook",
+                press: _signInWithApple,
+                text: "Connect with Apple",
                 color: const Color(0xFF395998),
                 icon: SvgPicture.string(
                   facebookIcon,

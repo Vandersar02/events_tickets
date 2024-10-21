@@ -31,8 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _fullNameController.text,
         );
         if (user != null) {
-          // Naviguer vers la page d'événements après l'inscription réussie
-          Navigator.pushReplacementNamed(context, '/events');
+          Navigator.pushReplacementNamed(context, '/');
         }
       } catch (e) {
         setState(() {

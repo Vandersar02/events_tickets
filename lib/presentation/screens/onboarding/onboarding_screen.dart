@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -78,7 +79,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // Sauvegarde l'état de l'onboarding dans les préférences
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('hasSeenOnboarding', true);
                     Navigator.pushNamed(context, '/login');
                   },
                   child: const Text(
@@ -105,8 +109,11 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                   }),
                 ),
                 CustomArrowButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (currentPage == onboardingData.length - 1) {
+                      // Sauvegarde l'état de l'onboarding dans les préférences
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('hasSeenOnboarding', true);
                       Navigator.pushNamed(context, '/login');
                     } else {
                       _pageController.nextPage(
