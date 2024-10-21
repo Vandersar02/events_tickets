@@ -50,6 +50,6 @@
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false />
 		<key>NSCameraUsageDescription</key>
-		<string>We need access to your camera to scan QR codes</string>
+		<string>This app requires camera access to scan QR codes.</string>
 	</dict>
 </plist>

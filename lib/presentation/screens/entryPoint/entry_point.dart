@@ -1,3 +1,4 @@
+import 'package:events_ticket/presentation/screens/events/qr_scanner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'dart:math';
@@ -7,6 +8,7 @@ import 'package:events_ticket/core/constants/constants.dart';
 import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
 import 'package:events_ticket/presentation/screens/home/home_screen.dart';
 import 'package:events_ticket/presentation/screens/social/social_screen.dart';
+import 'package:events_ticket/presentation/screens/events/chat_screen.dart';
 
 import 'components/btm_nav_item.dart';
 import 'components/menu_btn.dart';
@@ -30,6 +32,8 @@ class _EntryPointState extends State<EntryPoint>
     const HomePage(),
     const SocialScreen(),
     const TicketsPage(),
+    const ChatsScreen(),
+    const QRScannerScreen(),
     //const CalendarPage(),
     //const ChatPage(),
   ];

@@ -3,6 +3,7 @@ import 'package:events_ticket/data/providers/theme_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -11,6 +12,12 @@ void main() async {
 
   // Préserve l'écran de splash jusqu'à ce que les initialisations soient complètes
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Forcer l'orientation en portrait uniquement
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    // DeviceOrientation.portraitDown,
+  ]);
 
   // Initialisation de Firebase avec les options spécifiques à la plateforme
   await Firebase.initializeApp(
