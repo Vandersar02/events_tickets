@@ -35,12 +35,14 @@ class AuthRepository {
       User? user = userCredential.user;
 
       if (user != null) {
-        await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'name': name,
-          'email': email,
-          'preferences': [],
-        });
+        await _firestore.collection('users').doc(user.uid).set(
+          {
+            'uid': user.uid,
+            'name': name,
+            'email': email,
+            'preferences': [],
+          },
+        );
       }
 
       return user;
