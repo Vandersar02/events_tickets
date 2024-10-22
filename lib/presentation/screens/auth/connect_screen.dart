@@ -16,16 +16,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authRepository = AuthRepository();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _nameController = TextEditingController();
+  // final _nameController = TextEditingController();
   String _errorMessage = '';
 
   // Fonction d'inscription
   Future<void> _signUp() async {
     try {
-      User? user = await _authRepository.signUpWithEmail(
+      User? user = await _authRepository.signInWithEmail(
         _emailController.text,
         _passwordController.text,
-        _nameController.text,
       );
       if (user != null) {
         Navigator.pushReplacementNamed(context, '/');
