@@ -24,7 +24,7 @@ class AuthRepository {
           .where('email', isEqualTo: email)
           .get();
       if (existingUser.docs.isNotEmpty) {
-        throw Exception("L'utilisateur existe déjà");
+        throw Exception("L' utilisateur existe déjà");
       }
 
       UserCredential userCredential =

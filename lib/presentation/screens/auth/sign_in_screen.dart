@@ -25,10 +25,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       try {
-        User? user = await _authRepository.signUpWithEmail(
+        User? user = await _authRepository.signInWithEmail(
           _emailController.text,
           _passwordController.text,
-          _fullNameController.text,
         );
         if (user != null) {
           Navigator.pushReplacementNamed(context, '/');
