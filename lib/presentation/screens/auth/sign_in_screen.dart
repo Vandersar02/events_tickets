@@ -41,6 +41,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  // Fonction de connexion avec Google
+  Future<void> _signInWithGoogle() async {
+    try {
+      User? user = await _authRepository.signInWithGoogle();
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  // Fonction de connexion avec Apple
+  Future<void> _signInWithApple() async {
+    try {
+      User? user = await _authRepository.signInWithApple();
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // Social Buttons (Apple and Google)
               SocialButton(
-                press: () {},
+                press: _signInWithApple,
                 text: "Connect with Apple",
                 color: const Color(0xFF395998),
                 icon: SvgPicture.asset(
@@ -120,7 +148,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               SocialButton(
-                press: () {},
+                press: _signInWithGoogle,
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
                 icon: SvgPicture.asset(
