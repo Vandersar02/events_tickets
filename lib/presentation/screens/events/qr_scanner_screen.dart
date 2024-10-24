@@ -180,16 +180,20 @@ bool decryptAndVerifyQrData(String? encryptedData, String secretKey) {
 // Function to decrypt and verify the signed data
 String? decryptAndVerifyQrDataReal(String? encryptedData, String secretKey) {
   try {
-    // Step 1: Decrypt the encrypted data
+    // Step 1: Extract IV and encrypted data
+    final ivData = encryptedData!
+        .substring(0, 24); // Assume que l'IV fait 16 octets encodés en base64
+    final encryptedDataWithoutIv =
+        encryptedData.substring(24); // Le reste est le message chiffré
+
+    final iv = encrypt.IV.fromBase64(ivData);
     final key = encrypt.Key.fromUtf8(secretKey);
-    final iv = encrypt.IV
-        .fromLength(16); // Initialization Vector (must match encryption)
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
-    // Decrypt the data
-    final decrypted = encrypter.decrypt64((encryptedData).toString(), iv: iv);
+    // Step 2: Decrypt the data
+    final decrypted = encrypter.decrypt64(encryptedDataWithoutIv, iv: iv);
 
-    // Step 2: Separate the ticketData and the signature
+    // Step 3: Separate ticketData and signature
     final parts = decrypted.split("|signature=");
     if (parts.length != 2) {
       return null; // Invalid data format
@@ -197,20 +201,18 @@ String? decryptAndVerifyQrDataReal(String? encryptedData, String secretKey) {
     final ticketData = parts[0];
     final providedSignature = parts[1];
 
-    // Step 3: Recalculate the signature
+    // Step 4: Recalculate and verify the signature
     var bytes =
         utf8.encode(ticketData + secretKey); // Combine data and secret key
     var recalculatedSignature =
         sha256.convert(bytes).toString(); // Generate SHA-256 hash
 
-    // Step 4: Verify if the recalculated signature matches the provided signature
     if (providedSignature == recalculatedSignature) {
-      return ticketData; // Data is valid and not tampered with
+      return ticketData; // Data is valid
     } else {
-      return null; // Signature mismatch, data might be corrupted or tampered
+      return null; // Signature mismatch, data might be corrupted or tampered with
     }
   } catch (e) {
-    // Handle any errors during decryption or verification
     print("Decryption or verification failed: $e");
     return null;
   }

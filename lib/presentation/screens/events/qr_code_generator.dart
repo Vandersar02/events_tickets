@@ -15,14 +15,14 @@ String generateSignedAndEncryptedQrData(String ticketData, String secretKey) {
 
   // Step 2: Encrypt the data with AES
   final key = encrypt.Key.fromUtf8(secretKey);
-  final iv = encrypt.IV.fromLength(16); // Initialization Vector for AES
+  final iv = encrypt.IV.fromSecureRandom(16); // Génère un IV aléatoire
   final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
   // Combine ticketData with the signature
   final combinedData = ticketData + "|signature=" + signature;
   final encrypted = encrypter.encrypt(combinedData, iv: iv);
 
-  return encrypted.base64; // Return the encrypted data in base64
+  return iv.base64 + encrypted.base64; // Return IV + encrypted data
 }
 
 class TicketQRCodePage extends StatelessWidget {

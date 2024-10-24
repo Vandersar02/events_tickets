@@ -56,8 +56,8 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       onGenerateRoute: AppRoutes.generateRoute,
-      initialRoute: AppRoutes.onboarding,
-      // initialRoute: AppRoutes.entryPoint,
+      // initialRoute: AppRoutes.onboarding,
+      initialRoute: AppRoutes.entryPoint,
       // home: AuthCheck(), // Utilisation d'AuthCheck pour la redirection
     );
   }
