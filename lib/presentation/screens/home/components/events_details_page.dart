@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:events_ticket/try_moncash.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final String title, location, imageUrl;
@@ -31,11 +32,17 @@ class EventDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(imageUrl),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Event Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(imageUrl),
+                ),
+              ],
             ),
+
             const SizedBox(height: 16),
 
             // Event Title
@@ -81,8 +88,20 @@ class EventDetailsPage extends StatelessWidget {
             // Buy Ticket Button
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // Implement ticket purchase functionality
+                onPressed: () async {
+                  final accessToken = await getAccessToken();
+                  if (accessToken != null) {
+                    // 1. Initier un paiement
+                    await initiatePayment("336216631", "50938662809", 100.0);
+
+                    // 2. Confirmer le paiement
+                    await confirmPayment("336216631", "50938662809", 100.0);
+
+                    // 3. Vérifier le statut du paiement
+                    await checkPaymentStatus(reference: "336216631");
+                  } else {
+                    print('Failed to retrieve access token.');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
