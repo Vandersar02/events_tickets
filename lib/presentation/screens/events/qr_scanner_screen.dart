@@ -39,27 +39,9 @@ class QRScannerScreenState extends State<QRScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Scanner le QR Code')),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(
-        //       controller.value.torchEnabled ? Icons.flash_on : Icons.flash_off,
-        //       color: controller.value.torchEnabled ? Colors.yellow : Colors.grey,
-        //     ),
-        //     onPressed: () => controller.toggleTorch(),
-        //   ),
-        //   IconButton(
-        //     icon: Icon(
-        //       controller.value.cameraFacing == CameraFacing.front
-        //           ? Icons.camera_front
-        //           : Icons.camera_rear,
-        //     ),
-        //     onPressed: () => controller.switchCamera(),
-        //   ),
-        // ],
       ),
       body: Column(
         children: [
-          // Partie Scanner
           Expanded(
             flex: 4,
             child: Stack(
