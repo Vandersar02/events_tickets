@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:events_ticket/try_moncash.dart';
+import 'package:events_ticket/mon_cash_services.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final String title, location, imageUrl;
