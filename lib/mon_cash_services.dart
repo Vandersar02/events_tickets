@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // URL pour récupérer le token d'authentification
 const String authUrl =
@@ -14,8 +14,12 @@ const String checkPaymentUrl =
     'https://sandbox.moncashbutton.digicelgroup.com/MerChantApi/V1/CheckPayment';
 
 // Récupérer les identifiants MonCash du fichier .env
-final String clientId = dotenv.env['MONCASH_CLIENT_ID']!;
-final String clientSecret = dotenv.env['MONCASH_CLIENT_SECRET']!;
+// final String clientId = dotenv.env['MONCASH_CLIENT_ID']!;
+// final String clientSecret = dotenv.env['MONCASH_CLIENT_SECRET']!;
+
+const String clientId = 'ee1609349d7d1076730c1daa7a1a112a';
+const String clientSecret =
+    'oHrr4tbnB1PH0uz6VQNUvXroyjrsA3qhrSHZrzddx5rmrgMQXfSqB2uAn8uHcdJR';
 
 // Function to get access token
 Future<String?> getAccessToken() async {
