@@ -1,5 +1,5 @@
-import 'package:events_ticket/presentation/screens/auth/connect_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_in_screen.dart';
+import 'package:events_ticket/presentation/screens/auth/sign_up_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:events_ticket/presentation/screens/qr_code/qr_code_generator.dart';
@@ -35,7 +35,7 @@ class AppRoutes {
       case login:
         return MaterialPageRoute(
             builder: (_) =>
-                const LoginScreen()); // Route pour l'écran de connexion
+                const SignInScreen()); // Route pour l'écran de connexion
       case signUp:
         return MaterialPageRoute(
             builder: (_) =>
@@ -62,7 +62,7 @@ class AppRoutes {
       default:
         return MaterialPageRoute(
             builder: (_) =>
-                const LoginScreen()); // Route par défaut renvoyant à l'écran de connexion
+                const SignInScreen()); // Route par défaut renvoyant à l'écran de connexion
     }
   }
 }
