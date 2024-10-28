@@ -1,3 +1,4 @@
+import 'package:events_ticket/services/users_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,6 +7,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final SessionManager _sessionManager = SessionManager();
 
   // Vérification si l'utilisateur existe dans Firestore
   Future<bool> userExists(String uid) async {
@@ -37,13 +39,17 @@ class AuthRepository {
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).set(
           {
-            'uid': user.uid,
-            'name': name,
+            // 'username': username,
             'email': email,
-            'preferences': [],
+            'uid': user.uid,
+            'isAdmin': false, // Statut par défaut
+            'preferences': [], // Préférences vides par défaut
+            'createdAt': FieldValue.serverTimestamp(),
           },
         );
       }
+
+      await _sessionManager.saveUserLogin();
 
       return user;
     } catch (e) {
@@ -88,9 +94,12 @@ class AuthRepository {
           'uid': user.uid,
           'name': googleUser.displayName,
           'email': googleUser.email,
-          'preferences': [],
+          'isAdmin': false, // Statut par défaut
+          'preferences': [], // Préférences vides par défaut
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
+      await _sessionManager.saveUserLogin();
 
       return user;
     } catch (e) {
@@ -125,9 +134,12 @@ class AuthRepository {
           'uid': user.uid,
           'name': "${appleCredential.givenName} ${appleCredential.familyName}",
           'email': appleCredential.email,
-          'preferences': [],
+          'isAdmin': false, // Statut par défaut
+          'preferences': [], // Préférences vides par défaut
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
+      await _sessionManager.saveUserLogin();
 
       return user;
     } catch (e) {
@@ -138,6 +150,9 @@ class AuthRepository {
   // Déconnexion
   Future<void> signOut() async {
     await _auth.signOut();
+
+    // Supprime la session de l'utilisateur
+    await _sessionManager.logoutUser();
   }
 
   // Récupérer l'utilisateur actuel

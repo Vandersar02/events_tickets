@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       User? user = await _authRepository.signInWithGoogle();
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       User? user = await _authRepository.signInWithApple();
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushNamed(context, '/');
       }
     } catch (e) {
       setState(() {
