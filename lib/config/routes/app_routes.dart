@@ -2,7 +2,7 @@ import 'package:events_ticket/presentation/screens/auth/connect_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_in_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:events_ticket/presentation/screens/events/qr_code_generator.dart';
+import 'package:events_ticket/presentation/screens/qr_code/qr_code_generator.dart';
 import 'package:flutter/material.dart';
 
 // Classe contenant les routes de l'application

@@ -1,4 +1,4 @@
-import 'package:events_ticket/presentation/screens/events/qr_scanner_screen.dart';
+import 'package:events_ticket/presentation/screens/qr_code/qr_scanner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'dart:math';
