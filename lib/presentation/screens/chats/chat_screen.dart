@@ -1,3 +1,4 @@
+import 'package:events_ticket/presentation/screens/chats/components/message_screen.dart';
 import 'package:flutter/material.dart';
 
 class ChatsScreen extends StatelessWidget {
@@ -43,7 +44,9 @@ class ChatsScreen extends StatelessWidget {
               itemCount: chatsData.length,
               itemBuilder: (context, index) => ChatCard(
                 chat: chatsData[index],
-                press: () {},
+                press: () {
+                  const MessagesScreen();
+                },
               ),
             ),
           ),
