@@ -1,4 +1,3 @@
-// ignore_for_file: unused_field
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -16,7 +15,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _authRepository = AuthRepository();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _errorMessage = '';
+  String errorMessage = '';
 
   // Fonction d'inscription
   Future<void> _signUp() async {
@@ -30,7 +29,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        errorMessage = e.toString();
       });
     }
   }
@@ -44,7 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        errorMessage = e.toString();
       });
     }
   }
@@ -58,7 +57,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        errorMessage = e.toString();
       });
     }
   }
