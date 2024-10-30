@@ -64,6 +64,8 @@ class AuthRepository {
         email: email,
         password: password,
       );
+      await _sessionManager.saveUserLogin();
+
       return userCredential.user;
     } catch (e) {
       throw Exception("Erreur de connexion : $e");
@@ -134,8 +136,8 @@ class AuthRepository {
           'uid': user.uid,
           'name': "${appleCredential.givenName} ${appleCredential.familyName}",
           'email': appleCredential.email,
-          'isAdmin': false, // Statut par défaut
-          'preferences': [], // Préférences vides par défaut
+          'isAdmin': false,
+          'preferences': [],
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
@@ -147,7 +149,6 @@ class AuthRepository {
     }
   }
 
-  // Déconnexion
   Future<void> signOut() async {
     await _auth.signOut();
 

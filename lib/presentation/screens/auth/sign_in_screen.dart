@@ -18,18 +18,35 @@ class _SignInScreenState extends State<SignInScreen> {
   String errorMessage = '';
 
   // Fonction d'inscription
-  Future<void> _signUp() async {
+  Future<void> _signIn() async {
     try {
       User? user = await _authRepository.signInWithEmail(
-        _emailController.text,
-        _passwordController.text,
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
       if (user != null) {
         Navigator.pushNamed(context, '/');
       }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        switch (e.code) {
+          case 'invalid-email':
+            errorMessage = "L'adresse e-mail est invalide.";
+            break;
+          case 'user-not-found':
+            errorMessage = "Aucun utilisateur trouvé pour cet e-mail.";
+            break;
+          case 'wrong-password':
+            errorMessage = "Mot de passe incorrect.";
+            break;
+          default:
+            errorMessage = "Une erreur est survenue. Veuillez réessayer.";
+        }
+      });
     } catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage =
+            "Une erreur inattendue est survenue. Veuillez réessayer.";
       });
     }
   }
@@ -38,6 +55,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signInWithGoogle() async {
     try {
       User? user = await _authRepository.signInWithGoogle();
+      print(user);
       if (user != null) {
         Navigator.pushNamed(context, '/');
       }
@@ -52,6 +70,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signInWithApple() async {
     try {
       User? user = await _authRepository.signInWithApple();
+      print(user);
       if (user != null) {
         Navigator.pushNamed(context, '/');
       }
@@ -84,7 +103,7 @@ class _SignInScreenState extends State<SignInScreen> {
               SignInForm(
                 emailController: _emailController,
                 passwordController: _passwordController,
-                onSignIn: _signUp,
+                onSignIn: _signIn,
               ),
               const SizedBox(height: 16),
               Center(
