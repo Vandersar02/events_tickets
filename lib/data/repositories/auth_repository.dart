@@ -1,4 +1,4 @@
-import 'package:events_ticket/services/users_manager.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -41,7 +41,6 @@ class AuthRepository {
           {
             'username': name,
             'email': email,
-            'uid': user.uid,
             'isAdmin': false, // Statut par défaut
             'preferences': [], // Préférences vides par défaut
             'createdAt': FieldValue.serverTimestamp(),
@@ -93,7 +92,6 @@ class AuthRepository {
       bool exists = await userExists(user!.uid);
       if (!exists) {
         await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
           'name': googleUser.displayName,
           'email': googleUser.email,
           'isAdmin': false, // Statut par défaut
@@ -133,7 +131,6 @@ class AuthRepository {
       bool exists = await userExists(user!.uid);
       if (!exists) {
         await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
           'name': "${appleCredential.givenName} ${appleCredential.familyName}",
           'email': appleCredential.email,
           'isAdmin': false,

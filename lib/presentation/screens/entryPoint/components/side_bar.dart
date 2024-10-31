@@ -1,4 +1,4 @@
-import 'package:events_ticket/data/utils/rive_utils.dart';
+import 'package:events_ticket/core/utils/rive_utils.dart';
 import 'package:events_ticket/data/models/menu.dart';
 import 'package:flutter/material.dart';
 import 'info_card.dart';

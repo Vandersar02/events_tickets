@@ -2,7 +2,7 @@ import 'package:events_ticket/config/routes/app_routes.dart';
 import 'package:events_ticket/data/providers/theme_providers.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:events_ticket/services/users_manager.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';

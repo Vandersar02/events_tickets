@@ -70,20 +70,29 @@ Le projet est structuré pour être modulaire et extensible.
 
 ```plaintext
 lib/
-├── main.dart                  # Point d'entrée principal de l'application
+├── main.dart
 ├── config/
-│   ├── routes/                # Configuration des routes
-│   └── themes/                # Thèmes clair et sombre personnalisés
+│   ├── routes/
+│   └── themes/
+├── core/
+│   ├── services/
+│   │   ├── auth/
+│   │   ├── messaging/
+│   │   ├── storage/
+│   │   └── ticket/
+│   ├── models/
+│   └── utils/
 ├── data/
-│   ├── models/                # Modèles pour les utilisateurs et événements
-│   ├── providers/             # Fournisseurs pour les thèmes et autres données
-│   └── repositories/          # Communication avec Firebase et MonCash
-├── presentation/
-│   ├── screens/               # Écrans (authentification, événements, etc.)
-│   └── widgets/               # Widgets réutilisables
-└── services/
-    ├── users_manager.dart     # Gestion de l'authentification et des utilisateurs
-    └── session_manager.dart   # Gestion de la session utilisateur
+│   ├── models/
+│   ├── providers/
+│   └── repositories/
+└── presentation/
+    ├── screens/
+    │   ├── auth/
+    │   ├── events/
+    │   ├── ticket/
+    │   └── social/
+    └── widgets/
 ```
 
 ## Gestion des Thèmes
