@@ -32,4 +32,40 @@ class AuthService {
   Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
     await _firestore.collection('users').doc(uid).update(data);
   }
+
+  Future<void> updateUserProfilePicture(
+      String uid, String profilePictureUrl) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'profilePictureUrl': profilePictureUrl});
+  }
+
+  Future<void> updateUserName(String uid, String name) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'name': name});
+  }
+
+  Future<void> updateUserEmail(String uid, String email) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'email': email});
+  }
+
+  Future<void> updateUserIsOnline(String uid, bool isOnline) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'isOnline': isOnline});
+  }
+
+  Future<void> updateUserPreferences(List<String> preferences) async {
+    String uid = _auth.currentUser!.uid;
+    await _firestore.collection('users').doc(uid).update({
+      'preferences': preferences,
+    });
+  }
 }
