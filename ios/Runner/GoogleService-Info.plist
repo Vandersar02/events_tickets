@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>438000097602-rc9fb5j8icks4dfkacf24gt8enm9p4kk.apps.googleusercontent.com</string>
+	<string>930540187209-jkdqkog38bopsh9ju1r1cej0esn07k5t.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.438000097602-rc9fb5j8icks4dfkacf24gt8enm9p4kk</string>
+	<string>com.googleusercontent.apps.930540187209-jkdqkog38bopsh9ju1r1cej0esn07k5t</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBlNZXqbd3TjnoOX8r5pqAVUf79KSrgQEk</string>
+	<string>AIzaSyCdQFVO5Mlthn8tavHwUyTIZqtDzbaI1VY</string>
 	<key>GCM_SENDER_ID</key>
-	<string>438000097602</string>
+	<string>930540187209</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.eventsTicket</string>
+	<string>com.example.eventEase</string>
 	<key>PROJECT_ID</key>
-	<string>eventtickets-377db</string>
+	<string>eventstickets-3ceba</string>
 	<key>STORAGE_BUCKET</key>
-	<string>eventtickets-377db.appspot.com</string>
+	<string>eventstickets-3ceba.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:438000097602:ios:9f6cec12fb0769a50510db</string>
+	<string>1:930540187209:ios:5c5b4de980dde99a489998</string>
 	<key>DATABASE_URL</key>
-	<string>https://eventtickets-377db-default-rtdb.firebaseio.com</string>
+	<string>https://eventstickets-3ceba-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

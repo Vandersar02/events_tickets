@@ -29,48 +29,56 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAMywexTtjD3kpxY2ZThlWr3QKRK_ufRl4',
-    appId: '1:438000097602:web:293b23e282dc8d8a0510db',
-    messagingSenderId: '438000097602',
-    projectId: 'eventtickets-377db',
-    authDomain: 'eventtickets-377db.firebaseapp.com',
-    storageBucket: 'eventtickets-377db.appspot.com',
-    measurementId: 'G-HTWL0BW4GM',
+    apiKey: 'AIzaSyC2gkvektP9AEGhY0f5deGA2GaeWBlK--M',
+    appId: '1:930540187209:web:dbbaaadef6c55786489998',
+    messagingSenderId: '930540187209',
+    projectId: 'eventstickets-3ceba',
+    authDomain: 'eventstickets-3ceba.firebaseapp.com',
+    databaseURL: 'https://eventstickets-3ceba-default-rtdb.firebaseio.com',
+    storageBucket: 'eventstickets-3ceba.appspot.com',
+    measurementId: 'G-MYN1T5ZMP2',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBHHQ9iArVZzdncdvgtFTxO1BPijYCgQTE',
-    appId: '1:438000097602:android:4b9bb3c7f5daa5320510db',
-    messagingSenderId: '438000097602',
-    projectId: 'eventtickets-377db',
-    storageBucket: 'eventtickets-377db.appspot.com',
+    apiKey: 'AIzaSyDtDxhND9eu5SCF5_9KViaPrVx36scXADU',
+    appId: '1:930540187209:android:b8b06197f19b3a36489998',
+    messagingSenderId: '930540187209',
+    projectId: 'eventstickets-3ceba',
+    databaseURL: 'https://eventstickets-3ceba-default-rtdb.firebaseio.com',
+    storageBucket: 'eventstickets-3ceba.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBlNZXqbd3TjnoOX8r5pqAVUf79KSrgQEk',
-    appId: '1:438000097602:ios:9f6cec12fb0769a50510db',
-    messagingSenderId: '438000097602',
-    projectId: 'eventtickets-377db',
-    storageBucket: 'eventtickets-377db.appspot.com',
+    apiKey: 'AIzaSyCdQFVO5Mlthn8tavHwUyTIZqtDzbaI1VY',
+    appId: '1:930540187209:ios:f454663d66d85b52489998',
+    messagingSenderId: '930540187209',
+    projectId: 'eventstickets-3ceba',
+    databaseURL: 'https://eventstickets-3ceba-default-rtdb.firebaseio.com',
+    storageBucket: 'eventstickets-3ceba.appspot.com',
+    iosClientId: '930540187209-cituhbkj7ldg0gpg7a9tlu96v77bgkn5.apps.googleusercontent.com',
     iosBundleId: 'com.example.eventsTicket',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBlNZXqbd3TjnoOX8r5pqAVUf79KSrgQEk',
-    appId: '1:438000097602:ios:9f6cec12fb0769a50510db',
-    messagingSenderId: '438000097602',
-    projectId: 'eventtickets-377db',
-    storageBucket: 'eventtickets-377db.appspot.com',
+    apiKey: 'AIzaSyCdQFVO5Mlthn8tavHwUyTIZqtDzbaI1VY',
+    appId: '1:930540187209:ios:f454663d66d85b52489998',
+    messagingSenderId: '930540187209',
+    projectId: 'eventstickets-3ceba',
+    databaseURL: 'https://eventstickets-3ceba-default-rtdb.firebaseio.com',
+    storageBucket: 'eventstickets-3ceba.appspot.com',
+    iosClientId: '930540187209-cituhbkj7ldg0gpg7a9tlu96v77bgkn5.apps.googleusercontent.com',
     iosBundleId: 'com.example.eventsTicket',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAMywexTtjD3kpxY2ZThlWr3QKRK_ufRl4',
-    appId: '1:438000097602:web:d80502ae5d39a4bf0510db',
-    messagingSenderId: '438000097602',
-    projectId: 'eventtickets-377db',
-    authDomain: 'eventtickets-377db.firebaseapp.com',
-    storageBucket: 'eventtickets-377db.appspot.com',
-    measurementId: 'G-ZKCYQ13PNK',
+    apiKey: 'AIzaSyC2gkvektP9AEGhY0f5deGA2GaeWBlK--M',
+    appId: '1:930540187209:web:95a34967f1ab2e42489998',
+    messagingSenderId: '930540187209',
+    projectId: 'eventstickets-3ceba',
+    authDomain: 'eventstickets-3ceba.firebaseapp.com',
+    databaseURL: 'https://eventstickets-3ceba-default-rtdb.firebaseio.com',
+    storageBucket: 'eventstickets-3ceba.appspot.com',
+    measurementId: 'G-15FG33N60V',
   );
+
 }

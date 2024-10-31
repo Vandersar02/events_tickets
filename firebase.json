@@ -3,20 +3,20 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "eventtickets-377db",
-          "appId": "1:438000097602:android:4b9bb3c7f5daa5320510db",
+          "projectId": "eventstickets-3ceba",
+          "appId": "1:930540187209:android:b8b06197f19b3a36489998",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "eventtickets-377db",
+          "projectId": "eventstickets-3ceba",
           "configurations": {
-            "android": "1:438000097602:android:4b9bb3c7f5daa5320510db",
-            "ios": "1:438000097602:ios:9f6cec12fb0769a50510db",
-            "macos": "1:438000097602:ios:9f6cec12fb0769a50510db",
-            "web": "1:438000097602:web:293b23e282dc8d8a0510db",
-            "windows": "1:438000097602:web:d80502ae5d39a4bf0510db"
+            "android": "1:930540187209:android:b8b06197f19b3a36489998",
+            "ios": "1:930540187209:ios:f454663d66d85b52489998",
+            "macos": "1:930540187209:ios:f454663d66d85b52489998",
+            "web": "1:930540187209:web:dbbaaadef6c55786489998",
+            "windows": "1:930540187209:web:95a34967f1ab2e42489998"
           }
         }
       }

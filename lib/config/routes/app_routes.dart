@@ -1,3 +1,4 @@
+import 'package:events_ticket/presentation/screens/auth/components/forgot_password.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_in_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_up_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String payment = '/payment';
   static const String orderDetails = '/order-details';
   static const String address = '/address';
+  static const String forgetPassword = '/forgetPassword';
 
   // Méthode qui génère une route en fonction du nom donné
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -54,6 +56,10 @@ class AppRoutes {
         return MaterialPageRoute(
             builder: (_) =>
                 const TicketQRCodePage()); // Route pour l'écran du ticket
+      case forgetPassword:
+        return MaterialPageRoute(
+          builder: (_) => ForgotPasswordScreen(),
+        );
       // case socialFeed:
       //   return MaterialPageRoute(builder: (_) => SocialFeedScreen()); // Route pour le fil d'actualité social
       // case postDetails:

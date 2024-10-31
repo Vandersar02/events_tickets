@@ -1,38 +1,74 @@
 {
   "project_info": {
-    "project_number": "438000097602",
-    "firebase_url": "https://eventtickets-377db-default-rtdb.firebaseio.com",
-    "project_id": "eventtickets-377db",
-    "storage_bucket": "eventtickets-377db.appspot.com"
+    "project_number": "930540187209",
+    "firebase_url": "https://eventstickets-3ceba-default-rtdb.firebaseio.com",
+    "project_id": "eventstickets-3ceba",
+    "storage_bucket": "eventstickets-3ceba.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:438000097602:android:4b9bb3c7f5daa5320510db",
+        "mobilesdk_app_id": "1:930540187209:android:afb3251765ff40a4489998",
         "android_client_info": {
-          "package_name": "com.example.events_ticket"
+          "package_name": "com.example.event_ease"
         }
       },
       "oauth_client": [
         {
-          "client_id": "438000097602-qfvihn854hs5g253l1hh5c2eb43qutvs.apps.googleusercontent.com",
+          "client_id": "930540187209-o6mu29vgmsn4nukni67925l25p0cbps7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBHHQ9iArVZzdncdvgtFTxO1BPijYCgQTE"
+          "current_key": "AIzaSyDtDxhND9eu5SCF5_9KViaPrVx36scXADU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "438000097602-qfvihn854hs5g253l1hh5c2eb43qutvs.apps.googleusercontent.com",
+              "client_id": "930540187209-o6mu29vgmsn4nukni67925l25p0cbps7.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "438000097602-rc9fb5j8icks4dfkacf24gt8enm9p4kk.apps.googleusercontent.com",
+              "client_id": "930540187209-cituhbkj7ldg0gpg7a9tlu96v77bgkn5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eventsTicket"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930540187209:android:b8b06197f19b3a36489998",
+        "android_client_info": {
+          "package_name": "com.example.events_ticket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "930540187209-o6mu29vgmsn4nukni67925l25p0cbps7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtDxhND9eu5SCF5_9KViaPrVx36scXADU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "930540187209-o6mu29vgmsn4nukni67925l25p0cbps7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "930540187209-cituhbkj7ldg0gpg7a9tlu96v77bgkn5.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.eventsTicket"

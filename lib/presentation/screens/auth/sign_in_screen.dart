@@ -25,7 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
         _passwordController.text.trim(),
       );
       if (user != null) {
-        Navigator.pushNamed(context, '/');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -57,7 +57,7 @@ class _SignInScreenState extends State<SignInScreen> {
       User? user = await _authRepository.signInWithGoogle();
       print(user);
       if (user != null) {
-        Navigator.pushNamed(context, '/');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -72,7 +72,7 @@ class _SignInScreenState extends State<SignInScreen> {
       User? user = await _authRepository.signInWithApple();
       print(user);
       if (user != null) {
-        Navigator.pushNamed(context, '/');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -262,7 +262,9 @@ class _SignInFormState extends State<SignInForm> {
 
           // Forget Password
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/forgetPassword');
+            },
             child: Text(
               "Forget Password?",
               style: Theme.of(context)

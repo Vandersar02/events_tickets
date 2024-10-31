@@ -1,4 +1,5 @@
 import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -31,22 +32,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _fullNameController.text,
         );
         if (user != null) {
-          Navigator.pushNamed(context, '/');
+          Navigator.pushReplacementNamed(context, '/');
         }
+        print("The User ID is : $user");
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();
         });
       }
+      _emailController.clear();
+      _passwordController.clear();
+      _fullNameController.clear();
+      _confirmPasswordController.clear();
     }
   }
 
   // Fonction de connexion avec Google
   Future<void> _signInWithGoogle() async {
     try {
+      const EntryPoint();
+
       User? user = await _authRepository.signInWithGoogle();
+      print("The User ID is : $user");
       if (user != null) {
-        Navigator.pushNamed(context, '/');
+        Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
       setState(() {
@@ -58,10 +67,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
     try {
+      const EntryPoint();
       User? user = await _authRepository.signInWithApple();
       if (user != null) {
-        Navigator.pushNamed(context, '/');
+        // Navigator.pushReplacementNamed(context, '/');
       }
+      print("The User ID is : $user");
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

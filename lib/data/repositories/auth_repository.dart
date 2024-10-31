@@ -39,7 +39,7 @@ class AuthRepository {
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).set(
           {
-            // 'username': username,
+            'username': name,
             'email': email,
             'uid': user.uid,
             'isAdmin': false, // Statut par défaut
@@ -80,7 +80,7 @@ class AuthRepository {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
