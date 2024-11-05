@@ -7,7 +7,7 @@ class SocialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Supprime la flèche de retour
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF7553F6),
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
