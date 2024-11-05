@@ -5,37 +5,42 @@ class InfoCard extends StatelessWidget {
   const InfoCard({
     super.key,
     required this.name,
-    required this.bio,
+    // required this.bio,
+    required this.onTap,
   });
 
-  final String name, bio;
+  final VoidCallback onTap;
+  final String name; // , bio;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Colors.white24,
-        radius: 24,
-        child: Icon(
-          CupertinoIcons.person,
-          color: Colors.white,
-          size: 28,
+    return GestureDetector(
+      onTap: onTap,
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Colors.white24,
+          radius: 24,
+          child: Icon(
+            CupertinoIcons.person,
+            color: Colors.white,
+            size: 28,
+          ),
         ),
-      ),
-      title: Text(
-        name,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+        title: Text(
+          name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      subtitle: Text(
-        bio,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-        ),
+        // subtitle: Text(
+        //   bio,
+        //   style: const TextStyle(
+        //     color: Colors.white,
+        //     fontSize: 14,
+        //   ),
+        // ),
       ),
     );
   }
