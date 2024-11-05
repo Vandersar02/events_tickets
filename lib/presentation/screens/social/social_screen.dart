@@ -18,169 +18,181 @@ class SocialScreen extends StatelessWidget {
       ),
       body: const SafeArea(
         bottom: false,
-        child: SocialBody(),
+        child: SocialFeedScreen(),
       ),
     );
   }
 }
 
-class SocialBody extends StatelessWidget {
-  const SocialBody({super.key});
+class SocialFeedScreen extends StatelessWidget {
+  const SocialFeedScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      children: [
+        // Stories Section
+        SizedBox(
+          height: 120,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            children: [
+              _buildStoryTile("Add Story", "assets/add_story.png", true),
+              _buildStoryTile("Samera", "assets/images/event2.jpg"),
+              _buildStoryTile("Julien", "assets/images/event1.jpg"),
+              _buildStoryTile("Mariane", "assets/images/event3.jpg"),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 5),
+
+        // Posts Section
+        _buildPostCard(
+          userName: "Jemma Ray",
+          timeAgo: "19 hours ago",
+          imageUrl: "assets/images/event1.jpg",
+          likes: 4200,
+          comments: 273,
+        ),
+        _buildPostCard(
+          userName: "Eric Ray",
+          timeAgo: "20 hours ago",
+          imageUrl: "assets/images/event2.jpg",
+          likes: 2900,
+          comments: 133,
+        ),
+        _buildPostCard(
+          userName: "Jung Taekwoon",
+          timeAgo: "1 day ago",
+          imageUrl: "assets/images/event2.jpg",
+          likes: 20200,
+          comments: 908,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStoryTile(String name, String imageUrl,
+      [bool isAddStory = false]) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 15.0),
       child: Column(
         children: [
-          SizedBox(height: 10),
-          StoriesSection(),
-          Divider(),
-          FeedSection(),
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage(imageUrl),
+                child: isAddStory
+                    ? const Icon(Icons.add, color: Colors.white, size: 24)
+                    : null,
+              ),
+              if (!isAddStory)
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.orange, width: 3),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(
+            name,
+            style: const TextStyle(color: Colors.black, fontSize: 12),
+          ),
         ],
       ),
     );
   }
-}
 
-class StoriesSection extends StatelessWidget {
-  const StoriesSection({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of stories
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage: const AssetImage('assets/images/event2.jpg'),
-                ),
-                const SizedBox(height: 4),
-                Text('User $index'),
-              ],
+  Widget _buildPostCard({
+    required String userName,
+    required String timeAgo,
+    required String imageUrl,
+    required int likes,
+    required int comments,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: CircleAvatar(
+              backgroundImage: AssetImage(imageUrl),
+              radius: 24,
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class FeedSection extends StatelessWidget {
-  const FeedSection({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 5, // Number of posts
-      itemBuilder: (context, index) {
-        return const PostWidget();
-      },
-    );
-  }
-}
-
-class PostWidget extends StatelessWidget {
-  const PostWidget({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Post Header
-        const ListTile(
-          leading: CircleAvatar(
-            backgroundImage: AssetImage('assets/images/event2.jpg'),
+            title: Text(
+              userName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(timeAgo),
+            trailing: IconButton(
+              icon: const Icon(Icons.more_horiz),
+              onPressed: () {},
+            ),
           ),
-          title: Text('username'),
-          subtitle: Text('Location'),
-          trailing: Icon(Icons.more_vert),
-        ),
-
-        // Post Image
-        Container(
-          height: 300,
-          width: double.infinity,
-          color: Colors.grey[300],
-          child: Image.asset(
-            'assets/images/event2.jpg',
-            fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              imageUrl,
+              height: 250,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-
-        // Post Actions
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: () {},
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.comment_bank_outlined),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.favorite_border_sharp),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Likes and Caption
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Liked by user1 and 123 others',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              RichText(
-                text: const TextSpan(
-                  style: TextStyle(color: Colors.black),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
                   children: [
-                    TextSpan(
-                      text: 'username ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: 'Here is the caption of the post...'),
+                    Icon(Icons.favorite, color: Colors.red),
+                    const SizedBox(width: 4),
+                    Text('$likes'),
                   ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'View all 10 comments',
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '2 hours ago',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
+                Row(
+                  children: [
+                    Icon(Icons.comment, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text('$comments Comments'),
+                  ],
+                ),
+                Icon(Icons.share, color: Colors.grey),
+              ],
+            ),
           ),
-        ),
-      ],
+          const Divider(color: Colors.grey),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: AssetImage(imageUrl),
+                  radius: 14,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "Add a comment...",
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
