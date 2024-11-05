@@ -1,6 +1,6 @@
 import 'package:events_ticket/config/routes/app_routes.dart';
 import 'package:events_ticket/data/providers/theme_providers.dart';
-import 'package:events_ticket/data/repositories/auth_repository.dart';
+// import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 // import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
@@ -29,7 +29,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => AuthRepository()),
+        // ChangeNotifierProvider(create: (context) => AuthRepository()),
       ],
       child: const MyApp(),
     ),

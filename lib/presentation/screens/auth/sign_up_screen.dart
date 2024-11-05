@@ -1,4 +1,4 @@
-import 'package:events_ticket/data/repositories/auth_repository.dart';
+// import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _authRepository = AuthRepository();
+  // final _authRepository = AuthRepository();
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -25,11 +25,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await _authRepository.signUpWithEmail(
-          _emailController.text,
-          _passwordController.text,
-          _fullNameController.text,
-        );
+        // await _authRepository.signUpWithEmail(
+        //   _emailController.text,
+        //   _passwordController.text,
+        //   _fullNameController.text,
+        // );
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();
@@ -47,7 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       const EntryPoint();
 
-      await _authRepository.signInWithGoogle();
+      // await _authRepository.signInWithGoogle();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -58,7 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
     try {
-      await _authRepository.signInWithApple();
+      // await _authRepository.signInWithApple();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

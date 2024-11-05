@@ -1,4 +1,4 @@
-import 'package:events_ticket/data/repositories/auth_repository.dart';
+// import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,7 +11,7 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final _authRepository = AuthRepository();
+  // final _authRepository = AuthRepository();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String errorMessage = '';
@@ -23,10 +23,10 @@ class _SignInScreenState extends State<SignInScreen> {
       isLoading = true;
     });
     try {
-      await _authRepository.signInWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      // await _authRepository.signInWithEmail(
+      //   _emailController.text.trim(),
+      //   _passwordController.text.trim(),
+      // );
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -44,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
       isLoading = true;
     });
     try {
-      await _authRepository.signInWithGoogle();
+      // await _authRepository.signInWithGoogle();
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -62,7 +62,7 @@ class _SignInScreenState extends State<SignInScreen> {
       isLoading = true;
     });
     try {
-      await _authRepository.signInWithApple();
+      // await _authRepository.signInWithApple();
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
