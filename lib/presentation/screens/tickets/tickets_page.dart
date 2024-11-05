@@ -15,6 +15,8 @@ class _TicketsPageState extends State<TicketsPage>
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false, // Supprime la flèche de retour
+          backgroundColor: const Color(0xFF7553F6),
           title: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -22,6 +24,7 @@ class _TicketsPageState extends State<TicketsPage>
             ],
           ),
           bottom: const TabBar(
+            labelStyle: TextStyle(color: Colors.white),
             tabs: [
               Tab(text: 'Upcoming'),
               Tab(text: 'Completed'),

@@ -6,12 +6,21 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> addUserToFirestore(User user, String name) async {
-    await _firestore.collection('users').doc(user.uid).set({
-      'name': name,
-      'email': user.email,
-      'profilePictureUrl': '',
-      'isOnline': true,
-    });
+    await _firestore.collection('users').doc(user.uid).set(
+      {
+        'name': name,
+        'email': user.email,
+        'profilePictureUrl': '',
+        'isOnline': true,
+        "isOrganizer": false,
+        "isActive": true,
+        "createdAt": FieldValue.serverTimestamp(),
+        "lastActive": null,
+        "preferences": [],
+        "groups": [],
+        "chatRooms": []
+      },
+    );
   }
 
   Future<DocumentSnapshot> getUserData(String uid) async {
@@ -53,13 +62,6 @@ class AuthService {
         .collection('users')
         .doc(uid)
         .update({'email': email});
-  }
-
-  Future<void> updateUserIsOnline(String uid, bool isOnline) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .update({'isOnline': isOnline});
   }
 
   Future<void> updateUserPreferences(List<String> preferences) async {

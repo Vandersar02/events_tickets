@@ -17,6 +17,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
   MobileScannerController controller = MobileScannerController();
   String? qrCodeData;
   bool isValid = false;
+  bool isScanning = true;
+
   @override
   void initState() {
     super.initState();
@@ -25,11 +27,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
       final barcode = barcodeCapture.barcodes.first;
       setState(() {
         qrCodeData = decryptAndVerifyQrDataReal(barcode.rawValue, secretKey);
-
-        isValid =
-            decryptAndVerifyQrDataReal(barcode.rawValue, secretKey) == null
-                ? false
-                : true;
+        isValid = qrCodeData != null;
+        isScanning = false; // Stop scanning after receiving a QR code
       });
     });
   }
@@ -67,7 +66,6 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
           ),
-          // Espace en bas
           Container(
             padding: const EdgeInsets.symmetric(vertical: 50.0),
             decoration: BoxDecoration(
@@ -86,29 +84,45 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                   Text(
                     isValid
                         ? '$qrCodeData'
-                        : "QR Code is invalid or tampered with.",
+                        : "Le QR Code est invalide ou a été altéré.",
                     style: TextStyle(
                         fontSize: 18,
                         color: isValid ? Colors.green : Colors.red),
                   ),
+                if (isScanning) const CircularProgressIndicator(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        // Action Check-in
-                      },
+                      onPressed: isValid
+                          ? () {
+                              // Action Check-in
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Check-in effectué!')),
+                              );
+                            }
+                          : null,
                       child: const Text("Check-in"),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Action Check-out
-                      },
+                      onPressed: isValid
+                          ? () {
+                              // Action Check-out
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Check-out effectué!')),
+                              );
+                            }
+                          : null,
                       child: const Text("Check-out"),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         // Rescan button
+                        setState(() {
+                          qrCodeData = null;
+                          isValid = false;
+                          isScanning = true;
+                        });
                         controller.start();
                       },
                       child: const Text("Rescanner"),

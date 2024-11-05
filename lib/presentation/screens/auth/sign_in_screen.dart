@@ -1,5 +1,4 @@
 import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,67 +15,61 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String errorMessage = '';
+  bool isLoading = false;
 
   // Fonction d'inscription
   Future<void> _signIn() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      User? user = await _authRepository.signInWithEmail(
+      await _authRepository.signInWithEmail(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        switch (e.code) {
-          case 'invalid-email':
-            errorMessage = "L'adresse e-mail est invalide.";
-            break;
-          case 'user-not-found':
-            errorMessage = "Aucun utilisateur trouvé pour cet e-mail.";
-            break;
-          case 'wrong-password':
-            errorMessage = "Mot de passe incorrect.";
-            break;
-          default:
-            errorMessage = "Une erreur est survenue. Veuillez réessayer.";
-        }
-      });
     } catch (e) {
       setState(() {
-        errorMessage =
-            "Une erreur inattendue est survenue. Veuillez réessayer.";
+        errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
 
   // Fonction de connexion avec Google
   Future<void> _signInWithGoogle() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      User? user = await _authRepository.signInWithGoogle();
-      print(user);
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
+      await _authRepository.signInWithGoogle();
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
 
   // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      User? user = await _authRepository.signInWithApple();
-      print(user);
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
+      await _authRepository.signInWithApple();
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -105,11 +98,21 @@ class _SignInScreenState extends State<SignInScreen> {
                 passwordController: _passwordController,
                 onSignIn: _signIn,
               ),
+              if (errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               const SizedBox(height: 16),
               Center(
-                child: Text("Or",
-                    style: TextStyle(
-                        color: const Color(0xFF010F07).withOpacity(0.7))),
+                child: Text(
+                  "Or",
+                  style: TextStyle(
+                      color: const Color(0xFF010F07).withOpacity(0.7)),
+                ),
               ),
               const SizedBox(height: 16 * 1.5),
               Center(
@@ -134,8 +137,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Facebook Button (Dummy for now)
               SocialButton(
                 press: _signInWithApple,
                 text: "Connect with Apple",
@@ -149,8 +150,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Google Button
               SocialButton(
                 press: _signInWithGoogle,
                 text: "Connect with Google",
@@ -158,6 +157,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 icon: SvgPicture.string(googleIcon),
               ),
               const SizedBox(height: 16),
+              if (isLoading) const Center(child: CircularProgressIndicator()),
             ],
           ),
         ),
@@ -183,7 +183,7 @@ class WelcomeText extends StatelessWidget {
               .titleLarge!
               .copyWith(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 16 / 2),
+        const SizedBox(height: 8),
         Text(text, style: const TextStyle(color: Color(0xFF868686))),
         const SizedBox(height: 24),
       ],
@@ -217,7 +217,6 @@ class _SignInFormState extends State<SignInForm> {
       key: _formKey,
       child: Column(
         children: [
-          // Email Field
           TextFormField(
             controller: widget.emailController,
             textInputAction: TextInputAction.next,
@@ -231,10 +230,14 @@ class _SignInFormState extends State<SignInForm> {
                 borderSide: BorderSide(color: Color(0xFFF3F2F2)),
               ),
             ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
-
-          // Password Field
           TextFormField(
             controller: widget.passwordController,
             obscureText: _obscureText,
@@ -257,10 +260,14 @@ class _SignInFormState extends State<SignInForm> {
                     : const Icon(Icons.visibility, color: Color(0xFF868686)),
               ),
             ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
-
-          // Forget Password
           GestureDetector(
             onTap: () {
               Navigator.pushNamed(context, '/forgetPassword');
@@ -274,8 +281,6 @@ class _SignInFormState extends State<SignInForm> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Sign In Button
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
@@ -327,26 +332,14 @@ class SocialButton extends StatelessWidget {
         ),
         onPressed: press,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              height: 28,
-              width: 28,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(4)),
-              ),
-              child: icon,
-            ),
-            const Spacer(flex: 2),
+            icon,
+            const SizedBox(width: 8),
             Text(
-              text.toUpperCase(),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+              text,
+              style: const TextStyle(color: Colors.white),
             ),
-            const Spacer(flex: 3),
           ],
         ),
       ),

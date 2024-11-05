@@ -7,6 +7,8 @@ class SocialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Supprime la flèche de retour
+        backgroundColor: const Color(0xFF7553F6),
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -29,6 +31,7 @@ class SocialBody extends StatelessWidget {
     return const SingleChildScrollView(
       child: Column(
         children: [
+          SizedBox(height: 10),
           StoriesSection(),
           Divider(),
           FeedSection(),

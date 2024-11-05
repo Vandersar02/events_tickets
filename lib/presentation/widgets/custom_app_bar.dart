@@ -6,14 +6,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   // Définition de la hauteur préférée de l'AppBar
   @override
-  Size get preferredSize => const Size.fromHeight(150);
+  Size get preferredSize => const Size.fromHeight(130);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       // Style et décoration de l'AppBar
       decoration: const BoxDecoration(
-        color: Color(0xFF5F67EC), // Couleur de fond bleue
+        color: Color(0xFF7553F6), // Couleur de fond bleue
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.0), // Arrondi en bas à gauche
           bottomRight: Radius.circular(30.0), // Arrondi en bas à droite
@@ -33,7 +33,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      'Current Location', // Texte pour indiquer la localisation actuelle
+                      'Current Location',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
@@ -54,8 +54,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                             // Gérer l'action du clic sur la flèche (filtrer ou modifier la localisation)
                           },
                           child: const Icon(
-                            Icons
-                                .keyboard_arrow_down, // Icône de flèche vers le bas
+                            Icons.keyboard_arrow_down,
                             color: Colors.white,
                           ),
                         ),
@@ -63,16 +62,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                 ),
-                const SizedBox(
-                    width:
-                        10), // Espacement entre l'adresse et l'icône de notification
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined,
-                      color: Colors.white), // Icône de notification
-                  onPressed: () {
-                    // Gérer l'action des notifications
-                  },
-                ),
+                const SizedBox(width: 25),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: Colors.white),
+                    onPressed: () {
+                      // Gérer l'action des notifications
+                    },
+                  ),
+                )
               ],
             ),
 
@@ -85,44 +88,31 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Container(
                     // Style de la barre de recherche
                     decoration: BoxDecoration(
-                      color: Colors.white
-                          .withOpacity(0.2), // Couleur blanche avec opacité
-                      borderRadius:
-                          BorderRadius.circular(20), // Bordures arrondies
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15), // Espacement interne
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: const TextField(
                       decoration: InputDecoration(
-                        hintText:
-                            'Search...', // Texte d'indication pour la recherche
-                        hintStyle: TextStyle(
-                            color:
-                                Colors.white70), // Style du texte d'indication
-                        border: InputBorder.none, // Pas de bordure
-                        icon: Icon(Icons.search,
-                            color: Colors.white70), // Icône de recherche
+                        hintText: 'Search...',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        border: InputBorder.none,
+                        icon: Icon(Icons.search, color: Colors.white70),
                       ),
-                      style: TextStyle(
-                          color: Colors
-                              .white), // Style du texte dans le champ de recherche
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
-                const SizedBox(
-                    width:
-                        10), // Espacement entre la barre de recherche et l'icône de filtre
+                const SizedBox(width: 25),
                 Container(
                   // Conteneur pour l'icône de filtre
-                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(
-                        0.2), // Couleur blanche avec opacité pour l'arrière-plan
-                    shape: BoxShape.circle, // Forme circulaire
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.filter_alt_outlined,
-                        color: Colors.white), // Icône de filtre
+                        color: Colors.white),
                     onPressed: () {
                       // Gérer l'action du filtre
                     },

@@ -15,18 +15,27 @@ class InfoCard extends StatelessWidget {
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.white24,
+        radius: 24,
         child: Icon(
           CupertinoIcons.person,
           color: Colors.white,
+          size: 28,
         ),
       ),
       title: Text(
         name,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       subtitle: Text(
         bio,
-        style: const TextStyle(color: Colors.white70),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+        ),
       ),
     );
   }

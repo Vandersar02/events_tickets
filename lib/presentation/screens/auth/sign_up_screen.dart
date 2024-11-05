@@ -1,6 +1,5 @@
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,15 +25,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       try {
-        User? user = await _authRepository.signUpWithEmail(
+        await _authRepository.signUpWithEmail(
           _emailController.text,
           _passwordController.text,
           _fullNameController.text,
         );
-        if (user != null) {
-          Navigator.pushReplacementNamed(context, '/');
-        }
-        print("The User ID is : $user");
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();
@@ -52,11 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       const EntryPoint();
 
-      User? user = await _authRepository.signInWithGoogle();
-      print("The User ID is : $user");
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
+      await _authRepository.signInWithGoogle();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -67,12 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
     try {
-      const EntryPoint();
-      User? user = await _authRepository.signInWithApple();
-      if (user != null) {
-        // Navigator.pushReplacementNamed(context, '/');
-      }
-      print("The User ID is : $user");
+      await _authRepository.signInWithApple();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

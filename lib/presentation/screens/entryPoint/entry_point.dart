@@ -1,18 +1,11 @@
-import 'package:events_ticket/presentation/screens/qr_code/qr_scanner_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
-import 'dart:math';
-import 'package:events_ticket/data/models/menu.dart';
-import 'package:events_ticket/core/utils/rive_utils.dart';
-import 'package:events_ticket/config/constants/constants.dart';
-import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
-import 'package:events_ticket/presentation/screens/home/home_screen.dart';
-import 'package:events_ticket/presentation/screens/social/social_screen.dart';
+// import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
 import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
-
-import 'components/btm_nav_item.dart';
-import 'components/menu_btn.dart';
-import 'components/side_bar.dart';
+import 'package:events_ticket/presentation/screens/entryPoint/components/side_bar.dart';
+import 'package:events_ticket/presentation/screens/home/home_screen.dart';
+import 'package:events_ticket/presentation/screens/qr_code/qr_scanner_screen.dart';
+import 'package:events_ticket/presentation/screens/social/social_screen.dart';
+import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
+import 'package:flutter/material.dart';
 
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});
@@ -24,8 +17,6 @@ class EntryPoint extends StatefulWidget {
 class _EntryPointState extends State<EntryPoint>
     with SingleTickerProviderStateMixin {
   bool isSideBarOpen = false;
-
-  Menu selectedButtonNav = bottomNavItems.first;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -34,11 +25,7 @@ class _EntryPointState extends State<EntryPoint>
     const TicketsPage(),
     const ChatsScreen(),
     const QRScannerScreen(),
-    //const CalendarPage(),
-    //const ChatPage(),
   ];
-
-  late SMIBool isMenuOpenInput;
 
   late AnimationController _animationController;
   late Animation<double> scalAnimation;
@@ -47,16 +34,19 @@ class _EntryPointState extends State<EntryPoint>
   @override
   void initState() {
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200))
-      ..addListener(
-        () {
-          setState(() {});
-        },
-      );
-    scalAnimation = Tween<double>(begin: 1, end: 0.8).animate(CurvedAnimation(
-        parent: _animationController, curve: Curves.fastOutSlowIn));
-    animation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
-        parent: _animationController, curve: Curves.fastOutSlowIn));
+        vsync: this, duration: const Duration(milliseconds: 300))
+      ..addListener(() {
+        setState(() {});
+      });
+
+    // Animation de la mise à l'échelle
+    scalAnimation = Tween<double>(begin: 1, end: 0.85).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+
+    // Animation de rotation en perspective
+    animation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+
     super.initState();
   }
 
@@ -66,10 +56,20 @@ class _EntryPointState extends State<EntryPoint>
     super.dispose();
   }
 
+  void toggleSideBar() {
+    setState(() {
+      isSideBarOpen = !isSideBarOpen;
+      if (isSideBarOpen) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      selectedButtonNav = bottomNavItems[index];
     });
   }
 
@@ -78,115 +78,85 @@ class _EntryPointState extends State<EntryPoint>
     return Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      backgroundColor: backgroundColor2,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          AnimatedPositioned(
-            width: 288,
-            height: MediaQuery.of(context).size.height,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.fastOutSlowIn,
-            left: isSideBarOpen ? 0 : -288,
+          // Sidebar
+          Positioned(
+            left: isSideBarOpen ? 0 : -250, // Barre latérale coulissante
             top: 0,
+            bottom: 0,
+            width: 250,
             child: const SideBar(),
           ),
+
+          // Main Content avec rotation et mise à l'échelle
           Transform(
             alignment: Alignment.center,
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
-              ..rotateY(
-                  1 * animation.value - 30 * (animation.value) * pi / 180),
-            child: Transform.translate(
-              offset: Offset(animation.value * 265, 0),
-              child: Transform.scale(
-                scale: scalAnimation.value,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(24),
-                  ),
-                  child: _pages[_selectedIndex],
-                ),
+              ..rotateY(0.1 * animation.value) // Rotation légère
+              ..translate(
+                  animation.value * 250), // Translation de 250px vers la droite
+            child: Transform.scale(
+              scale: scalAnimation.value,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(isSideBarOpen ? 24 : 0),
+                child: _pages[_selectedIndex],
               ),
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.fastOutSlowIn,
-            left: isSideBarOpen ? 220 : 0,
-            top: 16,
-            child: MenuBtn(
-              press: () {
-                isMenuOpenInput.value = !isMenuOpenInput.value;
 
-                if (_animationController.value == 0) {
-                  _animationController.forward();
-                } else {
-                  _animationController.reverse();
-                }
-
-                setState(
-                  () {
-                    isSideBarOpen = !isSideBarOpen;
-                  },
-                );
-              },
-              riveOnInit: (artboard) {
-                final controller = StateMachineController.fromArtboard(
-                    artboard, "State Machine");
-
-                artboard.addController(controller!);
-
-                isMenuOpenInput =
-                    controller.findInput<bool>("isOpen") as SMIBool;
-                isMenuOpenInput.value = true;
-              },
+          // Menu Bouton pour ouvrir/fermer la Sidebar
+          Positioned(
+            left: isSideBarOpen ? 200 : 16, // Position dynamique selon état
+            top: 35,
+            child: IconButton(
+              icon: Icon(
+                isSideBarOpen ? Icons.close : Icons.menu,
+                size: 28,
+                color: Colors.white,
+              ),
+              onPressed: toggleSideBar,
             ),
           ),
         ],
       ),
-      bottomNavigationBar: Transform.translate(
-        offset: Offset(0, 100 * animation.value),
-        child: SafeArea(
-          child: Container(
-            padding:
-                const EdgeInsets.only(left: 12, top: 12, right: 12, bottom: 12),
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              color: backgroundColor2.withOpacity(0.8),
-              borderRadius: const BorderRadius.all(Radius.circular(24)),
-              boxShadow: [
-                BoxShadow(
-                  color: backgroundColor2.withOpacity(0.3),
-                  offset: const Offset(0, 20),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ...List.generate(
-                  bottomNavItems.length,
-                  (index) {
-                    Menu navBar = bottomNavItems[index];
-                    return BtmNavItem(
-                      navBar: navBar,
-                      press: () {
-                        RiveUtils.changeSMIBoolState(navBar.rive.status!);
-                        _onNavItemTapped(index);
-                      },
-                      riveOnInit: (artboard) {
-                        navBar.rive.status = RiveUtils.getRiveInput(artboard,
-                            stateMachineName: navBar.rive.stateMachineName);
-                      },
-                      selectedNav: selectedButtonNav,
-                    );
-                  },
-                ),
-              ],
-            ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        currentIndex: _selectedIndex,
+        onTap: _onNavItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor:
+            const Color(0xFF7553F6), // Couleur de l'icône sélectionnée
+        unselectedItemColor:
+            Colors.grey, // Couleur des icônes non sélectionnées
+        showSelectedLabels:
+            true, // Affiche les labels pour les items sélectionnés
+        showUnselectedLabels:
+            true, // Affiche les labels pour les items non sélectionnés
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Social',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number),
+            label: 'Tickets',
+          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.chat),
+          //   label: 'Chats',
+          // ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.portrait),
+          //   label: 'Scanner',
+          // ),
+        ],
       ),
     );
   }
