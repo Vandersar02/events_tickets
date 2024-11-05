@@ -1,4 +1,3 @@
-// import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
 import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/components/side_bar.dart';
 import 'package:events_ticket/presentation/screens/home/home_screen.dart';
