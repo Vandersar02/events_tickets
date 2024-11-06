@@ -1,36 +1,44 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionManager {
-  const SessionManager();
-  static const String _isLoggedInKey = 'isLoggedIn';
+  static const String _isLoggedInKey = 'is_logged_in';
+  static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
 
-  // Méthode pour sauvegarder le statut de connexion
-  Future<void> saveUserLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_isLoggedInKey, true);
+  // Singleton pattern
+  static final SessionManager _instance = SessionManager._internal();
+  factory SessionManager() => _instance;
+  SessionManager._internal();
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  // Marquer l'utilisateur comme connecté
+  Future<void> setUserLoggedIn(bool value) async {
+    final prefs = await _prefs;
+    await prefs.setBool(_isLoggedInKey, value);
   }
 
-  // Méthode pour vérifier si l'utilisateur est connecté
+  // Vérifier si l'utilisateur est connecté
   Future<bool> isUserLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_isLoggedInKey) ?? false; // Par défaut, retourne false
+    final prefs = await _prefs;
+    return prefs.getBool(_isLoggedInKey) ?? false;
   }
 
-  // Méthode pour supprimer le statut de connexion (déconnexion)
-  Future<void> logoutUser() async {
-    final prefs = await SharedPreferences.getInstance();
+  // Marquer l'utilisateur comme ayant vu l'onboarding
+  Future<void> setHasSeenOnboarding(bool value) async {
+    final prefs = await _prefs;
+    await prefs.setBool(_hasSeenOnboardingKey, value);
+  }
+
+  // Vérifier si l'utilisateur a vu l'onboarding
+  Future<bool> hasSeenOnboarding() async {
+    final prefs = await _prefs;
+    return prefs.getBool(_hasSeenOnboardingKey) ?? false;
+  }
+
+  // Effacer les données de session de l'utilisateur
+  Future<void> clearSession() async {
+    final prefs = await _prefs;
     await prefs.remove(_isLoggedInKey);
-  }
-
-  // Enregistrer une valeur
-  Future<void> saveUserName(String username) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('username', username);
-  }
-
-  // Récupérer une valeur
-  Future<String?> getUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username');
+    await prefs.remove(_hasSeenOnboardingKey);
   }
 }

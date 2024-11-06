@@ -1,8 +1,12 @@
 // import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'dart:io';
+import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -10,6 +14,8 @@ class SignUpScreen extends StatefulWidget {
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
+
+final supabase = Supabase.instance.client;
 
 class _SignUpScreenState extends State<SignUpScreen> {
   // final _authRepository = AuthRepository();
@@ -20,7 +26,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
 
   bool _obscureText = true;
+  bool isLoading = false;
   String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    supabase.auth.onAuthStateChange.listen((event) {
+      if (event == AuthChangeEvent.signedIn) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EntryPoint(),
+          ),
+        );
+      }
+    });
+  }
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -44,13 +66,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   // Fonction de connexion avec Google
   Future<void> _signInWithGoogle() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      const EntryPoint();
-
-      // await _authRepository.signInWithGoogle();
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        await AuthRepository().signInWithGoogle();
+      }
+      await supabase.auth.signInWithOAuth(OAuthProvider.google);
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -153,6 +183,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              if (isLoading) const Center(child: CircularProgressIndicator()),
             ],
           ),
         ),

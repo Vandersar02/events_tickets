@@ -1,152 +1,130 @@
 // import 'package:events_ticket/core/services/auth/auth_services.dart';
-// import 'package:events_ticket/core/services/auth/users_manager.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/foundation.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
-// import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-// class AuthRepository with ChangeNotifier {
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   final SessionManager _sessionManager = const SessionManager();
-//   User? currentUser;
-//   String? errorMessage = '';
+class AuthRepository with ChangeNotifier {
+  final webClientId =
+      '496831178944-8lfhmpqr2e0c03ogvhj13bujo9mc83ef.apps.googleusercontent.com';
+  final iosClientId =
+      '496831178944-ogtf55eote1lmvtgg19rhmmqcvoim75r.apps.googleusercontent.com';
+  final supabase = Supabase.instance.client;
+  User? currentUser;
+  String? errorMessage = '';
 
-//   Future<bool> userExists(String uid) async {
-//     try {
-//       DocumentSnapshot userDoc =
-//           await _firestore.collection('users').doc(uid).get();
-//       return userDoc.exists;
-//     } catch (e) {
-//       debugPrint(
-//           "Erreur lors de la vérification de l'existence de l'utilisateur: $e");
-//       return false;
-//     }
-//   }
+  // Méthode pour vérifier si un utilisateur existe dans la table `users`
+  Future<bool> userExists(String userId) async {
+    try {
+      final response =
+          await supabase.from('users').select().eq('id', userId).single();
 
-//   Future<void> signUpWithEmail(
-//       String email, String password, String name) async {
-//     try {
-//       var existingUser = await _firestore
-//           .collection('users')
-//           .where('email', isEqualTo: email)
-//           .get();
-//       if (existingUser.docs.isNotEmpty) {
-//         throw Exception("L'utilisateur existe déjà");
-//       }
+      return response.isNotEmpty;
+    } catch (error) {
+      debugPrint(
+          "Erreur lors de la vérification de l'existence de l'utilisateur: $error");
+      return false;
+    }
+  }
 
-//       UserCredential userCredential = await _auth
-//           .createUserWithEmailAndPassword(email: email, password: password);
-//       User? user = userCredential.user;
+  // Inscription par email et mot de passe
+  Future<void> signUpWithEmail(String email, String password) async {
+    final response = await supabase.auth.signUp(
+      email: email,
+      password: password,
+    );
 
-//       if (user != null) {
-//         await AuthService().addUserToFirestore(user, name);
-//         await _sessionManager.saveUserLogin();
-//         currentUser = user;
-//         notifyListeners();
-//       }
-//     } catch (e) {
-//       errorMessage = "Erreur d'inscription : $e";
-//       notifyListeners();
-//       rethrow;
-//     }
-//   }
+    if (response.user != null) {
+      // await AuthService().createUserInDatabase(response.user!, email);
+      await SessionManager().setUserLoggedIn(true);
+      notifyListeners();
+    }
+  }
 
-//   Future<void> signInWithEmail(String email, String password) async {
-//     try {
-//       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-//           email: email, password: password);
-//       await _sessionManager.saveUserLogin();
-//       currentUser = userCredential.user;
-//       notifyListeners();
-//     } catch (e) {
-//       errorMessage = "Erreur de connexion : $e";
-//       notifyListeners();
-//       rethrow;
-//     }
-//   }
+  // Connexion par email et mot de passe
+  Future<void> signInWithEmail(String email, String password) async {
+    final response = await supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
 
-//   Future<void> signInWithGoogle() async {
-//     try {
-//       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-//       if (googleUser == null) return;
+    if (response.user != null) {
+      await SessionManager().setUserLoggedIn(true);
+      notifyListeners();
+    }
+  }
 
-//       final GoogleSignInAuthentication googleAuth =
-//           await googleUser.authentication;
-//       final AuthCredential credential = GoogleAuthProvider.credential(
-//         accessToken: googleAuth.accessToken,
-//         idToken: googleAuth.idToken,
-//       );
+  // Connexion avec Google
+  Future<void> signInWithGoogle() async {
+    final googleSignIn = GoogleSignIn(
+      clientId: iosClientId,
+      serverClientId: webClientId,
+    );
 
-//       UserCredential userCredential =
-//           await _auth.signInWithCredential(credential);
-//       User? user = userCredential.user;
+    final googleUser = await googleSignIn.signIn();
+    final googleAuth = await googleUser!.authentication;
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
 
-//       if (user != null) {
-//         if (!await userExists(user.uid)) {
-//           await AuthService().addUserToFirestore(
-//               user, googleUser.displayName ?? "Utilisateur");
-//         }
-//         await _sessionManager.saveUserLogin();
-//         currentUser = user;
-//         notifyListeners();
-//       }
-//     } catch (e) {
-//       errorMessage = "Erreur avec Google Sign-In : $e";
-//       notifyListeners();
-//       rethrow;
-//     }
-//   }
+    if (accessToken == null) throw 'No access token found';
+    if (idToken == null) throw 'No id token found';
 
-//   Future<void> signInWithApple() async {
-//     try {
-//       final appleCredential = await SignInWithApple.getAppleIDCredential(
-//         scopes: [
-//           AppleIDAuthorizationScopes.email,
-//           AppleIDAuthorizationScopes.fullName
-//         ],
-//       );
+    await supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: googleAuth.idToken!,
+      accessToken: googleAuth.accessToken,
+    );
 
-//       final OAuthCredential oauthCredential =
-//           OAuthProvider("apple.com").credential(
-//         idToken: appleCredential.identityToken,
-//         accessToken: appleCredential.authorizationCode,
-//       );
+    currentUser = supabase.auth.currentUser;
+    if (currentUser != null && !await userExists(currentUser!.id)) {
+      // await _authService.createUserInDatabase(user, user.email!);
+      await SessionManager().setUserLoggedIn(true);
+    }
+  }
 
-//       UserCredential userCredential =
-//           await _auth.signInWithCredential(oauthCredential);
-//       User? user = userCredential.user;
+  // Connexion avec Apple
+  Future<void> signInWithApple() async {
+    final rawNonce = supabase.auth.generateRawNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
 
-//       if (user != null) {
-//         if (!await userExists(user.uid)) {
-//           final fullName =
-//               "${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}"
-//                   .trim();
-//           await AuthService().addUserToFirestore(
-//               user, fullName.isNotEmpty ? fullName : "Utilisateur Apple");
-//         }
-//         await _sessionManager.saveUserLogin();
-//         currentUser = user;
-//         notifyListeners();
-//       }
-//     } catch (e) {
-//       errorMessage = "Erreur avec Apple Sign-In : $e";
-//       notifyListeners();
-//       rethrow;
-//     }
-//   }
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
 
-//   Future<void> signOut() async {
-//     try {
-//       await _auth.signOut();
-//       await _sessionManager.logoutUser();
-//       currentUser = null;
-//       notifyListeners();
-//     } catch (e) {
-//       errorMessage = "Erreur lors de la déconnexion : $e";
-//       notifyListeners();
-//       rethrow;
-//     }
-//   }
-// }
+    if (credential.identityToken == null) {
+      throw 'Erreur d\'authentification Apple';
+    }
+
+    await supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.apple,
+      idToken: credential.identityToken!,
+      nonce: rawNonce,
+    );
+
+    final user = supabase.auth.currentUser;
+    if (user != null && !await userExists(user.id)) {
+      // await AuthService().createUserInDatabase(user, user.email!);
+    }
+  }
+
+  // Déconnexion de l'utilisateur
+  Future<void> signOut() async {
+    try {
+      await supabase.auth.signOut();
+      await SessionManager().clearSession();
+      currentUser = null;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = "Erreur lors de la déconnexion : $e";
+      notifyListeners();
+      rethrow;
+    }
+  }
+}

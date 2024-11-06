@@ -1,7 +1,8 @@
-// import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -10,12 +11,23 @@ class SignInScreen extends StatefulWidget {
   State<SignInScreen> createState() => _SignInScreenState();
 }
 
+final supabase = Supabase.instance.client;
+
 class _SignInScreenState extends State<SignInScreen> {
-  // final _authRepository = AuthRepository();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String errorMessage = '';
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    supabase.auth.onAuthStateChange.listen((event) {
+      if (event == AuthChangeEvent.signedIn) {
+        Navigator.pushNamed(context, '/entryPoint');
+      }
+    });
+  }
 
   // Fonction d'inscription
   Future<void> _signIn() async {
@@ -44,7 +56,7 @@ class _SignInScreenState extends State<SignInScreen> {
       isLoading = true;
     });
     try {
-      // await _authRepository.signInWithGoogle();
+      await AuthRepository().signInWithGoogle();
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -142,6 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 text: "Connect with Apple",
                 color: const Color(0xFF395998),
                 icon: SvgPicture.string(
+                  height: 10,
                   facebookIcon,
                   colorFilter: const ColorFilter.mode(
                     Color(0xFF395998),
@@ -154,7 +167,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 press: _signInWithGoogle,
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
-                icon: SvgPicture.string(googleIcon),
+                icon: SvgPicture.string(height: 10, googleIcon),
               ),
               const SizedBox(height: 16),
               if (isLoading) const Center(child: CircularProgressIndicator()),

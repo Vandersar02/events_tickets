@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -7,13 +8,26 @@ class ProfilePage extends StatefulWidget {
   ProfilePageState createState() => ProfilePageState();
 }
 
+final supabase = Supabase.instance.client;
+
 class ProfilePageState extends State<ProfilePage> {
-  final TextEditingController nameController =
-      TextEditingController(text: "John Doe");
-  final TextEditingController emailController =
-      TextEditingController(text: "john.doe@example.com");
-  final TextEditingController phoneController =
-      TextEditingController(text: "0123456789");
+  final TextEditingController nameController = TextEditingController(text: "");
+  final TextEditingController emailController = TextEditingController(text: "");
+  final TextEditingController phoneController = TextEditingController(text: "");
+
+  @override
+  void initState() {
+    super.initState();
+    supabase.auth.onAuthStateChange.listen((data) {
+      setState(() {
+        nameController.text =
+            data.session?.user.userMetadata!['name'] ?? "John Doe";
+        emailController.text =
+            data.session?.user.email ?? "john.doe@example.com";
+        phoneController.text = data.session?.user.phone ?? "0123456789";
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +73,9 @@ class ProfilePageState extends State<ProfilePage> {
             ElevatedButton(
               onPressed: () {
                 // Gérer la sauvegarde des informations
-                final name = nameController.text;
-                final email = emailController.text;
-                final phone = phoneController.text;
+                // final name = nameController.text;
+                // final email = emailController.text;
+                // final phone = phoneController.text;
                 // Ici, tu peux enregistrer ces données à l'aide d'une API ou d'une base de données
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
