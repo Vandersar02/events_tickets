@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AddEventPage extends StatefulWidget {
+  const AddEventPage({super.key});
+
   @override
   _AddEventPageState createState() => _AddEventPageState();
 }
@@ -30,7 +32,7 @@ class _AddEventPageState extends State<AddEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ajouter un événement"),
+        title: const Text("Ajouter un événement"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,7 +41,8 @@ class _AddEventPageState extends State<AddEventPage> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: "Nom de l'événement"),
+                decoration:
+                    const InputDecoration(labelText: "Nom de l'événement"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Veuillez entrer un nom d'événement.";
@@ -51,7 +54,8 @@ class _AddEventPageState extends State<AddEventPage> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: "Lieu de l'événement"),
+                decoration:
+                    const InputDecoration(labelText: "Lieu de l'événement"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Veuillez entrer un lieu.";
@@ -63,8 +67,8 @@ class _AddEventPageState extends State<AddEventPage> {
                 },
               ),
               TextFormField(
-                decoration:
-                    InputDecoration(labelText: "Nombre de tickets disponibles"),
+                decoration: const InputDecoration(
+                    labelText: "Nombre de tickets disponibles"),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || int.tryParse(value) == null) {
@@ -76,10 +80,10 @@ class _AddEventPageState extends State<AddEventPage> {
                   ticketsAvailable = int.parse(value!);
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text("Enregistrer l'événement"),
+                child: const Text("Enregistrer l'événement"),
               ),
             ],
           ),

@@ -5,8 +5,6 @@ import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 // import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:flutter/material.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';

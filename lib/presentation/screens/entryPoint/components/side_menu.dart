@@ -6,11 +6,11 @@ class SideMenu extends StatefulWidget {
   final VoidCallback onTap;
 
   const SideMenu({
-    Key? key,
+    super.key,
     required this.title,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   _SideMenuState createState() => _SideMenuState();

@@ -45,11 +45,19 @@
 		<true />
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true />
-		<key>UIStatusBarHidden</key>
-		<true />
-		<key>UIViewControllerBasedStatusBarAppearance</key>
-		<false />
 		<key>NSCameraUsageDescription</key>
 		<string>This app requires camera access to scan QR codes.</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>
+						com.googleusercontent.apps.496831178944-ogtf55eote1lmvtgg19rhmmqcvoim75r</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

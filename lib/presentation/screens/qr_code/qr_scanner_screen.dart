@@ -98,7 +98,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                           ? () {
                               // Action Check-in
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Check-in effectué!')),
+                                const SnackBar(
+                                    content: Text('Check-in effectué!')),
                               );
                             }
                           : null,
@@ -109,7 +110,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                           ? () {
                               // Action Check-out
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Check-out effectué!')),
+                                const SnackBar(
+                                    content: Text('Check-out effectué!')),
                               );
                             }
                           : null,

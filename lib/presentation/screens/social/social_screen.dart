@@ -154,19 +154,19 @@ class SocialFeedScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.favorite, color: Colors.red),
+                    const Icon(Icons.favorite, color: Colors.red),
                     const SizedBox(width: 4),
                     Text('$likes'),
                   ],
                 ),
                 Row(
                   children: [
-                    Icon(Icons.comment, color: Colors.grey),
+                    const Icon(Icons.comment, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text('$comments Comments'),
                   ],
                 ),
-                Icon(Icons.share, color: Colors.grey),
+                const Icon(Icons.share, color: Colors.grey),
               ],
             ),
           ),

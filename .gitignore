@@ -15,13 +15,6 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
-.env
-GoogleService-Info.plist
-firebase.json
-google-services.json
-
-guide.md
-event_card_from_network.txt
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line

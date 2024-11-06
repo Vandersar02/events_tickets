@@ -24,7 +24,7 @@ class EventDetailsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Event Details"),
+        title: const Text("Event Details"),
         backgroundColor: Colors.deepPurple,
       ),
       body: SingleChildScrollView(
@@ -57,7 +57,7 @@ class EventDetailsPage extends StatelessWidget {
             // Event Date and Location
             Row(
               children: [
-                Icon(Icons.calendar_today, color: Colors.deepPurple),
+                const Icon(Icons.calendar_today, color: Colors.deepPurple),
                 const SizedBox(width: 8),
                 Text(dateFormatted),
               ],
@@ -65,7 +65,7 @@ class EventDetailsPage extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.location_on, color: Colors.deepPurple),
+                const Icon(Icons.location_on, color: Colors.deepPurple),
                 const SizedBox(width: 8),
                 Text(location),
               ],
