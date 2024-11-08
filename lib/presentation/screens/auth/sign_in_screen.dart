@@ -1,4 +1,5 @@
 import 'package:events_ticket/data/repositories/auth_repository.dart';
+import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,74 +17,64 @@ final supabase = Supabase.instance.client;
 class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String errorMessage = '';
+  String errorMessage = AuthRepository().errorMessage ?? '';
   bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    supabase.auth.onAuthStateChange.listen((event) {
-      if (event == AuthChangeEvent.signedIn) {
-        Navigator.pushNamed(context, '/entryPoint');
-      }
-    });
-  }
 
   // Fonction d'inscription
   Future<void> _signIn() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
-      // await _authRepository.signInWithEmail(
-      //   _emailController.text.trim(),
-      //   _passwordController.text.trim(),
-      // );
+      await AuthRepository().signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      _navigateToEntryPoint();
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
+      setState(() => errorMessage = e.toString());
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
+    _clearFields();
   }
 
   // Fonction de connexion avec Google
   Future<void> _signInWithGoogle() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
-      await AuthRepository().signInWithGoogle();
+      await AuthRepository().signInWithGoogle(isSignIn: true);
+      _navigateToEntryPoint();
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
+      setState(() => errorMessage = e.toString());
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
   // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
-      // await _authRepository.signInWithApple();
+      await AuthRepository().signInWithApple();
+      _navigateToEntryPoint();
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
+      setState(() => errorMessage = e.toString());
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
+  }
+
+  void _navigateToEntryPoint() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EntryPoint(),
+      ),
+    );
+  }
+
+  void _clearFields() {
+    _emailController.clear();
+    _passwordController.clear();
   }
 
   @override

@@ -1,8 +1,5 @@
-// import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'dart:io';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,7 +15,6 @@ class SignUpScreen extends StatefulWidget {
 final supabase = Supabase.instance.client;
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  // final _authRepository = AuthRepository();
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -27,73 +23,64 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool _obscureText = true;
   bool isLoading = false;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    supabase.auth.onAuthStateChange.listen((event) {
-      if (event == AuthChangeEvent.signedIn) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const EntryPoint(),
-          ),
-        );
-      }
-    });
-  }
+  String _errorMessage = AuthRepository().errorMessage ?? '';
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
       try {
-        // await _authRepository.signUpWithEmail(
-        //   _emailController.text,
-        //   _passwordController.text,
-        //   _fullNameController.text,
-        // );
+        await AuthRepository().signUpWithEmail(
+          _emailController.text,
+          _passwordController.text,
+        );
+        _navigateToEntryPoint();
       } catch (e) {
-        setState(() {
-          _errorMessage = e.toString();
-        });
+        setState(() => _errorMessage = e.toString());
+      } finally {
+        setState(() => isLoading = false);
       }
-      _emailController.clear();
-      _passwordController.clear();
-      _fullNameController.clear();
-      _confirmPasswordController.clear();
+      _clearFields();
     }
   }
 
-  // Fonction de connexion avec Google
   Future<void> _signInWithGoogle() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        await AuthRepository().signInWithGoogle();
-      }
-      await supabase.auth.signInWithOAuth(OAuthProvider.google);
+      await AuthRepository().signInWithGoogle();
+      _navigateToEntryPoint();
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      setState(() => _errorMessage = e.toString());
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
-  // Fonction de connexion avec Apple
   Future<void> _signInWithApple() async {
+    setState(() => isLoading = true);
     try {
-      // await _authRepository.signInWithApple();
+      await AuthRepository().signInWithApple();
+      _navigateToEntryPoint();
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      setState(() => isLoading = false);
     }
+  }
+
+  void _navigateToEntryPoint() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EntryPoint(),
+      ),
+    );
+  }
+
+  void _clearFields() {
+    _emailController.clear();
+    _passwordController.clear();
+    _fullNameController.clear();
+    _confirmPasswordController.clear();
   }
 
   @override
@@ -112,14 +99,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               const WelcomeText(
                 title: "Create Account",
-                text: "Enter your Name, Email and Password \nfor sign up.",
+                text: "Enter your Name, Email, and Password for sign up.",
               ),
-
-              // Sign Up Form
               _buildSignUpForm(),
               const SizedBox(height: 16),
-
-              // Already have account
               Center(
                 child: Text.rich(
                   TextSpan(
@@ -144,7 +127,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
               Center(
                 child: Text(
-                  "By Signing up you agree to our Terms \nConditions & Privacy Policy.",
+                  "By Signing up you agree to our Terms\nConditions & Privacy Policy.",
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
@@ -158,8 +141,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Social Buttons (Apple and Google)
               SocialButton(
                 press: _signInWithApple,
                 text: "Connect with Apple",
@@ -173,14 +154,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
               SocialButton(
                 press: _signInWithGoogle,
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
-                icon: SvgPicture.asset(
-                  'assets/icons/google_box.svg',
-                ),
+                icon: SvgPicture.asset('assets/icons/google_box.svg'),
               ),
               const SizedBox(height: 16),
               if (isLoading) const Center(child: CircularProgressIndicator()),
@@ -200,12 +178,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           TextFormField(
             controller: _fullNameController,
             textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your full name';
-              }
-              return null;
-            },
+            validator: (value) => value == null || value.isEmpty
+                ? 'Please enter your full name'
+                : null,
             decoration: const InputDecoration(
               hintText: "Full Name",
               border: UnderlineInputBorder(
@@ -217,7 +192,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
           const SizedBox(height: 16),
-
           // Email Field
           TextFormField(
             controller: _emailController,
@@ -242,20 +216,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
           const SizedBox(height: 16),
-
           // Password Field
           TextFormField(
             controller: _passwordController,
             obscureText: _obscureText,
             textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              } else if (value.length < 6) {
-                return 'Password must be at least 6 characters';
-              }
-              return null;
-            },
+            validator: (value) => value == null || value.isEmpty
+                ? 'Please enter your password'
+                : null,
             decoration: InputDecoration(
               hintText: "Password",
               border: const UnderlineInputBorder(
@@ -265,32 +233,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderSide: BorderSide(color: Color(0xFFF3F2F2)),
               ),
               suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
-                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
+                onTap: () => setState(() => _obscureText = !_obscureText),
+                child: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: const Color(0xFF868686),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 16),
-
           // Confirm Password Field
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _obscureText,
             textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please confirm your password';
-              } else if (value != _passwordController.text) {
-                return 'Passwords do not match';
-              }
-              return null;
-            },
+            validator: (value) => value != _passwordController.text
+                ? 'Passwords do not match'
+                : null,
             decoration: InputDecoration(
               hintText: "Confirm Password",
               border: const UnderlineInputBorder(
@@ -300,20 +259,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderSide: BorderSide(color: Color(0xFFF3F2F2)),
               ),
               suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: Color(0xFF868686))
-                    : const Icon(Icons.visibility, color: Color(0xFF868686)),
+                onTap: () => setState(() => _obscureText = !_obscureText),
+                child: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: const Color(0xFF868686),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // Display error message if any
           if (_errorMessage.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -322,8 +276,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 style: const TextStyle(color: Colors.red),
               ),
             ),
-
-          // Sign Up Button
           ElevatedButton(
             onPressed: _signUp,
             style: ElevatedButton.styleFrom(

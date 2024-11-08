@@ -1,6 +1,5 @@
 import 'package:events_ticket/config/routes/app_routes.dart';
 import 'package:events_ticket/data/providers/theme_providers.dart';
-import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_in_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
@@ -29,10 +28,7 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => AuthRepository()),
-      ],
+      providers: [ChangeNotifierProvider(create: (context) => ThemeProvider())],
       child: const MyApp(),
     ),
   );
@@ -65,7 +61,7 @@ class AuthWrapper extends StatelessWidget {
   }
 
   Future<bool> _getIsUserLoggedIn() async {
-    return await SessionManager().isUserLoggedIn();
+    return await SessionManager().getUserId() != null;
   }
 
   @override
