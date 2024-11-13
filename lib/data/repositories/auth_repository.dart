@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:events_ticket/core/services/auth/auth_services.dart';
+import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -16,19 +16,25 @@ class AuthRepository {
   String? errorMessage;
 
   // Inscription avec email et mot de passe
-  Future<void> signUpWithEmail(String email, String password) async {
+  Future<void> signUpWithEmail(
+      String email, String password, String name) async {
     try {
       await supabase.auth.signUp(email: email, password: password);
       currentUser = supabase.auth.currentUser;
-
+      print("Current user: $currentUser");
       if (currentUser != null) {
-        bool userExists = await AuthService().userExists(currentUser!.id);
+        bool userExists =
+            await UserServices().getUserData(currentUser!.id) != null;
+        print("User exists: $userExists");
         if (!userExists) {
-          await AuthService().createUserInDatabase(currentUser!);
+          print("User doesn't exist");
+          await UserServices().createUserInDatabase(currentUser!, name: name);
         }
-        await SessionManager().saveUserId(currentUser!.id);
+        print(currentUser?.userMetadata);
+        await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
+      print("Error: $e");
       errorMessage = 'Erreur lors de l\'inscription: $e';
     }
   }
@@ -38,17 +44,23 @@ class AuthRepository {
     try {
       await supabase.auth.signInWithPassword(email: email, password: password);
       currentUser = supabase.auth.currentUser;
+      print("Current user: $currentUser");
 
       if (currentUser != null) {
-        bool userExists = await AuthService().userExists(currentUser!.id);
+        bool userExists =
+            await UserServices().getUserData(currentUser!.id) != null;
+        print("User exists: $userExists");
         if (!userExists) {
+          print("User doesn't exist");
           errorMessage = 'Compte introuvable, veuillez vous inscrire d\'abord.';
           await supabase.auth.signOut();
           return;
         }
-        await SessionManager().saveUserId(currentUser!.id);
+        print(currentUser?.userMetadata);
+        await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
+      print("Error: $e");
       errorMessage = 'Erreur lors de la connexion: $e';
     }
   }
@@ -60,6 +72,7 @@ class AuthRepository {
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
+        print("Error: googleUser is null");
         errorMessage = 'Connexion annulée par l\'utilisateur.';
         return;
       }
@@ -69,6 +82,7 @@ class AuthRepository {
       final accessToken = googleAuth.accessToken;
 
       if (idToken == null || accessToken == null) {
+        print("Error: idToken or accessToken is null");
         errorMessage = 'Erreur lors de la récupération des tokens Google.';
         return;
       }
@@ -81,27 +95,34 @@ class AuthRepository {
 
       currentUser = supabase.auth.currentUser;
       if (currentUser != null) {
-        bool userExists = await AuthService().userExists(currentUser!.id);
+        bool userExists =
+            await UserServices().getUserData(currentUser!.id) != null;
+        print("User exists: $userExists");
 
         if (isSignIn && !userExists) {
+          print("User doesn't exist");
           errorMessage = 'Aucun compte associé à cette adresse Google.';
           await supabase.auth.signOut();
           return;
         }
 
         if (!isSignIn && userExists) {
+          print("User already exists");
           errorMessage = 'Un compte existe déjà avec cet email Google.';
           await supabase.auth.signOut();
           return;
         }
 
         if (!userExists) {
-          await AuthService().createUserInDatabase(currentUser!);
+          print("User doesn't exist");
+          await UserServices().createUserInDatabase(currentUser!);
         }
+        print(currentUser?.userMetadata);
 
-        await SessionManager().saveUserId(currentUser!.id);
+        await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
+      print("Error: $e");
       errorMessage = 'Erreur inattendue lors de la connexion avec Google: $e';
     }
   }
@@ -133,7 +154,8 @@ class AuthRepository {
 
       currentUser = supabase.auth.currentUser;
       if (currentUser != null) {
-        bool userExists = await AuthService().userExists(currentUser!.id);
+        bool userExists =
+            await UserServices().getUserData(currentUser!.id) != null;
 
         if (isSignIn && !userExists) {
           errorMessage = 'Aucun compte associé à cette adresse Apple.';
@@ -148,10 +170,11 @@ class AuthRepository {
         }
 
         if (!userExists) {
-          await AuthService().createUserInDatabase(currentUser!);
+          await UserServices().createUserInDatabase(currentUser!);
         }
 
-        await SessionManager().saveUserId(currentUser!.id);
+        print(currentUser?.userMetadata);
+        await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
       errorMessage = 'Erreur inattendue lors de la connexion avec Apple: $e';
@@ -162,7 +185,8 @@ class AuthRepository {
   Future<void> signOut() async {
     try {
       await supabase.auth.signOut();
-      await SessionManager().clearSession();
+      await SessionManager().removePreference("has_seen_onboarding");
+      await SessionManager().removePreference("user_id");
       currentUser = null;
     } catch (e) {
       errorMessage = 'Erreur lors de la déconnexion : $e';

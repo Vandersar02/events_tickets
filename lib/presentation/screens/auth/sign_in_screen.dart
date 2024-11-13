@@ -1,7 +1,10 @@
+import 'dart:async';
+// import 'dart:math';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,12 +18,14 @@ class SignInScreen extends StatefulWidget {
 final supabase = Supabase.instance.client;
 
 class _SignInScreenState extends State<SignInScreen> {
+  late final StreamSubscription<AuthState> _userSubscription;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String errorMessage = AuthRepository().errorMessage ?? '';
+  bool _redirecting = false;
+  String errorMessage = '';
   bool isLoading = false;
 
-  // Fonction d'inscription
+  // Fonction de connexion classique
   Future<void> _signIn() async {
     setState(() => isLoading = true);
     try {
@@ -28,53 +33,89 @@ class _SignInScreenState extends State<SignInScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      _navigateToEntryPoint();
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      setState(() => context.showSnackBar(e.toString(), isError: true));
     } finally {
       setState(() => isLoading = false);
+      _clearFields();
     }
-    _clearFields();
   }
 
-  // Fonction de connexion avec Google
+  // Fonction de connexion via Google
   Future<void> _signInWithGoogle() async {
     setState(() => isLoading = true);
     try {
-      await AuthRepository().signInWithGoogle(isSignIn: true);
-      _navigateToEntryPoint();
-    } catch (e) {
-      setState(() => errorMessage = e.toString());
+      await AuthRepository().signInWithGoogle();
+    } on AuthException catch (error) {
+      if (mounted) context.showSnackBar(error.message, isError: true);
+    } catch (error) {
+      if (mounted) {
+        context.showSnackBar(error.toString(), isError: true);
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  // Fonction de connexion avec Apple
+  // Fonction de connexion via Apple
   Future<void> _signInWithApple() async {
     setState(() => isLoading = true);
     try {
       await AuthRepository().signInWithApple();
-      _navigateToEntryPoint();
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      setState(() => context.showSnackBar(e.toString(), isError: true));
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void _navigateToEntryPoint() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const EntryPoint(),
-      ),
-    );
-  }
-
+  // Fonction pour vider les champs de saisie
   void _clearFields() {
     _emailController.clear();
     _passwordController.clear();
+  }
+
+  // Initialisation de l'authentification à l'état
+  @override
+  void initState() {
+    super.initState();
+    _userSubscription = supabase.auth.onAuthStateChange.listen(
+      (data) {
+        if (_redirecting) return;
+        final session = data.session;
+        if (session != null) {
+          _redirecting = true;
+          Future.delayed(Duration.zero, () {
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const EntryPoint()),
+              );
+            }
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            context.showSnackBar(error.message, isError: true);
+            errorMessage = error.message;
+          });
+        }
+      },
+    );
+  }
+
+  // Désinscription de l'authentification à l'état lors de la destruction de l'écran
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _userSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -92,7 +133,7 @@ class _SignInScreenState extends State<SignInScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const WelcomeText(
-                title: "Welcome to",
+                title: "Welcome to back to Evens Ticket",
                 text:
                     "Enter your Email address for sign in. \nAccess to exclusive events :)",
               ),
@@ -346,6 +387,17 @@ class SocialButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+extension ShowSnackBar on BuildContext {
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
       ),
     );
   }

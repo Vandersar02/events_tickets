@@ -24,7 +24,8 @@ class ProfilePageState extends State<ProfilePage> {
             data.session?.user.userMetadata!['name'] ?? "John Doe";
         emailController.text =
             data.session?.user.email ?? "john.doe@example.com";
-        phoneController.text = data.session?.user.phone ?? "0123456789";
+        phoneController.text =
+            data.session?.user.userMetadata!['phone'] ?? "0123456789";
       });
     });
   }
@@ -33,7 +34,7 @@ class ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon Profil'),
+        title: const Text('My Profil'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,7 +44,7 @@ class ProfilePageState extends State<ProfilePage> {
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Nom',
+                labelText: 'Name',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -63,7 +64,7 @@ class ProfilePageState extends State<ProfilePage> {
             TextField(
               controller: phoneController,
               decoration: const InputDecoration(
-                labelText: 'Téléphone',
+                labelText: 'Phone',
                 border: OutlineInputBorder(),
               ),
             ),

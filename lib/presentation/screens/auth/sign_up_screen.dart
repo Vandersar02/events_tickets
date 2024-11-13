@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
+import 'package:events_ticket/presentation/screens/auth/user_information.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,15 +16,18 @@ class SignUpScreen extends StatefulWidget {
 final supabase = Supabase.instance.client;
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  late final StreamSubscription<AuthState> _userSubscription;
   final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
+  bool _redirecting = false;
   bool _obscureText = true;
   bool isLoading = false;
-  String _errorMessage = AuthRepository().errorMessage ?? '';
+  String _errorMessage = '';
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -32,55 +36,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
         await AuthRepository().signUpWithEmail(
           _emailController.text,
           _passwordController.text,
+          _fullNameController.text,
         );
-        _navigateToEntryPoint();
+        _clearFields();
       } catch (e) {
-        setState(() => _errorMessage = e.toString());
+        setState(() => context.showSnackBar(e.toString(), isError: true));
       } finally {
         setState(() => isLoading = false);
       }
-      _clearFields();
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() => isLoading = true);
-    try {
-      await AuthRepository().signInWithGoogle();
-      _navigateToEntryPoint();
-    } catch (e) {
-      setState(() => _errorMessage = e.toString());
-    } finally {
-      setState(() => isLoading = false);
-    }
+    _signInWithProvider(AuthRepository().signInWithGoogle);
   }
 
   Future<void> _signInWithApple() async {
+    _signInWithProvider(AuthRepository().signInWithApple);
+  }
+
+  Future<void> _signInWithProvider(Future<void> Function() signInMethod) async {
     setState(() => isLoading = true);
     try {
-      await AuthRepository().signInWithApple();
-      _navigateToEntryPoint();
+      await signInMethod();
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      setState(() => context.showSnackBar(e.toString(), isError: true));
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void _navigateToEntryPoint() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const EntryPoint(),
-      ),
-    );
-  }
-
   void _clearFields() {
+    _fullNameController.clear();
     _emailController.clear();
     _passwordController.clear();
-    _fullNameController.clear();
     _confirmPasswordController.clear();
+  }
+
+  @override
+  void initState() {
+    _userSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      if (_redirecting) return;
+      if (data.session != null) {
+        _redirecting = true;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const UserInformationScreen(),
+        ));
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _userSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -103,65 +115,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               _buildSignUpForm(),
               const SizedBox(height: 16),
-              Center(
-                child: Text.rich(
-                  TextSpan(
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall!
-                        .copyWith(fontWeight: FontWeight.w500),
-                    text: "Already have an account? ",
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: "Sign In",
-                        style: const TextStyle(color: Color(0xFF22A45D)),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.pushNamed(context, '/login');
-                          },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildLoginLink(context),
               const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  "By Signing up you agree to our Terms\nConditions & Privacy Policy.",
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
+              _buildPrivacyTerms(),
               const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  "Or",
-                  style: TextStyle(
-                      color: const Color(0xFF010F07).withOpacity(0.7)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SocialButton(
-                press: _signInWithApple,
-                text: "Connect with Apple",
-                color: const Color(0xFF395998),
-                icon: SvgPicture.asset(
-                  'assets/icons/apple_box.svg',
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF395998),
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SocialButton(
-                press: _signInWithGoogle,
-                text: "Connect with Google",
-                color: const Color(0xFF4285F4),
-                icon: SvgPicture.asset('assets/icons/google_box.svg'),
-              ),
-              const SizedBox(height: 16),
+              _buildSocialSignInButtons(),
               if (isLoading) const Center(child: CircularProgressIndicator()),
+              if (_errorMessage.isNotEmpty) _buildErrorText(),
             ],
           ),
         ),
@@ -174,121 +134,150 @@ class _SignUpScreenState extends State<SignUpScreen> {
       key: _formKey,
       child: Column(
         children: [
-          // Full Name Field
-          TextFormField(
-            controller: _fullNameController,
-            textInputAction: TextInputAction.next,
-            validator: (value) => value == null || value.isEmpty
-                ? 'Please enter your full name'
-                : null,
-            decoration: const InputDecoration(
-              hintText: "Full Name",
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-            ),
-          ),
+          _buildTextField("Full Name", _fullNameController, (value) {
+            if (value == null || value.isEmpty)
+              return 'Please enter your full name';
+            return null;
+          }),
           const SizedBox(height: 16),
-          // Email Field
-          TextFormField(
-            controller: _emailController,
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                return 'Please enter a valid email';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              hintText: "Email Address",
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-            ),
-          ),
+          _buildTextField("Email Address", _emailController, (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your email';
+            }
+            if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+              return 'Enter a valid email';
+            }
+            return null;
+          }, keyboardType: TextInputType.emailAddress),
           const SizedBox(height: 16),
-          // Password Field
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscureText,
-            textInputAction: TextInputAction.next,
-            validator: (value) => value == null || value.isEmpty
-                ? 'Please enter your password'
-                : null,
-            decoration: InputDecoration(
-              hintText: "Password",
-              border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              suffixIcon: GestureDetector(
-                onTap: () => setState(() => _obscureText = !_obscureText),
-                child: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: const Color(0xFF868686),
-                ),
-              ),
-            ),
-          ),
+          _buildPasswordField("Password", _passwordController),
           const SizedBox(height: 16),
-          // Confirm Password Field
-          TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: _obscureText,
-            textInputAction: TextInputAction.done,
-            validator: (value) => value != _passwordController.text
-                ? 'Passwords do not match'
-                : null,
-            decoration: InputDecoration(
-              hintText: "Confirm Password",
-              border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF3F2F2)),
-              ),
-              suffixIcon: GestureDetector(
-                onTap: () => setState(() => _obscureText = !_obscureText),
-                child: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: const Color(0xFF868686),
-                ),
-              ),
-            ),
-          ),
+          _buildPasswordField("Confirm Password", _confirmPasswordController,
+              confirm: true),
           const SizedBox(height: 16),
-          if (_errorMessage.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                _errorMessage,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
           ElevatedButton(
             onPressed: _signUp,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22A45D),
-              foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 40),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text("Sign Up"),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String hint, TextEditingController controller,
+      String? Function(String?) validator,
+      {TextInputType keyboardType = TextInputType.text}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      decoration: InputDecoration(
+        hintText: hint,
+        border: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(String hint, TextEditingController controller,
+      {bool confirm = false}) {
+    return TextFormField(
+      controller: controller,
+      obscureText: _obscureText,
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Please enter your password';
+        if (confirm && value != _passwordController.text) {
+          debugPrint('Passwords do not match');
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        hintText: hint,
+        suffixIcon: GestureDetector(
+          onTap: () => setState(() => _obscureText = !_obscureText),
+          child: Icon(
+            _obscureText ? Icons.visibility_off : Icons.visibility,
+            color: const Color(0xFF868686),
+          ),
+        ),
+        border: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFF3F2F2)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginLink(BuildContext context) {
+    return Center(
+      child: Text.rich(
+        TextSpan(
+          text: "Already have an account? ",
+          children: [
+            TextSpan(
+              text: "Sign In",
+              style: const TextStyle(color: Color(0xFF22A45D)),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => Navigator.pushNamed(context, '/login'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrivacyTerms() {
+    return Center(
+      child: Text(
+        "By Signing up you agree to our Terms\nConditions & Privacy Policy.",
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+    );
+  }
+
+  Widget _buildSocialSignInButtons() {
+    return Column(
+      children: [
+        SocialButton(
+          press: _signInWithApple,
+          text: "Connect with Apple",
+          color: const Color(0xFF395998),
+          icon: SvgPicture.asset(
+            'assets/icons/apple_box.svg',
+            colorFilter: const ColorFilter.mode(
+              Color(0xFF395998),
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SocialButton(
+          press: _signInWithGoogle,
+          text: "Connect with Google",
+          color: const Color(0xFF4285F4),
+          icon: SvgPicture.asset('assets/icons/google_box.svg'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorText() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        _errorMessage,
+        style: const TextStyle(color: Colors.red),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -369,6 +358,17 @@ class SocialButton extends StatelessWidget {
             const Spacer(flex: 3),
           ],
         ),
+      ),
+    );
+  }
+}
+
+extension ShowSnackBar on BuildContext {
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
       ),
     );
   }

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Iphone13ProMax215 extends StatelessWidget {
-  const Iphone13ProMax215({super.key});
+class SocialNetwork extends StatefulWidget {
+  const SocialNetwork({super.key});
+
+  @override
+  State<SocialNetwork> createState() => _SocialNetworkState();
+}
+
+class _SocialNetworkState extends State<SocialNetwork> {
   @override
   Widget build(BuildContext context) {
     return Column(

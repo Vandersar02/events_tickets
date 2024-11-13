@@ -6,6 +6,7 @@ import 'package:events_ticket/presentation/screens/events/event_management.dart'
 import 'package:events_ticket/presentation/screens/profil/profil_page.dart';
 import 'package:events_ticket/presentation/screens/settings/settings_page.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'info_card.dart';
 import 'side_menu.dart';
 
@@ -15,6 +16,8 @@ class SideBar extends StatefulWidget {
   @override
   State<SideBar> createState() => _SideBarState();
 }
+
+final supabase = Supabase.instance.client;
 
 class _SideBarState extends State<SideBar> {
   String selectedSideMenu = sidebarMenus.first;
@@ -78,8 +81,10 @@ class _SideBarState extends State<SideBar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InfoCard(
-                name: "St Cyr Lee J. Vandersar",
-                // bio: "Simple User",
+                name: supabase.auth.currentUser?.userMetadata!['name'] ??
+                    "John Doe",
+                bio: supabase.auth.currentUser?.userMetadata!['bio'] ??
+                    "Simple User",
                 onTap: () {
                   Navigator.push(
                     context,

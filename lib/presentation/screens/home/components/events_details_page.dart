@@ -92,10 +92,10 @@ class EventDetailsPage extends StatelessWidget {
                   final accessToken = await getAccessToken();
                   if (accessToken != null) {
                     // 1. Initier un paiement
-                    await initiatePayment("336216631", "50938662809", 100.0);
+                    await initiatePayment("336216631", "50936973307", 100.0);
 
                     // 2. Confirmer le paiement
-                    await confirmPayment("336216631", "50938662809", 100.0);
+                    await confirmPayment("336216631", "50936973307", 100.0);
 
                     // 3. Vérifier le statut du paiement
                     await checkPaymentStatus(reference: "336216631");

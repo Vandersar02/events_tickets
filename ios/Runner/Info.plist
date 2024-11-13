@@ -45,9 +45,11 @@
 		<true />
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true />
+		<!-- camera permission -->
 		<key>NSCameraUsageDescription</key>
 		<string>This app requires camera access to scan QR codes.</string>
 		<key>CFBundleURLTypes</key>
+
 		<array>
 			<dict>
 				<key>CFBundleTypeRole</key>
@@ -59,5 +61,21 @@
 				</array>
 			</dict>
 		</array>
+		<!-- location permission -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string> This app needs access to location when open.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string> This app needs access to location when open.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>location</string>
+			<string>fetch</string>
+		</array>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<true />
+		</dict>
+
 	</dict>
 </plist>

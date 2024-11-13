@@ -5,12 +5,12 @@ class InfoCard extends StatelessWidget {
   const InfoCard({
     super.key,
     required this.name,
-    // required this.bio,
+    required this.bio,
     required this.onTap,
   });
 
   final VoidCallback onTap;
-  final String name; // , bio;
+  final String name, bio;
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +30,17 @@ class InfoCard extends StatelessWidget {
           name,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
-        // subtitle: Text(
-        //   bio,
-        //   style: const TextStyle(
-        //     color: Colors.white,
-        //     fontSize: 14,
-        //   ),
-        // ),
+        subtitle: Text(
+          bio,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }

@@ -44,7 +44,7 @@ class EventCard extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        height: 200,
+        height: 230,
         width: 260,
         decoration: BoxDecoration(
           color: color,
