@@ -16,8 +16,7 @@ class AuthRepository {
   String? errorMessage;
 
   // Inscription avec email et mot de passe
-  Future<void> signUpWithEmail(
-      String email, String password, String name) async {
+  Future<void> signUpWithEmail(String email, String password) async {
     try {
       await supabase.auth.signUp(email: email, password: password);
       currentUser = supabase.auth.currentUser;
@@ -28,9 +27,9 @@ class AuthRepository {
         print("User exists: $userExists");
         if (!userExists) {
           print("User doesn't exist");
-          await UserServices().createUserInDatabase(currentUser!, name: name);
+          await UserServices().createUserInDatabase(currentUser!);
         }
-        print(currentUser?.userMetadata);
+        print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
@@ -56,7 +55,7 @@ class AuthRepository {
           await supabase.auth.signOut();
           return;
         }
-        print(currentUser?.userMetadata);
+        print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
@@ -117,8 +116,7 @@ class AuthRepository {
           print("User doesn't exist");
           await UserServices().createUserInDatabase(currentUser!);
         }
-        print(currentUser?.userMetadata);
-
+        print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
@@ -173,7 +171,7 @@ class AuthRepository {
           await UserServices().createUserInDatabase(currentUser!);
         }
 
-        print(currentUser?.userMetadata);
+        print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {

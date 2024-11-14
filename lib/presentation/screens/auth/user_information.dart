@@ -1,5 +1,7 @@
+import 'package:events_ticket/core/services/auth/preferences_services.dart';
+import 'package:events_ticket/core/services/auth/user_services.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:flutter/material.dart';
-// import 'package:geolocator/geolocator.dart';
 
 class UserInformationScreen extends StatefulWidget {
   const UserInformationScreen({super.key});
@@ -10,6 +12,7 @@ class UserInformationScreen extends StatefulWidget {
 
 class _UserInformationScreenState extends State<UserInformationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final userId = SessionManager().getPreference("user_id").toString();
 
   // Champs pour stocker les informations de l'utilisateur
   String? fullName;
@@ -18,38 +21,28 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   String? language;
   String? phoneNumber;
   List<String> interests = [];
-  String? location;
-  bool isWheelchairAccessible = false;
-  bool isVegan = false;
 
-  // Liste des catégories d'intérêt
-  List<String> availableInterests = [
-    "Art",
-    "Music",
-    "Sports",
-    "Food",
-    "Party",
-    "Technology"
+  final List<String> availableInterests = [
+    'Art',
+    'Music',
+    'Sport',
+    'Food',
+    'Party',
+    'Technology',
+    'Books',
+    'Photography'
   ];
 
-  // Méthode pour obtenir la localisation actuelle
-  // Future<void> _getCurrentLocation() async {
-  //   try {
-  //     Position position = await Geolocator.getCurrentPosition(
-  //         desiredAccuracy: LocationAccuracy.high);
-  //     setState(() {
-  //       location = "${position.latitude}, ${position.longitude}";
-  //     });
-  //   } catch (e) {
-  //     print("Erreur lors de la récupération de la localisation: $e");
-  //   }
-  // }
-
-  @override
-  void initState() {
-    super.initState();
-    // _getCurrentLocation();
-  }
+  final Map<String, IconData> interestIcons = {
+    'Art': Icons.palette,
+    'Music': Icons.music_note,
+    'Sport': Icons.sports_soccer,
+    'Food': Icons.fastfood,
+    'Party': Icons.people,
+    'Technology': Icons.smartphone,
+    'Books': Icons.menu_book,
+    'Photography': Icons.camera_alt,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -114,24 +107,7 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                     value!.isEmpty ? "Enter your phone number" : null,
               ),
 
-              // Localisation actuelle
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Row(
-                  children: [
-                    Text(location != null
-                        ? "Location: $location"
-                        : "Location not defined"),
-                    IconButton(
-                      icon: const Icon(Icons.location_on),
-                      onPressed: () {},
-                      // onPressed: _getCurrentLocation,
-                    ),
-                  ],
-                ),
-              ),
-
-              Divider(),
+              const Divider(),
 
               // Intérêts et préférences événementielles
               const Text("Select your interests"),
@@ -154,37 +130,31 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                 }).toList(),
               ),
 
-              Divider(),
-
-              // Accessibilité et exigences spéciales
-              const Text("Accessibility and special requirements"),
-              SwitchListTile(
-                title: const Text("Access to wheelchair"),
-                value: isWheelchairAccessible,
-                onChanged: (value) {
-                  setState(() {
-                    isWheelchairAccessible = value;
-                  });
-                },
-              ),
-              SwitchListTile(
-                title: const Text("Food preferences (vegetarian)"),
-                value: isVegan,
-                onChanged: (value) {
-                  setState(() {
-                    isVegan = value;
-                  });
-                },
-              ),
+              const Divider(),
 
               const SizedBox(height: 20),
 
               // Bouton de soumission
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: ajouter la logique pour sauvegarder les informations utilisateur dans la base de données
-                    print("Info saved");
+                    print("Info saved for user $fullName ");
+                    print(interests);
+
+                    await UserServices().updateUserName(userId, fullName ?? '');
+                    // Obtenez l'ID des préférences sélectionnées
+                    final selectedPreferenceIds = interests.map((interest) {
+                      return availableInterests.indexOf(interest).toString();
+                    }).toList();
+
+                    // Appel à la fonction de mise à jour des préférences
+                    await PreferencesServices()
+                        .updateUserPreferences(userId, selectedPreferenceIds);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Preferences updated successfully!')),
+                    );
                   }
                 },
                 child: const Text("Save"),

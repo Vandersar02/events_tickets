@@ -1,19 +1,24 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/material.dart';
 
 class PreferencesServices {
   final supabase = Supabase.instance.client;
 
-  // Met à jour les préférences de l'utilisateur
+  // Fonction pour mettre à jour les préférences utilisateur
   Future<void> updateUserPreferences(
-      String userId, List<String> preferences) async {
+      String userId, List<String> preferenceIds) async {
     try {
-      await supabase
-          .from('users')
-          .update({'preferences': preferences}).eq('user_id', userId);
+      // Supprime toutes les préférences existantes pour l'utilisateur
+      await supabase.from('user_preferences').delete().eq('user_id', userId);
+
+      // Crée une liste d'entrées pour les nouvelles préférences
+      final newPreferences = preferenceIds.map((preferenceId) {
+        return {'user_id': userId, 'preference_id': preferenceId};
+      }).toList();
+
+      // Insère les nouvelles préférences
+      await supabase.from('user_preferences').insert(newPreferences);
     } catch (error) {
-      debugPrint(
-          "Erreur lors de la mise à jour des préférences utilisateur: $error");
+      print("Erreur lors de la mise à jour des préférences: $error");
     }
   }
 

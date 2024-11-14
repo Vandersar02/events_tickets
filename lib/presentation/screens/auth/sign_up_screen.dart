@@ -36,7 +36,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         await AuthRepository().signUpWithEmail(
           _emailController.text,
           _passwordController.text,
-          _fullNameController.text,
         );
         _clearFields();
       } catch (e) {
