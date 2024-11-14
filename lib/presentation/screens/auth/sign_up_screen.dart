@@ -18,7 +18,6 @@ final supabase = Supabase.instance.client;
 class _SignUpScreenState extends State<SignUpScreen> {
   late final StreamSubscription<AuthState> _userSubscription;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -27,7 +26,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _redirecting = false;
   bool _obscureText = true;
   bool isLoading = false;
-  String _errorMessage = '';
+  final String _errorMessage = '';
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -66,7 +65,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _clearFields() {
-    _fullNameController.clear();
     _emailController.clear();
     _passwordController.clear();
     _confirmPasswordController.clear();
@@ -133,11 +131,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       key: _formKey,
       child: Column(
         children: [
-          _buildTextField("Full Name", _fullNameController, (value) {
-            if (value == null || value.isEmpty)
-              return 'Please enter your full name';
-            return null;
-          }),
           const SizedBox(height: 16),
           _buildTextField("Email Address", _emailController, (value) {
             if (value == null || value.isEmpty) {

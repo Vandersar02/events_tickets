@@ -1,10 +1,10 @@
 import 'dart:async';
-// import 'dart:math';
+import 'package:events_ticket/core/services/auth/user_services.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -91,6 +91,10 @@ class _SignInScreenState extends State<SignInScreen> {
           _redirecting = true;
           Future.delayed(Duration.zero, () {
             if (mounted) {
+              // Save user data in SessionManager
+              SessionManager().savePreference(
+                  "user", UserServices().getUserData(session.user.id));
+              // Navigate to the entry point screen
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const EntryPoint()),
               );

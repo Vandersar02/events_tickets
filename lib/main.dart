@@ -61,7 +61,6 @@ class AuthWrapper extends StatelessWidget {
   }
 
   Future<bool> _getIsUserLoggedIn() async {
-    // return false;
     return await SessionManager().getPreference("user_id") != null;
   }
 

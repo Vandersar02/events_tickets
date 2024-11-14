@@ -8,15 +8,16 @@ class EventCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.date,
-    required this.location,
-    required this.imageUrl,
+    required this.address,
+    required this.coverImg,
     this.isFree = false,
     this.attendeesCount = 0,
     this.color = const Color(0xFF7553F6),
     this.iconSrc = "assets/icons/calendar.svg",
   });
 
-  final String title, location, imageUrl, iconSrc;
+  final String title, iconSrc;
+  final String? address, coverImg;
   final DateTime date;
   final bool isFree;
   final int attendeesCount;
@@ -34,8 +35,8 @@ class EventCard extends StatelessWidget {
             builder: (context) => EventDetailsPage(
               title: title,
               date: date,
-              location: location,
-              imageUrl: imageUrl,
+              location: address.toString(),
+              imageUrl: coverImg.toString(),
               isFree: isFree,
               attendeesCount: attendeesCount,
             ),
@@ -64,7 +65,9 @@ class EventCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          color: Colors.white, fontWeight: FontWeight.w600),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -76,19 +79,21 @@ class EventCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      location,
+                      address.toString(),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         if (isFree)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
+                              vertical: 4,
+                              horizontal: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green,
                               borderRadius: BorderRadius.circular(12),
@@ -101,17 +106,13 @@ class EventCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                        const SizedBox(width: 10),
-                        Row(
-                          children: [
-                            Text(
-                              '$attendeesCount Going',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        if (isFree) const SizedBox(width: 10),
+                        Text(
+                          '$attendeesCount Going',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -119,7 +120,14 @@ class EventCard extends StatelessWidget {
                 ),
               ),
             ),
-            SvgPicture.asset(iconSrc),
+            SvgPicture.asset(
+              iconSrc,
+              width: 24,
+              colorFilter: ColorFilter.mode(
+                Colors.white.withOpacity(0.5),
+                BlendMode.srcIn,
+              ),
+            ),
           ],
         ),
       ),

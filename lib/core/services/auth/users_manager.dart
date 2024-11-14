@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionManager {
@@ -22,6 +24,8 @@ class SessionManager {
       await prefs.setDouble(key, value);
     } else if (value is String) {
       await prefs.setString(key, value);
+    } else if (value is Map<String, dynamic> || value is List<dynamic>) {
+      await prefs.setString(key, jsonEncode(value));
     }
   }
 
@@ -29,6 +33,17 @@ class SessionManager {
   Future<dynamic> getPreference(String key) async {
     final prefs = await _prefs;
     return prefs.get(key);
+  }
+
+  // Méthode pour récupérer une préférence de type Map ou List (objet JSON)
+  Future<dynamic> getPreferenceList(String key) async {
+    final prefs = await _prefs;
+    String? jsonString = prefs.getString(key);
+
+    if (jsonString != null) {
+      return jsonDecode(jsonString);
+    }
+    return null;
   }
 
   // Méthode pour supprimer des données dans SharedPreferences
@@ -47,3 +62,19 @@ class SessionManager {
     return await getPreference(_hasSeenOnboardingKey) ?? false;
   }
 }
+// Map<String, dynamic> user = {
+//   "user_id": "user123",
+//   "name": "John Doe",
+//   "age": 30,
+//   "gender": "Male",
+//   "email": "john.doe@example.com",
+//   "profile_picture_url": "https://example.com/profile.jpg",
+//   "preference": ["preferences_id_1", "preferences_id_2", "preferences_id_3"]
+//   "saved_ticket": ["ticket_id_1", "ticket_id_2"]
+// };
+
+// var user = await prefs.getPreference("user");
+// if (user != null) {
+//   print("Nom: ${user['name']}, Préférences: ${user['preference']}");
+// }
+

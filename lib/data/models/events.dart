@@ -1,87 +1,121 @@
 class Event {
-  final DateTime date;
+  final String? eventType;
+  final String organizerId;
+  final String? coverImg;
+  final String? address;
+  final String? about;
   final String title;
-  final String location;
-  final String imageUrl;
-  final bool isFree;
-  final int attendeesCount;
-  final String category;
-  final int ticketsAvailable;
-  final int ticketsSold;
-  final double revenue;
-  final String? description;
-  final List<Map<String, dynamic>> reviews;
+  final DateTime? deadline;
+  final DateTime startAt;
+  final DateTime endAt;
+  final DateTime createdAt;
+  bool isAvailable;
 
   Event({
-    required this.date,
+    this.eventType,
+    required this.organizerId,
+    this.coverImg,
+    this.address,
+    this.about,
     required this.title,
-    required this.location,
-    required this.imageUrl,
-    this.isFree = false,
-    this.attendeesCount = 0,
-    required this.category,
-    required this.ticketsAvailable,
-    this.ticketsSold = 0,
-    this.revenue = 0.0,
-    this.description,
-    this.reviews = const [],
-  });
+    this.deadline,
+    required this.startAt,
+    required this.endAt,
+    DateTime? createdAt,
+    bool? isAvailable,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        isAvailable = isAvailable ?? false {
+    // Calcul automatique de isAvailable
+    this.isAvailable = _calculateIsAvailable();
+  }
+
+  // Fonction pour calculer automatiquement la disponibilité
+  bool _calculateIsAvailable() {
+    final now = DateTime.now();
+
+    // Vérifie que la date actuelle est entre la date de début et de fin
+    final isDuringEvent = now.isAfter(startAt) && now.isBefore(endAt);
+    // Si une deadline est définie, vérifie que l'achat de tickets est encore possible
+    final isBeforeDeadline = deadline == null || now.isBefore(deadline!);
+
+    return isDuringEvent && isBeforeDeadline;
+  }
+
+  // Conversion des données depuis la base de données (JSON) en modèle Event
+  factory Event.fromJson(Map<String, dynamic> json) {
+    return Event(
+      eventType: json['event_type'] as String?,
+      organizerId: json['organizer_id'] as String,
+      coverImg: json['cover_img'] as String?,
+      address: json['address'] as String?,
+      about: json['about'] as String?,
+      title: json['title'] as String,
+      deadline:
+          json['deadline'] != null ? DateTime.parse(json['deadline']) : null,
+      startAt: DateTime.parse(json['start_at']),
+      endAt: DateTime.parse(json['end_at']),
+      createdAt: DateTime.parse(json['created_at']),
+      isAvailable: json['is_available'] as bool,
+    );
+  }
+
+  // Conversion du modèle Event en JSON pour l'envoi vers la base de données
+  Map<String, dynamic> toJson() {
+    return {
+      'event_type': eventType,
+      'organizer_id': organizerId,
+      'cover_img': coverImg,
+      'address': address,
+      'about': about,
+      'title': title,
+      'deadline': deadline?.toIso8601String(),
+      'start_at': startAt.toIso8601String(),
+      'end_at': endAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'is_available': _calculateIsAvailable(), // recalculer isAvailable
+    };
+  }
 }
 
 final List<Event> events = [
   Event(
-    date: DateTime.parse("2023-06-01 23:00:00"),
+    eventType:
+        "Music", // Id ou catégorie d'événement, pourrait être UUID d'une catégorie
+    organizerId: "user123",
+    coverImg: "assets/images/event1.jpg",
+    address: "Delmas 105",
+    about: "An annual festival celebrating the best in national music.",
     title: "National Music Festival",
-    location: "Delmas 105",
-    imageUrl: "assets/images/event1.jpg",
-    isFree: true,
-    attendeesCount: 100,
-    category: "Music",
-    ticketsAvailable: 500,
-    ticketsSold: 350,
-    revenue: 15000.0,
-    description: "An annual festival celebrating the best in national music.",
-    reviews: [
-      {"user": "Alice", "comment": "Amazing festival!", "rating": 4.5},
-      {"user": "Bob", "comment": "Loved the performances!", "rating": 4.0},
-    ],
+    deadline: DateTime.parse("2023-06-01 20:00:00"),
+    startAt: DateTime.parse("2023-06-01 23:00:00"),
+    endAt: DateTime.parse("2023-06-02 02:00:00"),
+    createdAt: DateTime.now(),
+    isAvailable: true, // Calcul automatique dans le modèle
   ),
   Event(
-    date: DateTime.parse("2023-06-03 22:00:00"),
+    eventType: "Art",
+    organizerId: "user456",
+    coverImg: "assets/images/event2.jpg",
+    address: "Catalpa 8A, Delmas 75",
+    about: "A workshop exploring contemporary art techniques.",
     title: "Art Workshop",
-    location: "Catalpa 8A, Delmas 75",
-    imageUrl: "assets/images/event2.jpg",
-    isFree: false,
-    attendeesCount: 50,
-    category: "Art",
-    ticketsAvailable: 100,
-    ticketsSold: 50,
-    revenue: 2500.0,
-    description: "A workshop exploring contemporary art techniques.",
-    reviews: [
-      {
-        "user": "Clara",
-        "comment": "Inspiring and well-organized!",
-        "rating": 5.0
-      },
-      {"user": "David", "comment": "Great learning experience.", "rating": 4.5},
-    ],
+    deadline: DateTime.parse("2023-06-03 18:00:00"),
+    startAt: DateTime.parse("2023-06-03 22:00:00"),
+    endAt: DateTime.parse("2023-06-03 23:30:00"),
+    createdAt: DateTime.now(),
+    isAvailable: true,
   ),
   Event(
-    date: DateTime.parse("2023-06-05 20:00:00"),
+    eventType: "Music",
+    organizerId: "user789",
+    coverImg: "assets/images/event3.jpg",
+    address: "Petion-Ville",
+    about: "A live concert featuring top music artists.",
     title: "Music Concert",
-    location: "Petion-Ville",
-    imageUrl: "assets/images/event3.jpg",
-    isFree: false,
-    attendeesCount: 200,
-    category: "Music",
-    ticketsAvailable: 300,
-    ticketsSold: 200,
-    revenue: 10000.0,
-    description: "A live concert featuring top music artists.",
-    reviews: [
-      {"user": "Emma", "comment": "Fantastic concert!", "rating": 5.0},
-      {"user": "Frank", "comment": "Great atmosphere.", "rating": 4.0},
-    ],
+    deadline: DateTime.parse("2023-06-05 18:00:00"),
+    startAt: DateTime.parse("2023-06-05 20:00:00"),
+    endAt: DateTime.parse("2023-06-05 23:00:00"),
+    createdAt: DateTime.now(),
+    isAvailable: true,
   ),
 ];

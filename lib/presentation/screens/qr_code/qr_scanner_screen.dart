@@ -1,8 +1,6 @@
+import 'package:events_ticket/core/utils/encryption_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:crypto/crypto.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
-import 'dart:convert';
 
 const secretKey = "mySuperSecretKey1234567890123456";
 
@@ -26,7 +24,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
     controller.barcodes.listen((barcodeCapture) {
       final barcode = barcodeCapture.barcodes.first;
       setState(() {
-        qrCodeData = decryptAndVerifyQrDataReal(barcode.rawValue, secretKey);
+        qrCodeData = EncryptionUtils.decryptAndVerifyQrDataReal(
+            barcode.rawValue, secretKey);
         isValid = qrCodeData != null;
         isScanning = false; // Stop scanning after receiving a QR code
       });
@@ -41,6 +40,7 @@ class QRScannerScreenState extends State<QRScannerScreen> {
       ),
       body: Column(
         children: [
+          // QR code scanner section
           Expanded(
             flex: 4,
             child: Stack(
@@ -66,6 +66,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
           ),
+
+          //ticket details
           Container(
             padding: const EdgeInsets.symmetric(vertical: 50.0),
             decoration: BoxDecoration(
@@ -81,6 +83,7 @@ class QRScannerScreenState extends State<QRScannerScreen> {
             child: Column(
               children: [
                 if (qrCodeData != null)
+                  // display the ticket data if valid
                   Text(
                     isValid
                         ? '$qrCodeData'
@@ -90,6 +93,8 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                         color: isValid ? Colors.green : Colors.red),
                   ),
                 if (isScanning) const CircularProgressIndicator(),
+
+                // button to check-in or check-out the ticket
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -143,46 +148,5 @@ class QRScannerScreenState extends State<QRScannerScreen> {
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-}
-
-// Function to decrypt and verify the signed data
-String? decryptAndVerifyQrDataReal(String? encryptedData, String secretKey) {
-  try {
-    // Step 1: Extract IV and encrypted data
-    final ivData = encryptedData!
-        .substring(0, 24); // Assume que l'IV fait 16 octets encodés en base64
-    final encryptedDataWithoutIv =
-        encryptedData.substring(24); // Le reste est le message chiffré
-
-    final iv = encrypt.IV.fromBase64(ivData);
-    final key = encrypt.Key.fromUtf8(secretKey);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-    // Step 2: Decrypt the data
-    final decrypted = encrypter.decrypt64(encryptedDataWithoutIv, iv: iv);
-
-    // Step 3: Separate ticketData and signature
-    final parts = decrypted.split("|signature=");
-    if (parts.length != 2) {
-      return null; // Invalid data format
-    }
-    final ticketData = parts[0];
-    final providedSignature = parts[1];
-
-    // Step 4: Recalculate and verify the signature
-    var bytes =
-        utf8.encode(ticketData + secretKey); // Combine data and secret key
-    var recalculatedSignature =
-        sha256.convert(bytes).toString(); // Generate SHA-256 hash
-
-    if (providedSignature == recalculatedSignature) {
-      return ticketData; // Data is valid
-    } else {
-      return null; // Signature mismatch, data might be corrupted or tampered with
-    }
-  } catch (e) {
-    print("Decryption or verification failed: $e");
-    return null;
   }
 }

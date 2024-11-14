@@ -12,9 +12,10 @@ class UserInformationScreen extends StatefulWidget {
 
 class _UserInformationScreenState extends State<UserInformationScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Todo: Get userId from SessionManager
   final userId = SessionManager().getPreference("user_id").toString();
 
-  // Champs pour stocker les informations de l'utilisateur
   String? fullName;
   DateTime? birthDate;
   String? gender;
@@ -141,7 +142,9 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                     print("Info saved for user $fullName ");
                     print(interests);
 
-                    await UserServices().updateUserName(userId, fullName ?? '');
+                    await UserServices()
+                        .updateUserField(userId, 'name', fullName ?? '');
+
                     // Obtenez l'ID des préférences sélectionnées
                     final selectedPreferenceIds = interests.map((interest) {
                       return availableInterests.indexOf(interest).toString();
@@ -151,10 +154,17 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                     await PreferencesServices()
                         .updateUserPreferences(userId, selectedPreferenceIds);
 
+                    if (!mounted) return;
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content: Text('Preferences updated successfully!')),
                     );
+                    // Save user data in SessionManager
+                    SessionManager().savePreference(
+                        "user", UserServices().getUserData(userId));
+                    // Navigate to the entry point screen
+                    Navigator.of(context).popAndPushNamed('/entryPoint');
                   }
                 },
                 child: const Text("Save"),

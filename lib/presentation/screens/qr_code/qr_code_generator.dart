@@ -1,29 +1,9 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:events_ticket/core/utils/encryption_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 // Secret Key for encryption (should be kept secret) 32 characters for AES-256
 const secretKey = "mySuperSecretKey1234567890123456";
-
-// Function to generate encrypted data with signature
-String generateSignedAndEncryptedQrData(String ticketData, String secretKey) {
-  // Step 1: Create a signature using SHA-256
-  var bytes = utf8.encode(ticketData + secretKey);
-  var signature = sha256.convert(bytes).toString(); // Generate SHA-256 hash
-
-  // Step 2: Encrypt the data with AES
-  final key = encrypt.Key.fromUtf8(secretKey);
-  final iv = encrypt.IV.fromSecureRandom(16); // Génère un IV aléatoire
-  final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-  // Combine ticketData with the signature
-  final combinedData = "$ticketData|signature=$signature";
-  final encrypted = encrypter.encrypt(combinedData, iv: iv);
-
-  return iv.base64 + encrypted.base64; // Return IV + encrypted data
-}
 
 class TicketQRCodePage extends StatelessWidget {
   const TicketQRCodePage({super.key});
@@ -31,11 +11,11 @@ class TicketQRCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example ticket data
-    String ticketData = "event_id=12345|user_id=67890|ticket_id=abcd";
+    String ticketData = "event_id=12345|user_id=67890|ticket_type_id=abcd";
 
     // Generate the secure QR data
     String secureQrData =
-        generateSignedAndEncryptedQrData(ticketData, secretKey);
+        EncryptionUtils.generateSignedAndEncryptedQrData(ticketData, secretKey);
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +25,9 @@ class TicketQRCodePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            onPressed: () {
+              // TODO: Implement the menu
+            },
           ),
         ],
       ),
@@ -214,7 +196,7 @@ class TicketQRCodePage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
 
-              // Payment Information
+              // Ticket Information
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -270,6 +252,8 @@ class TicketQRCodePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20.0),
+
+              // Payment Information
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -318,6 +302,7 @@ class TicketQRCodePage extends StatelessWidget {
 
               const SizedBox(height: 20.0),
 
+              // Download Ticket Button
               ElevatedButton(
                 onPressed: () {
                   // Action to download the ticket
