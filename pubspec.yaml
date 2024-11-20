@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  rive: ^0.13.13
+  # rive: ^0.13.13
   flutter_svg: ^2.0.10+1
 
   provider: ^6.1.2
@@ -26,14 +26,13 @@ dependencies:
   encrypt: ^5.0.0
   crypto: ^3.0.6
 
+  hive: ^2.2.3
   http: ^1.2.2
   intl: ^0.19.0
   # flutter_dotenv: ^5.2.1
 
   supabase_flutter: ^2.8.0
   google_sign_in: ^6.2.2
-  sign_in_with_apple: ^6.1.3
-  flutter_secure_storage: ^4.2.1
 
 dev_dependencies:
   flutter_test:

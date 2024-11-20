@@ -19,9 +19,9 @@ void main() async {
   );
 
   await Supabase.initialize(
-    url: "https://naujkknzedkdcmmjlvrr.supabase.co",
+    url: "https://lwmdduywrqgmpenrouox.supabase.co",
     anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hdWpra256ZWRrZGNtbWpsdnJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA1NDgwNTUsImV4cCI6MjA0NjEyNDA1NX0.SlbuNISfQs9RIvMJGD-HO87ATHyQTKRA08c0Zhjk-Fc",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bWRkdXl3cnFnbXBlbnJvdW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4NzM0ODAsImV4cCI6MjA0NzQ0OTQ4MH0.JO-8P-0qlXX4FPRHvu7N5jfkIew2imxo5lyyopTFNBA",
   );
 
   FlutterNativeSplash.remove();
@@ -53,15 +53,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// TODO: Remove the true value for testing
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   Future<bool> _getHasSeenOnboarding() async {
-    return await SessionManager().hasSeenOnboarding();
+    // return await SessionManager().hasSeenOnboarding();
+    return true;
   }
 
   Future<bool> _getIsUserLoggedIn() async {
-    return await SessionManager().getUserId() != null;
+    // return await SessionManager().getPreference("user_id") != null;
+    return true;
   }
 
   @override

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -15,6 +18,21 @@ class ProfilePageState extends State<ProfilePage> {
   final TextEditingController emailController = TextEditingController(text: "");
   final TextEditingController phoneController = TextEditingController(text: "");
 
+  // Image picker variables
+  File? _selectedImage;
+
+  // Method to pick an image
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +42,8 @@ class ProfilePageState extends State<ProfilePage> {
             data.session?.user.userMetadata!['name'] ?? "John Doe";
         emailController.text =
             data.session?.user.email ?? "john.doe@example.com";
-        phoneController.text = data.session?.user.phone ?? "0123456789";
+        phoneController.text =
+            data.session?.user.userMetadata!['phone'] ?? "0123456789";
       });
     });
   }
@@ -33,17 +52,33 @@ class ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon Profil'),
+        title: const Text('My Profil'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: _selectedImage != null
+                    ? CircleAvatar(
+                        radius: 60,
+                        backgroundImage: FileImage(_selectedImage!),
+                      )
+                    : CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.grey.shade300,
+                        child: const Icon(Icons.camera_alt, size: 40),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Nom
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Nom',
+                labelText: 'Name',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -63,7 +98,7 @@ class ProfilePageState extends State<ProfilePage> {
             TextField(
               controller: phoneController,
               decoration: const InputDecoration(
-                labelText: 'Téléphone',
+                labelText: 'Phone',
                 border: OutlineInputBorder(),
               ),
             ),

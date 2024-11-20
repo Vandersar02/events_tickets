@@ -76,9 +76,9 @@ class _SideMenuState extends State<SideMenu>
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? Colors.white.withOpacity(0.15) // Background for selected item
+                ? Colors.white.withOpacity(0.15)
                 : _isHovering
-                    ? Colors.white.withOpacity(0.08) // Hover background
+                    ? Colors.white.withOpacity(0.08)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),

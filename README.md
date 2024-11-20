@@ -4,7 +4,7 @@
 
 ## Fonctionnalités
 
-- **Inscription et Connexion Sécurisées** : Authentification via Firebase.
+- **Inscription et Connexion Sécurisées** : Authentification via Supabase.
 - **Personnalisation des Préférences d'Événements** : Les utilisateurs peuvent sauvegarder leurs préférences.
 - **Paiement Intégré** : Intégration de MonCash pour un paiement sécurisé.
 - **Gestion des Tickets** : Génération de QR codes pour les tickets achetés, et validation par scan.
@@ -14,15 +14,15 @@
 ## Prérequis
 
 - Flutter SDK (dernière version stable) [Installation Flutter](https://flutter.dev/docs/get-started/install)
-- Compte Firebase configuré pour l'authentification, Firestore et le stockage
+- Projet Supabase configuré pour l'authentification, la base de données et le stockage
 - Clés d’API MonCash pour le paiement
 
 ## Installation
 
-1. **Clone le dépôt (pour usage interne uniquement)** :
+1. **Clone le dépôt** :
 
    ```bash
-   git clone https://your-repository-url.git
+   git clone https://github.com/Vandersar02/events_tickets.git
    cd event_ticket
    ```
 
@@ -32,13 +32,17 @@
    flutter pub get
    ```
 
-3. **Configurer Firebase** :
+3. **Configurer Supabase** :
 
-   - Crée un projet Firebase et télécharge les fichiers `google-services.json` (pour Android) et `GoogleService-Info.plist` (pour iOS).
-   - Place ces fichiers dans `android/app` et `ios/Runner`, respectivement.
+   - Crée un projet Supabase et configure les tables nécessaires pour gérer les utilisateurs, les événements et les tickets.
+   - Ajoute les informations d'authentification et d'URL Supabase dans un fichier `.env` à la racine du projet.
 
-4. **Ajouter les Identifiants MonCash dans un fichier `.env`** :
-   Crée un fichier `.env` à la racine du projet avec les informations d’authentification MonCash.
+   ```plaintext
+   SUPABASE_URL=https://your-supabase-url.supabase.co
+   SUPABASE_ANON_KEY=your_anon_key
+   ```
+
+4. **Ajouter les Identifiants MonCash dans le fichier `.env`** :
 
    ```plaintext
    MONCASH_CLIENT_ID=your_client_id
@@ -46,6 +50,7 @@
    ```
 
 5. **Lancer l’application** :
+
    ```bash
    flutter run
    ```
@@ -53,7 +58,7 @@
 ## Utilisation de l'Application
 
 1. **Connexion Utilisateur** :
-   Les utilisateurs peuvent s’inscrire et se connecter avec Firebase Authentication.
+   Les utilisateurs peuvent s’inscrire et se connecter avec Supabase Authentication.
 
 2. **Achat de Tickets** :
    En utilisant l’intégration MonCash, les utilisateurs peuvent acheter des tickets pour des événements. Une fois le paiement effectué, un QR code unique est généré pour chaque ticket.
@@ -72,15 +77,18 @@ Le projet est structuré pour être modulaire et extensible.
 lib/
 ├── main.dart
 ├── config/
+│   ├── constants/
 │   ├── routes/
 │   └── themes/
 ├── core/
 │   ├── services/
 │   │   ├── auth/
-│   │   ├── messaging/
+│   │   ├── evnts/
+│   │   ├── payment/
+│   │   ├── post/
+│   │   ├── preferences/
 │   │   ├── storage/
-│   │   └── ticket/
-│   ├── models/
+│   │   └── tickets/
 │   └── utils/
 ├── data/
 │   ├── models/
@@ -88,10 +96,18 @@ lib/
 │   └── repositories/
 └── presentation/
     ├── screens/
+    │   ├── about/
     │   ├── auth/
+    │   ├── bookmark/
+    │   ├── contact/
+    │   ├── entryPoint/
     │   ├── events/
+    │   ├── home/
+    │   ├── notifications/
+    │   ├── post/
+    │   ├── qrCode/
+    │   ├── social/
     │   ├── ticket/
-    │   └── social/
     └── widgets/
 ```
 
@@ -102,7 +118,7 @@ L’application détecte automatiquement le mode sombre ou clair de l’appareil
 ## Technologies Utilisées
 
 - **Flutter** : Développement multiplateforme.
-- **Firebase** : Backend pour l'authentification, la base de données et le stockage.
+- **Supabase** : Backend pour l'authentification, la base de données et le stockage.
 - **MonCash API** : Système de paiement pour les tickets.
 - **Provider** : Gestion de l’état global de l’application.
 - **SharedPreferences** : Pour sauvegarder la session utilisateur en local.

@@ -1,15 +1,15 @@
-import 'package:events_ticket/data/models/events.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 import 'package:flutter/material.dart';
 
 class EventDashboardPage extends StatelessWidget {
-  final Event event; // Use Event as the type
+  final EventModel event; // Use Event as the type
 
   const EventDashboardPage({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     final dateFormatted =
-        "${event.date.day}/${event.date.month}/${event.date.year}";
+        "${event.createdAt.day}/${event.createdAt.month}/${event.createdAt.year}";
 
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +24,7 @@ class EventDashboardPage extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
-                event.imageUrl,
+                event.coverImg.toString(),
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -36,28 +36,25 @@ class EventDashboardPage extends StatelessWidget {
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
-              "$dateFormatted • ${event.location}",
+              "$dateFormatted • ${event.address}",
               style: const TextStyle(color: Colors.grey),
             ),
             const Divider(height: 32),
 
             // Metrics Section
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                MetricWidget(
-                    label: 'Tickets Sold', value: event.ticketsSold.toString()),
-                MetricWidget(
-                    label: 'Tickets Available',
-                    value: event.ticketsAvailable.toString()),
-                MetricWidget(label: 'Revenue', value: "\$${event.revenue}"),
+                MetricWidget(label: 'Tickets Sold', value: "30"),
+                MetricWidget(label: 'Tickets Available', value: "30"),
+                MetricWidget(label: 'Revenue', value: "30"),
               ],
             ),
             const Divider(height: 32),
 
             // Category and Event Summary
             Text(
-              'Category: ${event.category}',
+              'Category: ${event.eventType}',
               style: const TextStyle(fontSize: 16, color: Colors.black87),
             ),
             const SizedBox(height: 10),
@@ -70,32 +67,10 @@ class EventDashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              event.description ?? "No description available.",
+              event.about ?? "No description available.",
               style: const TextStyle(color: Colors.black87),
             ),
             const Divider(height: 32),
-
-            // Top Reviews Section
-            const Text('Top Reviews',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: event.reviews.length,
-                itemBuilder: (context, index) {
-                  final review = event.reviews[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading:
-                        const Icon(Icons.star, color: Colors.amber, size: 24),
-                    title: Text(review['user']),
-                    subtitle: Text(review['comment']),
-                    trailing: Text("${review['rating']} ⭐",
-                        style: const TextStyle(color: Colors.amber)),
-                  );
-                },
-              ),
-            ),
           ],
         ),
       ),

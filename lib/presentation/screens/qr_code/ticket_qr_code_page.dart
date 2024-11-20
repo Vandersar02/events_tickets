@@ -1,29 +1,11 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:events_ticket/core/utils/encryption_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+// import 'dart:io';
 
 // Secret Key for encryption (should be kept secret) 32 characters for AES-256
 const secretKey = "mySuperSecretKey1234567890123456";
-
-// Function to generate encrypted data with signature
-String generateSignedAndEncryptedQrData(String ticketData, String secretKey) {
-  // Step 1: Create a signature using SHA-256
-  var bytes = utf8.encode(ticketData + secretKey);
-  var signature = sha256.convert(bytes).toString(); // Generate SHA-256 hash
-
-  // Step 2: Encrypt the data with AES
-  final key = encrypt.Key.fromUtf8(secretKey);
-  final iv = encrypt.IV.fromSecureRandom(16); // Génère un IV aléatoire
-  final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-  // Combine ticketData with the signature
-  final combinedData = "$ticketData|signature=$signature";
-  final encrypted = encrypter.encrypt(combinedData, iv: iv);
-
-  return iv.base64 + encrypted.base64; // Return IV + encrypted data
-}
 
 class TicketQRCodePage extends StatelessWidget {
   const TicketQRCodePage({super.key});
@@ -31,11 +13,78 @@ class TicketQRCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example ticket data
-    String ticketData = "event_id=12345|user_id=67890|ticket_id=abcd";
+    String qrCodeData = "event_id=12345|user_id=67890|ticket_type_id=abcd";
 
     // Generate the secure QR data
     String secureQrData =
-        generateSignedAndEncryptedQrData(ticketData, secretKey);
+        EncryptionUtils.generateSignedAndEncryptedQrData(qrCodeData, secretKey);
+
+    // Function to pick image or video
+    Future<void> pickMedia(BuildContext context) async {
+      final picker = ImagePicker();
+
+      // Show options to the user
+      final selectedOption = await showModalBottomSheet<String>(
+        context: context,
+        builder: (BuildContext ctx) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Pick Image from Gallery'),
+                  onTap: () => Navigator.pop(ctx, 'gallery_image'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.video_library),
+                  title: const Text('Pick Video from Gallery'),
+                  onTap: () => Navigator.pop(ctx, 'gallery_video'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Take a Photo'),
+                  onTap: () => Navigator.pop(ctx, 'camera_photo'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.videocam),
+                  title: const Text('Record a Video'),
+                  onTap: () => Navigator.pop(ctx, 'camera_video'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (selectedOption == null) return;
+
+      XFile? file;
+
+      // Handle the user's choice
+      switch (selectedOption) {
+        case 'gallery_image':
+          file = await picker.pickImage(source: ImageSource.gallery);
+          break;
+        case 'gallery_video':
+          file = await picker.pickVideo(source: ImageSource.gallery);
+          break;
+        case 'camera_photo':
+          file = await picker.pickImage(source: ImageSource.camera);
+          break;
+        case 'camera_video':
+          file = await picker.pickVideo(source: ImageSource.camera);
+          break;
+      }
+
+      if (file != null) {
+        // Do something with the selected file
+        print('File selected: ${file.path}');
+        // Example: Update state or upload file
+      } else {
+        print('No file selected.');
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -44,8 +93,10 @@ class TicketQRCodePage extends StatelessWidget {
         // leading: const Icon(Icons.arrow_back),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            icon: const Icon(Icons.camera_alt),
+            onPressed: () {
+              pickMedia(context);
+            },
           ),
         ],
       ),
@@ -126,95 +177,7 @@ class TicketQRCodePage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
 
-              // User Information
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                elevation: 4,
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Full Name",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("Andrew Ainsley", style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Nickname",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("Andrew", style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Gender",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("Male", style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Date of Birth",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("12/27/1995", style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Country",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("United States", style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Phone",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("+1 111 467 378 399",
-                              style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Email",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("andrew_ainsley@yo...com",
-                              style: TextStyle(fontSize: 14))
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20.0),
-
-              // Payment Information
+              // Ticket Information
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -270,6 +233,8 @@ class TicketQRCodePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20.0),
+
+              // Payment Information
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -286,7 +251,7 @@ class TicketQRCodePage extends StatelessWidget {
                           Text("Payment Methods",
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text("MasterCard", style: TextStyle(fontSize: 14))
+                          Text("Moncash", style: TextStyle(fontSize: 14))
                         ],
                       ),
                       SizedBox(height: 8),
@@ -318,6 +283,7 @@ class TicketQRCodePage extends StatelessWidget {
 
               const SizedBox(height: 20.0),
 
+              // Download Ticket Button
               ElevatedButton(
                 onPressed: () {
                   // Action to download the ticket

@@ -1,4 +1,4 @@
-import 'package:events_ticket/data/models/events.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 import 'package:events_ticket/presentation/screens/events/create_events_screen.dart';
 import 'package:events_ticket/presentation/screens/events/event_dashboard.dart';
 import 'package:events_ticket/presentation/screens/qr_code/qr_scanner_screen.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EventManagementPage extends StatefulWidget {
-  final List<Event> events; // List of events provided by the user
+  final List<EventModel> events; // List of events provided by the user
 
   const EventManagementPage({super.key, required this.events});
 
@@ -17,8 +17,8 @@ class EventManagementPage extends StatefulWidget {
 class _EventManagementPageState extends State<EventManagementPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late List<Event> upcomingEvents;
-  late List<Event> pastEvents;
+  late List<EventModel> upcomingEvents;
+  late List<EventModel> pastEvents;
 
   @override
   void initState() {
@@ -28,9 +28,9 @@ class _EventManagementPageState extends State<EventManagementPage>
     // Filter events into upcoming and past categories based on the current date
     DateTime now = DateTime.now();
     upcomingEvents =
-        widget.events.where((event) => event.date.isAfter(now)).toList();
+        widget.events.where((event) => event.createdAt.isAfter(now)).toList();
     pastEvents =
-        widget.events.where((event) => event.date.isBefore(now)).toList();
+        widget.events.where((event) => event.createdAt.isBefore(now)).toList();
   }
 
   @override
@@ -67,7 +67,7 @@ class _EventManagementPageState extends State<EventManagementPage>
 }
 
 class EventListView extends StatelessWidget {
-  final List<Event> events;
+  final List<EventModel> events;
   final bool isUpcoming;
 
   const EventListView(
@@ -90,14 +90,15 @@ class EventListView extends StatelessWidget {
 }
 
 class EventCard extends StatelessWidget {
-  final Event event;
+  final EventModel event;
   final bool isUpcoming;
 
   const EventCard({super.key, required this.event, required this.isUpcoming});
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('EEE, MMM d, yyyy').format(event.date);
+    final formattedDate =
+        DateFormat('EEE, MMM d, yyyy').format(event.createdAt);
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -112,7 +113,7 @@ class EventCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(event.imageUrl,
+                  child: Image.asset(event.coverImg.toString(),
                       height: 150, width: double.infinity, fit: BoxFit.cover),
                 ),
                 Positioned(
@@ -144,15 +145,15 @@ class EventCard extends StatelessWidget {
               children: [
                 Chip(
                   label: Text(
-                    event.category,
+                    event.eventType.toString(),
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  '${event.attendeesCount} people going', // Displaying attendeesCount correctly
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                // Text(
+                //   '${event.attendeesCount} people going', // Displaying attendeesCount correctly
+                //   style: const TextStyle(color: Colors.grey),
+                // ),
                 const Spacer(),
                 const Icon(Icons.bookmark_border),
               ],
@@ -161,7 +162,7 @@ class EventCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  event.location,
+                  event.address.toString(),
                   style: const TextStyle(color: Colors.blueGrey),
                 ),
                 const SizedBox(width: 10),

@@ -1,8 +1,6 @@
+import 'package:events_ticket/core/utils/encryption_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:crypto/crypto.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
-import 'dart:convert';
 
 const secretKey = "mySuperSecretKey1234567890123456";
 
@@ -14,22 +12,41 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class QRScannerScreenState extends State<QRScannerScreen> {
-  MobileScannerController controller = MobileScannerController();
+  final MobileScannerController controller = MobileScannerController();
   String? qrCodeData;
   bool isValid = false;
   bool isScanning = true;
+  int scanCount = 0; // Nombre total de scans
+  final List<String> scanHistory = []; // Historique des scans
 
   @override
   void initState() {
     super.initState();
     controller.start();
     controller.barcodes.listen((barcodeCapture) {
-      final barcode = barcodeCapture.barcodes.first;
-      setState(() {
-        qrCodeData = decryptAndVerifyQrDataReal(barcode.rawValue, secretKey);
-        isValid = qrCodeData != null;
-        isScanning = false; // Stop scanning after receiving a QR code
-      });
+      if (isScanning) {
+        final barcode = barcodeCapture.barcodes.first;
+        final decryptedData = EncryptionUtils.decryptAndVerifyQrDataReal(
+          barcode.rawValue,
+          secretKey,
+        );
+
+        setState(() {
+          qrCodeData = decryptedData;
+          isValid = qrCodeData != null;
+          isScanning = false;
+
+          // Mise à jour des statistiques
+          if (isValid) {
+            scanCount++;
+            scanHistory.insert(
+                0, qrCodeData!); // Ajouter au début de l'historique
+            if (scanHistory.length > 5) {
+              scanHistory.removeLast(); // Limiter à 5 scans
+            }
+          }
+        });
+      }
     });
   }
 
@@ -38,9 +55,25 @@ class QRScannerScreenState extends State<QRScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Scanner le QR Code')),
+        actions: [
+          IconButton(
+            icon: Icon(isScanning ? Icons.pause : Icons.play_arrow),
+            onPressed: () {
+              setState(() {
+                isScanning = !isScanning;
+                if (isScanning) {
+                  controller.start();
+                } else {
+                  controller.stop();
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
+          // Section scanner
           Expanded(
             flex: 4,
             child: Stack(
@@ -66,8 +99,10 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
           ),
+
+          // Section informations et actions
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 50.0),
+            padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               boxShadow: [
@@ -79,27 +114,76 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Informations sur le QR code
                 if (qrCodeData != null)
                   Text(
                     isValid
-                        ? '$qrCodeData'
-                        : "Le QR Code est invalide ou a été altéré.",
+                        ? 'QR Code valide : $qrCodeData'
+                        : "Le QR Code est invalide ou altéré.",
                     style: TextStyle(
-                        fontSize: 18,
-                        color: isValid ? Colors.green : Colors.red),
+                      fontSize: 16,
+                      color: isValid ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                if (isScanning) const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+
+                // Statistiques
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Nombre de scans : $scanCount",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          scanCount = 0;
+                          scanHistory.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Réinitialiser"),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Historique des scans
+                if (scanHistory.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Historique des derniers scans :",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ...scanHistory.map((scan) => Text(
+                            "- $scan",
+                            style: const TextStyle(fontSize: 14),
+                          )),
+                    ],
+                  ),
+
+                const SizedBox(height: 24),
+
+                // Actions (Check-in, Check-out, Rescan)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
                       onPressed: isValid
                           ? () {
-                              // Action Check-in
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Check-in effectué!')),
+                                  content: Text('Check-in effectué!'),
+                                ),
                               );
                             }
                           : null,
@@ -108,10 +192,10 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                     ElevatedButton(
                       onPressed: isValid
                           ? () {
-                              // Action Check-out
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Check-out effectué!')),
+                                  content: Text('Check-out effectué!'),
+                                ),
                               );
                             }
                           : null,
@@ -119,7 +203,6 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Rescan button
                         setState(() {
                           qrCodeData = null;
                           isValid = false;
@@ -143,46 +226,5 @@ class QRScannerScreenState extends State<QRScannerScreen> {
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-}
-
-// Function to decrypt and verify the signed data
-String? decryptAndVerifyQrDataReal(String? encryptedData, String secretKey) {
-  try {
-    // Step 1: Extract IV and encrypted data
-    final ivData = encryptedData!
-        .substring(0, 24); // Assume que l'IV fait 16 octets encodés en base64
-    final encryptedDataWithoutIv =
-        encryptedData.substring(24); // Le reste est le message chiffré
-
-    final iv = encrypt.IV.fromBase64(ivData);
-    final key = encrypt.Key.fromUtf8(secretKey);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-    // Step 2: Decrypt the data
-    final decrypted = encrypter.decrypt64(encryptedDataWithoutIv, iv: iv);
-
-    // Step 3: Separate ticketData and signature
-    final parts = decrypted.split("|signature=");
-    if (parts.length != 2) {
-      return null; // Invalid data format
-    }
-    final ticketData = parts[0];
-    final providedSignature = parts[1];
-
-    // Step 4: Recalculate and verify the signature
-    var bytes =
-        utf8.encode(ticketData + secretKey); // Combine data and secret key
-    var recalculatedSignature =
-        sha256.convert(bytes).toString(); // Generate SHA-256 hash
-
-    if (providedSignature == recalculatedSignature) {
-      return ticketData; // Data is valid
-    } else {
-      return null; // Signature mismatch, data might be corrupted or tampered with
-    }
-  } catch (e) {
-    print("Decryption or verification failed: $e");
-    return null;
   }
 }

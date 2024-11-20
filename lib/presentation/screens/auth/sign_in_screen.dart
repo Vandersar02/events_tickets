@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,12 +15,14 @@ class SignInScreen extends StatefulWidget {
 final supabase = Supabase.instance.client;
 
 class _SignInScreenState extends State<SignInScreen> {
+  late final StreamSubscription<AuthState> _userSubscription;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String errorMessage = AuthRepository().errorMessage ?? '';
+  bool _redirecting = false;
+  String? errorMessage = AuthRepository().errorMessage ?? '';
   bool isLoading = false;
 
-  // Fonction d'inscription
+  // Fonction de connexion classique
   Future<void> _signIn() async {
     setState(() => isLoading = true);
     try {
@@ -28,53 +30,76 @@ class _SignInScreenState extends State<SignInScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      _navigateToEntryPoint();
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      setState(() => context.showSnackBar(e.toString(), isError: true));
     } finally {
       setState(() => isLoading = false);
+      _clearFields();
     }
-    _clearFields();
   }
 
-  // Fonction de connexion avec Google
+  // Fonction de connexion via Google
   Future<void> _signInWithGoogle() async {
     setState(() => isLoading = true);
     try {
-      await AuthRepository().signInWithGoogle(isSignIn: true);
-      _navigateToEntryPoint();
-    } catch (e) {
-      setState(() => errorMessage = e.toString());
+      await AuthRepository().signInWithGoogle();
+    } on AuthException catch (error) {
+      if (mounted) context.showSnackBar(error.message, isError: true);
+    } catch (error) {
+      if (mounted) {
+        context.showSnackBar(error.toString(), isError: true);
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  // Fonction de connexion avec Apple
-  Future<void> _signInWithApple() async {
-    setState(() => isLoading = true);
-    try {
-      await AuthRepository().signInWithApple();
-      _navigateToEntryPoint();
-    } catch (e) {
-      setState(() => errorMessage = e.toString());
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
-  void _navigateToEntryPoint() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const EntryPoint(),
-      ),
-    );
-  }
-
+  // Fonction pour vider les champs de saisie
   void _clearFields() {
     _emailController.clear();
     _passwordController.clear();
+  }
+
+  // Initialisation de l'authentification à l'état
+  @override
+  void initState() {
+    super.initState();
+    _userSubscription = supabase.auth.onAuthStateChange.listen(
+      (data) {
+        if (_redirecting) return;
+        final session = data.session;
+        if (session != null) {
+          _redirecting = true;
+          Future.delayed(Duration.zero, () {
+            if (mounted) {
+              // Navigate to the entry point screen
+              Navigator.of(context).pushReplacementNamed("/entryPoint");
+            }
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            context.showSnackBar(error.message, isError: true);
+            errorMessage = error.message;
+          });
+        }
+      },
+    );
+  }
+
+  // Désinscription de l'authentification à l'état lors de la destruction de l'écran
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _userSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -92,7 +117,7 @@ class _SignInScreenState extends State<SignInScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const WelcomeText(
-                title: "Welcome to",
+                title: "Welcome to back to Evens Ticket",
                 text:
                     "Enter your Email address for sign in. \nAccess to exclusive events :)",
               ),
@@ -101,11 +126,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 passwordController: _passwordController,
                 onSignIn: _signIn,
               ),
-              if (errorMessage.isNotEmpty)
+              if (errorMessage!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
-                    errorMessage,
+                    errorMessage!,
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
@@ -136,20 +161,6 @@ class _SignInScreenState extends State<SignInScreen> {
                           },
                       )
                     ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SocialButton(
-                press: _signInWithApple,
-                text: "Connect with Apple",
-                color: const Color(0xFF395998),
-                icon: SvgPicture.string(
-                  height: 10,
-                  facebookIcon,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF395998),
-                    BlendMode.srcIn,
                   ),
                 ),
               ),
@@ -351,15 +362,16 @@ class SocialButton extends StatelessWidget {
   }
 }
 
-const String facebookIcon =
-    '''<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-<path style="fill:#2196F3;" d="M320,85.333h64c5.891,0,10.667-4.776,10.667-10.667v-64C394.667,4.776,389.891,0,384,0h-64
-	c-64.772,0.071-117.263,52.561-117.333,117.333V192H128c-5.891,0-10.667,4.776-10.667,10.667v64c0,5.891,4.776,10.667,10.667,10.667
-	h74.667v224c0,5.891,4.776,10.667,10.667,10.667h64c5.891,0,10.667-4.776,10.667-10.667v-224h74.667
-	c4.589-0.003,8.662-2.942,10.112-7.296l21.333-64c1.862-5.589-1.16-11.629-6.749-13.491c-1.084-0.361-2.22-0.546-3.363-0.547h-96
-	v-74.667C288,99.66,302.327,85.333,320,85.333z"/>
-</svg>''';
+extension ShowSnackBar on BuildContext {
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
+  }
+}
 
 const String googleIcon =
     '''<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"

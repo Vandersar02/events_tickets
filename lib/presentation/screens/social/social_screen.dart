@@ -12,181 +12,98 @@ class SocialScreen extends StatelessWidget {
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Social network'),
+            Text('Social network',
+                style: TextStyle(fontSize: 22, color: Colors.white)),
           ],
         ),
       ),
       body: const SafeArea(
         bottom: false,
-        child: SocialFeedScreen(),
+        child: SocialPostList(), // Utilisation correcte d'un widget distinct
       ),
     );
   }
 }
 
-class SocialFeedScreen extends StatelessWidget {
-  const SocialFeedScreen({super.key});
+// Nouveau widget séparé pour la liste des posts
+class SocialPostList extends StatelessWidget {
+  const SocialPostList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      children: [
-        // Stories Section
-        SizedBox(
-          height: 120,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            children: [
-              _buildStoryTile("Add Story", "assets/add_story.png", true),
-              _buildStoryTile("Samera", "assets/images/event2.jpg"),
-              _buildStoryTile("Julien", "assets/images/event1.jpg"),
-              _buildStoryTile("Mariane", "assets/images/event3.jpg"),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 5),
-
-        // Posts Section
-        _buildPostCard(
-          userName: "Jemma Ray",
-          timeAgo: "19 hours ago",
-          imageUrl: "assets/images/event1.jpg",
-          likes: 4200,
-          comments: 273,
-        ),
-        _buildPostCard(
-          userName: "Eric Ray",
-          timeAgo: "20 hours ago",
-          imageUrl: "assets/images/event2.jpg",
-          likes: 2900,
-          comments: 133,
-        ),
-        _buildPostCard(
-          userName: "Jung Taekwoon",
-          timeAgo: "1 day ago",
-          imageUrl: "assets/images/event2.jpg",
-          likes: 20200,
-          comments: 908,
-        ),
-      ],
+    return ListView.builder(
+      itemCount: 10, // Exemple : 10 éléments
+      itemBuilder: (context, index) {
+        return buildPostCard(
+          userName: index % 2 == 0 ? "Thanh Pham" : "Bruno From Happy New Year",
+          timeAgo: index % 2 == 0 ? "2 hours ago" : "1 day ago",
+          profilePictureUrl: index % 2 == 0
+              ? "https://img.freepik.com/free-vector/professional-tiktok-profile-picture_742173-5866.jpg"
+              : "https://img.freepik.com/free-photo/front-view-man-party-suit-bow-tie_23-2148331839.jpg",
+          imageUrl: index % 2 == 0
+              ? "https://img.freepik.com/free-psd/party-social-media-template_505751-3159.jpg"
+              : "https://img.freepik.com/free-photo/front-view-man-party-suit-bow-tie_23-2148331839.jpg",
+          likes: 125,
+          comments: 20,
+        );
+      },
     );
   }
 
-  Widget _buildStoryTile(String name, String imageUrl,
-      [bool isAddStory = false]) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 15.0),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage(imageUrl),
-                child: isAddStory
-                    ? const Icon(Icons.add, color: Colors.white, size: 24)
-                    : null,
-              ),
-              if (!isAddStory)
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.orange, width: 3),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            style: const TextStyle(color: Colors.black, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPostCard({
+  // Ajout de la méthode buildPostCard ici
+  Widget buildPostCard({
     required String userName,
     required String timeAgo,
     required String imageUrl,
+    required String profilePictureUrl,
     required int likes,
     required int comments,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: AssetImage(imageUrl),
+              backgroundImage: NetworkImage(profilePictureUrl),
               radius: 24,
             ),
-            title: Text(
-              userName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(userName,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(timeAgo),
-            trailing: IconButton(
-              icon: const Icon(Icons.more_horiz),
-              onPressed: () {},
-            ),
           ),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              imageUrl,
-              height: 250,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(imageUrl,
+                height: 200, width: double.infinity, fit: BoxFit.cover),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.favorite, color: Colors.red),
-                    const SizedBox(width: 4),
-                    Text('$likes'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.comment, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text('$comments Comments'),
-                  ],
-                ),
-                const Icon(Icons.share, color: Colors.grey),
-              ],
-            ),
-          ),
-          const Divider(color: Colors.grey),
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage(imageUrl),
-                  radius: 14,
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Add a comment...",
-                      border: InputBorder.none,
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {},
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Text(comments.toString(),
+                        style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 16),
+                    const Icon(Icons.comment),
+                    const SizedBox(width: 8),
+                    Text(likes.toString(),
+                        style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -196,3 +113,30 @@ class SocialFeedScreen extends StatelessWidget {
     );
   }
 }
+
+
+// FutureBuilder<List<Post>>(
+//   future: fetchPosts("popular"), // Replace "popular" with the selected tab's category
+//   builder: (context, snapshot) {
+//     if (snapshot.connectionState == ConnectionState.waiting) {
+//       return const Center(child: CircularProgressIndicator());
+//     } else if (snapshot.hasError) {
+//       return const Center(child: Text("Failed to load posts"));
+//     } else {
+//       final posts = snapshot.data!;
+//       return ListView.builder(
+//         itemCount: posts.length,
+//         itemBuilder: (context, index) {
+//           final post = posts[index];
+//           return buildPostCard(
+//             userName: post.userName,
+//             timeAgo: post.timeAgo,
+//             imageUrl: post.imageUrl,
+//             likes: post.likes,
+//             comments: post.comments,
+//           );
+//         },
+//       );
+//     }
+//   },
+// );
