@@ -5,10 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepository {
-  final String webClientId =
-      '496831178944-8lfhmpqr2e0c03ogvhj13bujo9mc83ef.apps.googleusercontent.com';
-  final String iosClientId =
-      '496831178944-ogtf55eote1lmvtgg19rhmmqcvoim75r.apps.googleusercontent.com';
+  final String webClientId = '';
+  final String iosClientId = '';
   final supabase = Supabase.instance.client;
   User? currentUser;
   String? errorMessage;

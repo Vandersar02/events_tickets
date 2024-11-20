@@ -127,10 +127,6 @@ L’application détecte automatiquement le mode sombre ou clair de l’appareil
 
 Les informations sensibles (identifiants d'API et clés de sécurité) sont stockées dans un fichier `.env` non inclus dans le dépôt.
 
-## Support
-
-Pour toute question ou assistance technique, merci de contacter l'équipe de développement interne.
-
 ## Licence et Confidentialité
 
 Cette application est strictement privée et non open-source. Toute utilisation, distribution, ou modification du code sans autorisation explicite est interdite.
