@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'package:events_ticket/core/services/auth/user_services.dart';
-import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,7 +19,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _redirecting = false;
-  String errorMessage = '';
+  String? errorMessage = AuthRepository().errorMessage ?? '';
   bool isLoading = false;
 
   // Fonction de connexion classique
@@ -61,18 +58,6 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  // Fonction de connexion via Apple
-  Future<void> _signInWithApple() async {
-    setState(() => isLoading = true);
-    try {
-      await AuthRepository().signInWithApple();
-    } catch (e) {
-      setState(() => context.showSnackBar(e.toString(), isError: true));
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
   // Fonction pour vider les champs de saisie
   void _clearFields() {
     _emailController.clear();
@@ -91,13 +76,8 @@ class _SignInScreenState extends State<SignInScreen> {
           _redirecting = true;
           Future.delayed(Duration.zero, () {
             if (mounted) {
-              // Save user data in SessionManager
-              SessionManager().savePreference(
-                  "user", UserServices().getUserData(session.user.id));
               // Navigate to the entry point screen
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const EntryPoint()),
-              );
+              Navigator.of(context).pushReplacementNamed("/entryPoint");
             }
           });
         }
@@ -146,11 +126,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 passwordController: _passwordController,
                 onSignIn: _signIn,
               ),
-              if (errorMessage.isNotEmpty)
+              if (errorMessage!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
-                    errorMessage,
+                    errorMessage!,
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
@@ -181,20 +161,6 @@ class _SignInScreenState extends State<SignInScreen> {
                           },
                       )
                     ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SocialButton(
-                press: _signInWithApple,
-                text: "Connect with Apple",
-                color: const Color(0xFF395998),
-                icon: SvgPicture.string(
-                  height: 10,
-                  facebookIcon,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF395998),
-                    BlendMode.srcIn,
                   ),
                 ),
               ),
@@ -406,16 +372,6 @@ extension ShowSnackBar on BuildContext {
     );
   }
 }
-
-const String facebookIcon =
-    '''<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
-<path style="fill:#2196F3;" d="M320,85.333h64c5.891,0,10.667-4.776,10.667-10.667v-64C394.667,4.776,389.891,0,384,0h-64
-	c-64.772,0.071-117.263,52.561-117.333,117.333V192H128c-5.891,0-10.667,4.776-10.667,10.667v64c0,5.891,4.776,10.667,10.667,10.667
-	h74.667v224c0,5.891,4.776,10.667,10.667,10.667h64c5.891,0,10.667-4.776,10.667-10.667v-224h74.667
-	c4.589-0.003,8.662-2.942,10.112-7.296l21.333-64c1.862-5.589-1.16-11.629-6.749-13.491c-1.084-0.361-2.22-0.546-3.363-0.547h-96
-	v-74.667C288,99.66,302.327,85.333,320,85.333z"/>
-</svg>''';
 
 const String googleIcon =
     '''<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"

@@ -9,7 +9,7 @@ class AboutUsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("About Us"),
         centerTitle: true,
-        backgroundColor: const Color(0xFF7553F6), // Personnalisez la couleur
+        backgroundColor: const Color(0xFF7553F6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

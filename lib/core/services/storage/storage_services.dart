@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/material.dart';
 
 class StorageService {
   final supabase = Supabase.instance.client;
@@ -25,6 +26,29 @@ class StorageService {
     } catch (e) {
       print("Erreur: $e");
       return null;
+    }
+  }
+
+  // Upload un fichier dans Supabase Storage
+  Future<String?> uploadMedia(File file, String path) async {
+    try {
+      final response =
+          await supabase.storage.from('user_media').upload(path, file);
+      return response; // Retourne l'URL du fichier
+    } catch (error) {
+      debugPrint("Erreur lors du téléchargement du média : $error");
+      return null;
+    }
+  }
+
+  // Supprimer un fichier dans Supabase Storage
+  Future<bool> deleteMedia(String path) async {
+    try {
+      await supabase.storage.from('user_media').remove([path]);
+      return true;
+    } catch (error) {
+      debugPrint("Erreur lors de la suppression du média : $error");
+      return false;
     }
   }
 }

@@ -1,8 +1,5 @@
-import 'package:events_ticket/presentation/screens/chats/chat_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/components/side_bar.dart';
 import 'package:events_ticket/presentation/screens/home/home_screen.dart';
-import 'package:events_ticket/presentation/screens/qr_code/qr_scanner_screen.dart';
-// import 'package:events_ticket/presentation/screens/social/another_screen.dart';
 import 'package:events_ticket/presentation/screens/social/social_screen.dart';
 import 'package:events_ticket/presentation/screens/tickets/tickets_page.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +20,6 @@ class _EntryPointState extends State<EntryPoint>
     const HomePage(),
     const SocialScreen(),
     const TicketsPage(),
-    const ChatsScreen(),
-    const QRScannerScreen(),
   ];
 
   late AnimationController _animationController;
@@ -148,14 +143,6 @@ class _EntryPointState extends State<EntryPoint>
             icon: Icon(Icons.confirmation_number),
             label: 'Tickets',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.chat),
-          //   label: 'Chats',
-          // ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.portrait),
-          //   label: 'Scanner',
-          // ),
         ],
       ),
     );

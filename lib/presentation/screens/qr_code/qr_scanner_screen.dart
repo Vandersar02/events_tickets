@@ -12,23 +12,41 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class QRScannerScreenState extends State<QRScannerScreen> {
-  MobileScannerController controller = MobileScannerController();
+  final MobileScannerController controller = MobileScannerController();
   String? qrCodeData;
   bool isValid = false;
   bool isScanning = true;
+  int scanCount = 0; // Nombre total de scans
+  final List<String> scanHistory = []; // Historique des scans
 
   @override
   void initState() {
     super.initState();
     controller.start();
     controller.barcodes.listen((barcodeCapture) {
-      final barcode = barcodeCapture.barcodes.first;
-      setState(() {
-        qrCodeData = EncryptionUtils.decryptAndVerifyQrDataReal(
-            barcode.rawValue, secretKey);
-        isValid = qrCodeData != null;
-        isScanning = false; // Stop scanning after receiving a QR code
-      });
+      if (isScanning) {
+        final barcode = barcodeCapture.barcodes.first;
+        final decryptedData = EncryptionUtils.decryptAndVerifyQrDataReal(
+          barcode.rawValue,
+          secretKey,
+        );
+
+        setState(() {
+          qrCodeData = decryptedData;
+          isValid = qrCodeData != null;
+          isScanning = false;
+
+          // Mise à jour des statistiques
+          if (isValid) {
+            scanCount++;
+            scanHistory.insert(
+                0, qrCodeData!); // Ajouter au début de l'historique
+            if (scanHistory.length > 5) {
+              scanHistory.removeLast(); // Limiter à 5 scans
+            }
+          }
+        });
+      }
     });
   }
 
@@ -37,10 +55,25 @@ class QRScannerScreenState extends State<QRScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Scanner le QR Code')),
+        actions: [
+          IconButton(
+            icon: Icon(isScanning ? Icons.pause : Icons.play_arrow),
+            onPressed: () {
+              setState(() {
+                isScanning = !isScanning;
+                if (isScanning) {
+                  controller.start();
+                } else {
+                  controller.stop();
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // QR code scanner section
+          // Section scanner
           Expanded(
             flex: 4,
             child: Stack(
@@ -67,9 +100,9 @@ class QRScannerScreenState extends State<QRScannerScreen> {
             ),
           ),
 
-          //ticket details
+          // Section informations et actions
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 50.0),
+            padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               boxShadow: [
@@ -81,30 +114,76 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Informations sur le QR code
                 if (qrCodeData != null)
-                  // display the ticket data if valid
                   Text(
                     isValid
-                        ? '$qrCodeData'
-                        : "Le QR Code est invalide ou a été altéré.",
+                        ? 'QR Code valide : $qrCodeData'
+                        : "Le QR Code est invalide ou altéré.",
                     style: TextStyle(
-                        fontSize: 18,
-                        color: isValid ? Colors.green : Colors.red),
+                      fontSize: 16,
+                      color: isValid ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                if (isScanning) const CircularProgressIndicator(),
+                const SizedBox(height: 16),
 
-                // button to check-in or check-out the ticket
+                // Statistiques
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Nombre de scans : $scanCount",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          scanCount = 0;
+                          scanHistory.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Réinitialiser"),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Historique des scans
+                if (scanHistory.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Historique des derniers scans :",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ...scanHistory.map((scan) => Text(
+                            "- $scan",
+                            style: const TextStyle(fontSize: 14),
+                          )),
+                    ],
+                  ),
+
+                const SizedBox(height: 24),
+
+                // Actions (Check-in, Check-out, Rescan)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
                       onPressed: isValid
                           ? () {
-                              // Action Check-in
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Check-in effectué!')),
+                                  content: Text('Check-in effectué!'),
+                                ),
                               );
                             }
                           : null,
@@ -113,10 +192,10 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                     ElevatedButton(
                       onPressed: isValid
                           ? () {
-                              // Action Check-out
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Check-out effectué!')),
+                                  content: Text('Check-out effectué!'),
+                                ),
                               );
                             }
                           : null,
@@ -124,7 +203,6 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Rescan button
                         setState(() {
                           qrCodeData = null;
                           isValid = false;

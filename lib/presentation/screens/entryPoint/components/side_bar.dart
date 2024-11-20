@@ -1,8 +1,8 @@
-// import 'package:events_ticket/data/models/events.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 import 'package:events_ticket/presentation/screens/about/about_us.dart';
 import 'package:events_ticket/presentation/screens/contact/contact_us.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
-// import 'package:events_ticket/presentation/screens/events/event_management.dart';
+import 'package:events_ticket/presentation/screens/events/event_management.dart';
 import 'package:events_ticket/presentation/screens/profil/profil_page.dart';
 import 'package:events_ticket/presentation/screens/settings/settings_page.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,9 @@ class _SideBarState extends State<SideBar> {
   // Map associant chaque menu à sa page de destination
   final Map<String, WidgetBuilder> _menuPages = {
     "Home": (context) => const EntryPoint(),
-    // "Organizer": (context) => EventManagementPage(events: events,),
+    "Organizer": (context) => EventManagementPage(
+          events: events,
+        ),
     "Settings": (context) => const SettingsPage(),
     "Contact Us": (context) => const ContactUsPage(),
     "About Us": (context) => const AboutUsPage(),
@@ -148,3 +150,5 @@ final List<String> sidebarMenus2 = [
   "Contact Us",
   "About Us",
 ];
+
+final List<EventModel> events = [];

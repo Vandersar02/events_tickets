@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:events_ticket/data/repositories/auth_repository.dart';
-import 'package:events_ticket/presentation/screens/auth/user_information.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,7 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _redirecting = false;
   bool _obscureText = true;
   bool isLoading = false;
-  final String _errorMessage = '';
+  String? errorMessage = AuthRepository().errorMessage ?? '';
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -49,10 +48,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _signInWithProvider(AuthRepository().signInWithGoogle);
   }
 
-  Future<void> _signInWithApple() async {
-    _signInWithProvider(AuthRepository().signInWithApple);
-  }
-
   Future<void> _signInWithProvider(Future<void> Function() signInMethod) async {
     setState(() => isLoading = true);
     try {
@@ -72,16 +67,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void initState() {
+    super.initState();
     _userSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      print(data.session);
       if (_redirecting) return;
       if (data.session != null) {
         _redirecting = true;
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const UserInformationScreen(),
-        ));
+        Navigator.of(context).pushReplacementNamed("/user-information");
       }
     });
-    super.initState();
   }
 
   @override
@@ -118,7 +112,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
               _buildSocialSignInButtons(),
               if (isLoading) const Center(child: CircularProgressIndicator()),
-              if (_errorMessage.isNotEmpty) _buildErrorText(),
+              if (errorMessage!.isNotEmpty) _buildErrorText(),
             ],
           ),
         ),
@@ -241,19 +235,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Column(
       children: [
         SocialButton(
-          press: _signInWithApple,
-          text: "Connect with Apple",
-          color: const Color(0xFF395998),
-          icon: SvgPicture.asset(
-            'assets/icons/apple_box.svg',
-            colorFilter: const ColorFilter.mode(
-              Color(0xFF395998),
-              BlendMode.srcIn,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SocialButton(
           press: _signInWithGoogle,
           text: "Connect with Google",
           color: const Color(0xFF4285F4),
@@ -267,7 +248,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Text(
-        _errorMessage,
+        errorMessage!,
         style: const TextStyle(color: Colors.red),
         textAlign: TextAlign.center,
       ),

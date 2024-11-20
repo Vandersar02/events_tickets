@@ -1,4 +1,6 @@
+// import 'dart:ffi';
 import 'package:events_ticket/core/utils/encryption_utils.dart';
+import 'package:events_ticket/data/models/ticket_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TicketsServices {
@@ -8,6 +10,19 @@ class TicketsServices {
   Future<void> buyTicket(
       String userId, String ticketTypeId, String orderId) async {
     try {
+      // Check availability of the ticket type
+      final ticketType = await supabase
+          .from('ticket_types')
+          .select('n_available')
+          .eq('id', ticketTypeId)
+          .single();
+
+      if (ticketType.isEmpty || ticketType['n_available'] <= 0) {
+        print("Aucun ticket disponible pour ce type.");
+        return;
+      }
+
+      // Insert new ticket
       final ticket = {
         'user_id': userId,
         'ticket_type_id': ticketTypeId,
@@ -19,7 +34,13 @@ class TicketsServices {
       final response =
           await supabase.from('tickets').insert(ticket).select().single();
 
-      print("Ticket créé avec succès: ${response['id']}");
+      // Update ticket type availability
+      await supabase.from('ticket_types').update({
+        'n_available': ticketType['n_available'] - 1,
+        'n_sold': ticketType['n_sold'] + 1,
+      }).eq('id', ticketTypeId);
+
+      print("Ticket acheté avec succès: ${response['id']}");
     } catch (error) {
       print("Erreur lors de l'achat du ticket: $error");
     }
@@ -28,16 +49,34 @@ class TicketsServices {
   // Fonction pour annuler un ticket
   Future<void> cancelTicket(String ticketId) async {
     try {
-      final response = await supabase
+      final ticket = await supabase
           .from('tickets')
-          .update({
-            'state': 'cancelled',
-          })
+          .select('ticket_type_id, state')
           .eq('id', ticketId)
-          .select()
           .single();
 
-      print("Ticket annulé: ${response['id']}");
+      if (ticket.isEmpty || ticket['state'] == 'cancelled') {
+        print("Le ticket est déjà annulé ou introuvable.");
+        return;
+      }
+
+      // final ticketTypeId = ticket['ticket_type_id'];
+
+      // Update ticket state
+      await supabase
+          .from('tickets')
+          .update({'state': 'cancelled'}).eq('id', ticketId);
+
+      //// Update availability of the ticket type
+      // await supabase.from('ticket_types').update({
+      //   'n_available': supabase
+      //           .from('ticket_types')
+      //           .select('n_available')
+      //           .eq('id', ticketTypeId) + 1,
+      //   'n_sold':supabase.from('ticket_types').select('n_sold').eq('id', ticketTypeId) - 1,
+      // }).eq('id', ticketTypeId);
+
+      print("Ticket annulé avec succès.");
     } catch (error) {
       print("Erreur lors de l'annulation du ticket: $error");
     }
@@ -101,15 +140,20 @@ class TicketsServices {
   }
 
   // Fonction pour obtenir tous les tickets d'un utilisateur
-  Future<List<Map<String, dynamic>>> getUserTickets(String userId) async {
+  Future<List<TicketModel>> getUserTickets(String userId,
+      {int limit = 10, int offset = 0}) async {
     try {
-      final response =
-          await supabase.from('tickets').select().eq('user_id', userId);
+      final response = await supabase
+          .from('tickets')
+          .select()
+          .eq('user_id', userId)
+          .range(offset, offset + limit - 1);
 
-      return List<Map<String, dynamic>>.from(response);
+      return response
+          .map<TicketModel>((json) => TicketModel.fromJson(json))
+          .toList();
     } catch (error) {
-      print(
-          "Erreur lors de la récupération des tickets de l'utilisateur: $error");
+      print("Erreur lors de la récupération des tickets: $error");
       return [];
     }
   }

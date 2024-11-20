@@ -1,6 +1,6 @@
-import 'package:events_ticket/core/services/auth/preferences_services.dart';
 import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
+import 'package:events_ticket/core/services/preferences/preferences_services.dart';
 import 'package:flutter/material.dart';
 
 class UserInformationScreen extends StatefulWidget {
@@ -12,12 +12,15 @@ class UserInformationScreen extends StatefulWidget {
 
 class _UserInformationScreenState extends State<UserInformationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _birthDateController = TextEditingController();
 
   // Todo: Get userId from SessionManager
-  final userId = SessionManager().getPreference("user_id").toString();
+  final userId = SessionManager().getPreference("user_Id").toString();
+
+  bool isLoading = false;
 
   String? fullName;
-  DateTime? birthDate;
+  DateTime? dateOfBirth;
   String? gender;
   String? language;
   String? phoneNumber;
@@ -48,7 +51,9 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Personal Information")),
+      appBar: AppBar(
+        title: const Text("Personal Information"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -65,17 +70,34 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
 
               // Date de naissance
               TextFormField(
-                decoration: const InputDecoration(
-                    labelText: ' Birth date (JJ/MM/AAAA)'),
-                keyboardType: TextInputType.datetime,
-                onChanged: (value) {
-                  birthDate = DateTime.tryParse(value);
+                controller: _birthDateController,
+                readOnly: true,
+                decoration: const InputDecoration(labelText: 'Birth Date'),
+                validator: (value) =>
+                    value!.isEmpty ? "Enter your birth date" : null,
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      dateOfBirth = pickedDate;
+                      // Mettre à jour le texte du contrôleur
+                      _birthDateController.text =
+                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                    });
+                  }
                 },
               ),
 
               // Genre
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Gender'),
+                validator: (value) =>
+                    value == null ? 'Please select a gender' : null,
                 items: ['Male', 'Female', 'Unspecified'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -108,7 +130,7 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                     value!.isEmpty ? "Enter your phone number" : null,
               ),
 
-              const Divider(),
+              const SizedBox(height: 20),
 
               // Intérêts et préférences événementielles
               const Text("Select your interests"),
@@ -139,11 +161,22 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    setState(() => isLoading = true);
+
+                    print("UserId: $userId");
                     print("Info saved for user $fullName ");
                     print(interests);
 
                     await UserServices()
                         .updateUserField(userId, 'name', fullName ?? '');
+                    await UserServices()
+                        .updateUserField(userId, 'gender', gender ?? '');
+                    await UserServices().updateUserField(
+                        userId, 'date_of_birth', dateOfBirth ?? '');
+                    await UserServices()
+                        .updateUserField(userId, 'language', language ?? '');
+                    await UserServices().updateUserField(
+                        userId, 'phone_number', phoneNumber ?? '');
 
                     // Obtenez l'ID des préférences sélectionnées
                     final selectedPreferenceIds = interests.map((interest) {
@@ -154,20 +187,20 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                     await PreferencesServices()
                         .updateUserPreferences(userId, selectedPreferenceIds);
 
-                    if (!mounted) return;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Preferences updated successfully!')),
-                    );
-                    // Save user data in SessionManager
-                    SessionManager().savePreference(
-                        "user", UserServices().getUserData(userId));
-                    // Navigate to the entry point screen
-                    Navigator.of(context).popAndPushNamed('/entryPoint');
+                    if (mounted) {
+                      setState(() => isLoading = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Preferences updated successfully!')),
+                      );
+                      // Save user data in SessionManager
+                      SessionManager().savePreference("user_id", userId);
+                      // Navigate to the entry point screen
+                      Navigator.of(context).popAndPushNamed('/entryPoint');
+                    }
                   }
                 },
-                child: const Text("Save"),
+                child: isLoading ? const Text("Saving...") : const Text("Save"),
               ),
             ],
           ),

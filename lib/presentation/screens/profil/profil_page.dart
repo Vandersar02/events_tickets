@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -14,6 +17,21 @@ class ProfilePageState extends State<ProfilePage> {
   final TextEditingController nameController = TextEditingController(text: "");
   final TextEditingController emailController = TextEditingController(text: "");
   final TextEditingController phoneController = TextEditingController(text: "");
+
+  // Image picker variables
+  File? _selectedImage;
+
+  // Method to pick an image
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -40,6 +58,22 @@ class ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: _selectedImage != null
+                    ? CircleAvatar(
+                        radius: 60,
+                        backgroundImage: FileImage(_selectedImage!),
+                      )
+                    : CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.grey.shade300,
+                        child: const Icon(Icons.camera_alt, size: 40),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Nom
             TextField(
               controller: nameController,

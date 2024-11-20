@@ -14,15 +14,15 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> onboardingData = [
     {
-      "image": 'assets/images/onboarding2.png',
+      "image": 'assets/images/subscriptions.jpg',
       "text": "Your solution for effortless premium subscription management."
     },
     {
-      "image": 'assets/images/onboarding2.png',
+      "image": 'assets/images/manage.jpg',
       "text": "Track, manage, and renew all your subscriptions in one place."
     },
     {
-      "image": 'assets/images/onboarding3.png',
+      "image": 'assets/images/reminder.jpg',
       "text":
           "Get reminders before subscriptions expire, so you never miss out."
     },

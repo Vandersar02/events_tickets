@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
+import 'package:events_ticket/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthRepository {
   final String webClientId =
@@ -15,25 +13,47 @@ class AuthRepository {
   User? currentUser;
   String? errorMessage;
 
+  void createUserInDb(User? currentUser) async {
+    //  Todo: check if it's really the correct logic to get the info
+    final userModel = UserModel(
+      userId: currentUser!.id,
+      name:
+          currentUser.userMetadata?['name'] ?? currentUser.email?.split('@')[0],
+      email: currentUser.email.toString(),
+      profilePictureUrl: currentUser.userMetadata?['picture'] ?? '',
+      dateOfBirth: currentUser.userMetadata?['avatar_url'] ?? '',
+      gender: currentUser.userMetadata?['gender'] ?? '',
+      phoneNumber: currentUser.phone ?? '',
+      lastActive: DateTime.now(),
+      createdAt: DateTime.now(),
+    );
+    await UserServices().createUserInDatabase(userModel);
+  }
+
   // Inscription avec email et mot de passe
   Future<void> signUpWithEmail(String email, String password) async {
     try {
       await supabase.auth.signUp(email: email, password: password);
+
       currentUser = supabase.auth.currentUser;
       print("Current user: $currentUser");
+
       if (currentUser != null) {
         bool userExists =
             await UserServices().getUserData(currentUser!.id) != null;
         print("User exists: $userExists");
+
         if (!userExists) {
           print("User doesn't exist");
-          await UserServices().createUserInDatabase(currentUser!);
+          createUserInDb(currentUser!);
         }
-        print("The User Metadata is: ${currentUser?.userMetadata}");
+        print(
+            "The User Metadata is: ${UserServices().getUserData(currentUser!.id)}");
+
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
-      print("Error: $e");
+      print("Erreur lors de l\'inscription:: $e");
       errorMessage = 'Erreur lors de l\'inscription: $e';
     }
   }
@@ -55,11 +75,13 @@ class AuthRepository {
           await supabase.auth.signOut();
           return;
         }
-        print("The User Metadata is: ${currentUser?.userMetadata}");
+        print("UserMedata: ${currentUser?.userMetadata}\n\n\n");
+        print(
+            "The User Metadata is: ${UserServices().getUserData(currentUser!.id)}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
-      print("Error: $e");
+      print("Erreur lors de la connexion:: $e");
       errorMessage = 'Erreur lors de la connexion: $e';
     }
   }
@@ -67,7 +89,10 @@ class AuthRepository {
   // Connexion avec Google
   Future<void> signInWithGoogle({bool isSignIn = false}) async {
     try {
-      final googleSignIn = GoogleSignIn();
+      final googleSignIn = GoogleSignIn(
+        clientId: iosClientId,
+        serverClientId: webClientId,
+      );
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -81,7 +106,8 @@ class AuthRepository {
       final accessToken = googleAuth.accessToken;
 
       if (idToken == null || accessToken == null) {
-        print("Error: idToken or accessToken is null");
+        print(
+            "Error: idToken:{$idToken} or accessToken:{$accessToken} is null");
         errorMessage = 'Erreur lors de la récupération des tokens Google.';
         return;
       }
@@ -114,68 +140,14 @@ class AuthRepository {
 
         if (!userExists) {
           print("User doesn't exist");
-          await UserServices().createUserInDatabase(currentUser!);
+          createUserInDb(currentUser!);
         }
         print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
-      print("Error: $e");
+      print("Erreur inattendue lors de la connexion avec Google:: $e");
       errorMessage = 'Erreur inattendue lors de la connexion avec Google: $e';
-    }
-  }
-
-  // Connexion avec Apple
-  Future<void> signInWithApple({bool isSignIn = false}) async {
-    try {
-      final rawNonce = supabase.auth.generateRawNonce();
-      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: hashedNonce,
-      );
-
-      if (credential.identityToken == null) {
-        errorMessage = 'Erreur lors de la connexion avec Apple';
-        return;
-      }
-
-      await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.apple,
-        idToken: credential.identityToken!,
-        nonce: rawNonce,
-      );
-
-      currentUser = supabase.auth.currentUser;
-      if (currentUser != null) {
-        bool userExists =
-            await UserServices().getUserData(currentUser!.id) != null;
-
-        if (isSignIn && !userExists) {
-          errorMessage = 'Aucun compte associé à cette adresse Apple.';
-          await supabase.auth.signOut();
-          return;
-        }
-
-        if (!isSignIn && userExists) {
-          errorMessage = 'Un compte existe déjà avec cet identifiant Apple.';
-          await supabase.auth.signOut();
-          return;
-        }
-
-        if (!userExists) {
-          await UserServices().createUserInDatabase(currentUser!);
-        }
-
-        print("The User Metadata is: ${currentUser?.userMetadata}");
-        await SessionManager().savePreference("user_id", currentUser!.id);
-      }
-    } catch (e) {
-      errorMessage = 'Erreur inattendue lors de la connexion avec Apple: $e';
     }
   }
 

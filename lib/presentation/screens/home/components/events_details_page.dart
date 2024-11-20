@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:events_ticket/core/services/payment/mon_cash_services.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 
 class EventDetailsPage extends StatelessWidget {
-  final String title, location, imageUrl;
-  final DateTime date;
-  final bool isFree;
-  final int attendeesCount;
+  final EventModel? event;
 
   const EventDetailsPage({
     super.key,
-    required this.title,
-    required this.date,
-    required this.location,
-    required this.imageUrl,
-    required this.isFree,
-    required this.attendeesCount,
+    required this.event,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dateFormatted = DateFormat('EEE, MMM d, yyyy').format(date);
+    // Formatting dates
+    final startDateFormatted =
+        DateFormat('EEE, MMM d, yyyy h:mm a').format(event!.startAt);
+    final endDateFormatted =
+        DateFormat('EEE, MMM d, yyyy h:mm a').format(event!.endAt);
+    // final createdAtFormatted = DateFormat('EEE, MMM d, yyyy').format(event.createdAt);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,42 +30,64 @@ class EventDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Event Image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(imageUrl),
-                ),
-              ],
+            // Event Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                event!.coverImg ?? "https://via.placeholder.com/150",
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
-
             const SizedBox(height: 16),
 
             // Event Title
             Text(
-              title,
+              event!.title,
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
 
-            // Event Date and Location
+            // Event Type (Category) Chip
+            if (event!.eventType != null)
+              Chip(
+                label: Text(event!.eventType!),
+                backgroundColor: Colors.deepPurple[50],
+                labelStyle: TextStyle(color: Colors.deepPurple[700]),
+              ),
+            const SizedBox(height: 16),
+
+            // Event Date Range
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.calendar_today, color: Colors.deepPurple),
                 const SizedBox(width: 8),
-                Text(dateFormatted),
+                Expanded(
+                  child: Text(
+                    'Starts: $startDateFormatted\nEnds: $endDateFormatted',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 16),
+
+            // Event Location
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.location_on, color: Colors.deepPurple),
                 const SizedBox(width: 8),
-                Text(location),
+                Expanded(
+                  child: Text(
+                    event!.address ?? "Location not specified",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -79,41 +99,72 @@ class EventDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+              event!.about ??
+                  "No additional details are available for this event.",
               style: TextStyle(color: Colors.grey[700]),
             ),
-
             const SizedBox(height: 16),
 
-            // Buy Ticket Button
+            // Event Availability
+            Text(
+              event!.isAvailable
+                  ? "This event is currently available for registration."
+                  : "This event is no longer available.",
+              style: TextStyle(
+                color: event!.isAvailable ? Colors.green : Colors.redAccent,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Organizer Info
+            Row(
+              children: [
+                const Icon(Icons.person, color: Colors.deepPurple),
+                const SizedBox(width: 8),
+                Text(
+                  "Organized by: ${event!.organizerId}",
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Ticket Purchase Button
             Center(
               child: ElevatedButton(
-                onPressed: () async {
-                  final accessToken = await getAccessToken();
-                  if (accessToken != null) {
-                    // 1. Initier un paiement
-                    await initiatePayment("336216631", "50936973307", 100.0);
-
-                    // 2. Confirmer le paiement
-                    await confirmPayment("336216631", "50936973307", 100.0);
-
-                    // 3. Vérifier le statut du paiement
-                    await checkPaymentStatus(reference: "336216631");
-                  } else {
-                    print('Failed to retrieve access token.');
-                  }
-                },
+                onPressed: event!.isAvailable
+                    ? () async {
+                        // Payment Logic with MonCash
+                        final accessToken = await getAccessToken();
+                        if (accessToken != null) {
+                          // Assume ticket price is dynamic or fixed, for now $100
+                          await initiatePayment(
+                              "336216631", "50936973307", 100.0);
+                          await confirmPayment(
+                              "336216631", "50936973307", 100.0);
+                          await checkPaymentStatus(reference: "336216631");
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Failed to retrieve access token'),
+                            ),
+                          );
+                        }
+                      }
+                    : null, // Disable button if not available
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor:
+                      event!.isAvailable ? Colors.deepPurple : Colors.grey,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
                 ),
-                child: const Text(
-                  "Buy Ticket",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Text(
+                  event!.isAvailable ? "Register Now" : "Unavailable",
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ),
