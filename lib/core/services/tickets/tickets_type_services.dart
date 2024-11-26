@@ -1,3 +1,4 @@
+import 'package:events_ticket/data/models/ticket_types_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TicketsTypeServices {
@@ -27,15 +28,26 @@ class TicketsTypeServices {
     }
   }
 
-  // Fonction pour obtenir tous les types de tickets pour un événement
-  Future<List<Map<String, dynamic>>> getEventTicketTypes(String eventId) async {
+// Fonction pour obtenir tous les types de tickets pour un événement
+  Future<List<TicketTypesModel>> getEventTicketTypes(String eventId) async {
     try {
-      final response =
-          await supabase.from('ticket_types').select().eq('event_id', eventId);
+      // Effectuer une jointure pour obtenir les types de tickets liés à l'événement
+      final response = await supabase
+          .from('ticket_types')
+          .select('*, event:eventId(*)')
+          .eq('eventId', eventId);
 
-      return List<Map<String, dynamic>>.from(response);
+      if (response.isEmpty) {
+        print("Aucun type de ticket trouvé pour l'événement $eventId");
+        return [];
+      }
+
+      // Mapper les données pour les transformer en une liste de modèles
+      return (response as List).map((ticketData) {
+        return TicketTypesModel.fromJson(ticketData as Map<String, dynamic>);
+      }).toList();
     } catch (error) {
-      print("Erreur lors de la récupération des types de tickets: $error");
+      print("Erreur lors de la récupération des types de tickets : $error");
       return [];
     }
   }
@@ -90,6 +102,20 @@ class TicketsTypeServices {
       print("Type de ticket mis à jour avec succès: ${response['id']}");
     } catch (error) {
       print("Erreur lors de la mise à jour du type de ticket: $error");
+    }
+  }
+
+  Future<TicketTypesModel?> getTicketsType(String ticketTypeId) async {
+    try {
+      final response =
+          await supabase.from('ticket_types').select().eq('id', ticketTypeId);
+
+      return (response as List).isNotEmpty
+          ? TicketTypesModel.fromJson(response.first)
+          : null;
+    } catch (error) {
+      print("Erreur lors de la récupération du type de ticket: $error");
+      return null;
     }
   }
 }

@@ -1,16 +1,16 @@
+import 'package:events_ticket/data/models/user_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class InfoCard extends StatelessWidget {
   const InfoCard({
     super.key,
-    required this.name,
-    required this.bio,
+    required this.user,
     required this.onTap,
   });
 
   final VoidCallback onTap;
-  final String name, bio;
+  final UserModel user;
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +27,16 @@ class InfoCard extends StatelessWidget {
           ),
         ),
         title: Text(
-          name,
+          user.name ?? "John Doe",
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text(
-          bio,
-          style: const TextStyle(
+        subtitle: const Text(
+          "Simple User",
+          style: TextStyle(
             color: Colors.white,
             fontSize: 12,
           ),

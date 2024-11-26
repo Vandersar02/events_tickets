@@ -1,7 +1,9 @@
+import 'package:events_ticket/data/models/ticket_types_model.dart';
+
 class TicketModel {
   final String id;
   final String? userId;
-  final String ticketTypeId;
+  final TicketTypesModel ticketTypeId;
   final String orderId;
   final String state;
   final String paymentMethod;
@@ -23,23 +25,26 @@ class TicketModel {
     this.scannedAt,
   });
 
+  // Conversion des données depuis la base de données (JSON) en modèle Ticket
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
       id: json['id'],
       userId: json['user_id'],
-      ticketTypeId: json['ticket_type_id'],
+      ticketTypeId: TicketTypesModel.fromJson(
+          json['ticket_type'] as Map<String, dynamic>),
       orderId: json['order_id'],
-      state: json['state'],
-      paymentMethod: json['payment_method'],
       qrCodeData: json['qrcode_data'],
       isScanned: json['is_scanned'] ?? false,
       createdAt: DateTime.parse(json['created_at']),
       scannedAt: json['scanned_at'] != null
           ? DateTime.parse(json['scanned_at'])
           : null,
+      state: json['state'],
+      paymentMethod: json['payment_method'],
     );
   }
 
+  // Conversion du modèle Ticket en JSON pour l'envoi vers la base de données
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,6 +1,7 @@
 import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/core/services/preferences/preferences_services.dart';
+import 'package:events_ticket/data/models/preference_model.dart';
 import 'package:flutter/material.dart';
 
 class UserInformationScreen extends StatefulWidget {
@@ -15,7 +16,11 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   final TextEditingController _birthDateController = TextEditingController();
 
   // Todo: Get userId from SessionManager
-  final userId = SessionManager().getPreference("user_Id").toString();
+  // final userId = SessionManager().getPreference("user_id").toString();
+  final String userId = SessionManager().userId;
+
+  Future<List<PreferencesModel>> preferencesResponse() async =>
+      await PreferencesServices().getUserPreferences(userId);
 
   bool isLoading = false;
 
@@ -24,29 +29,29 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   String? gender;
   String? language;
   String? phoneNumber;
-  List<String> interests = [];
+  List<PreferencesModel> interests = [];
 
-  final List<String> availableInterests = [
-    'Art',
-    'Music',
-    'Sport',
-    'Food',
-    'Party',
-    'Technology',
-    'Books',
-    'Photography'
-  ];
+  List<PreferencesModel> availableInterests = [];
 
-  final Map<String, IconData> interestIcons = {
-    'Art': Icons.palette,
-    'Music': Icons.music_note,
-    'Sport': Icons.sports_soccer,
-    'Food': Icons.fastfood,
-    'Party': Icons.people,
-    'Technology': Icons.smartphone,
-    'Books': Icons.menu_book,
-    'Photography': Icons.camera_alt,
-  };
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() {
+    // availableInterests = (preferencesResponse() as List<dynamic>)
+    //     .map((data) => PreferencesModel.fromMap(data))
+    //     .toList();
+    availableInterests = [
+      PreferencesModel(id: "", title: "Art"),
+      PreferencesModel(id: "", title: "Music"),
+      PreferencesModel(id: "", title: "Sports"),
+      PreferencesModel(id: "", title: "Party"),
+      PreferencesModel(id: "", title: "Movies"),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +143,7 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                 spacing: 10,
                 children: availableInterests.map((interest) {
                   return ChoiceChip(
-                    label: Text(interest),
+                    label: Text(interest.title.toString()),
                     selected: interests.contains(interest),
                     onSelected: (selected) {
                       setState(() {
@@ -179,9 +184,8 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                         userId, 'phone_number', phoneNumber ?? '');
 
                     // Obtenez l'ID des préférences sélectionnées
-                    final selectedPreferenceIds = interests.map((interest) {
-                      return availableInterests.indexOf(interest).toString();
-                    }).toList();
+                    final selectedPreferenceIds =
+                        interests.map((interest) => interest.id).toList();
 
                     // Appel à la fonction de mise à jour des préférences
                     await PreferencesServices()

@@ -137,7 +137,7 @@ class EventCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              event.title,
+              event.title.toString(),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
@@ -145,7 +145,7 @@ class EventCard extends StatelessWidget {
               children: [
                 Chip(
                   label: Text(
-                    event.eventType.toString(),
+                    event.eventTypeFromDB!.title.toString(),
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -194,7 +194,8 @@ class EventCard extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const QRScannerScreen()),
+                                builder: (context) =>
+                                    QRScannerScreen(event: event)),
                           );
                         }
                       : null,

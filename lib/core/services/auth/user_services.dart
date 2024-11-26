@@ -29,12 +29,20 @@ class UserServices {
     }
   }
 
+  Future<void> updateUserData(String userId, UserModel user) async {
+    try {
+      await supabase.from("users").update(user.toJson()).eq("user_id", userId);
+    } catch (e) {
+      debugPrint("$e");
+    }
+  }
+
   // Récupère les données de l'utilisateur
-  Future<Map<String, dynamic>?> getUserData(String userId) async {
+  Future<UserModel?> getUserData(String userId) async {
     try {
       final response =
           await supabase.from('users').select().eq('user_id', userId).single();
-      return response;
+      return UserModel.fromJson(response);
     } catch (error) {
       debugPrint(
           "Erreur lors de la récupération des données utilisateur: $error");

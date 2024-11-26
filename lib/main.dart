@@ -58,10 +58,12 @@ class AuthWrapper extends StatelessWidget {
 
   Future<bool> _getHasSeenOnboarding() async {
     return await SessionManager().hasSeenOnboarding();
+    // return true;
   }
 
   Future<bool> _getIsUserLoggedIn() async {
     return await SessionManager().getPreference("user_id") != null;
+    // return true;
   }
 
   @override
@@ -82,7 +84,7 @@ class AuthWrapper extends StatelessWidget {
           } else if (hasSeenOnboarding) {
             return const SignInScreen(); // User has seen onboarding, navigate to login
           } else {
-            return const SignInScreen(); // User hasn't seen onboarding, navigate to onboarding
+            return const OnboardingScreen(); // User hasn't seen onboarding, navigate to onboarding
           }
         } else {
           return const Center(child: Text("Erreur lors de la vérification"));

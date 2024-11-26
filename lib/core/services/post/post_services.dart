@@ -1,36 +1,139 @@
+import 'package:events_ticket/data/models/post_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:flutter/material.dart';
 
 class PostServices {
   final supabase = Supabase.instance.client;
 
-  Future<void> createPost(User? user, String post) async {
+  /// Créer un nouveau post
+  Future<void> createPost({
+    required String userId,
+    String? eventId,
+    String? mediaUrl,
+    required String content,
+  }) async {
     try {
-      await supabase.from('posts').insert({
-        'user_id': user!.id,
-        'post': post,
+      final response = await supabase.from('posts').insert({
+        'user_id': userId,
+        'event_id': eventId,
+        'media_url': mediaUrl,
+        'post': content,
+        'created_at': DateTime.now().toIso8601String(),
       });
+
+      if (response.error != null) {
+        debugPrint(
+            "Erreur lors de la création du post : ${response.error!.message}");
+      } else {
+        debugPrint("Post créé avec succès !");
+      }
     } catch (error) {
-      debugPrint(
-          "Erreur lors de l'ajout du post dans la base de données: $error");
+      debugPrint("Erreur lors de la création du post : $error");
     }
   }
 
-  // Ajoute un post à l'utilisateur
-  Future<void> addUserPost(String userId, String postId) async {
+  /// Récupérer un post spécifique avec ses relations
+  Future<PostModel?> getPostById(String postId) async {
     try {
-      final userData = await UserServices().getUserData(userId);
-      if (userData != null) {
-        List<dynamic> currentPosts = userData['posts'];
-        currentPosts.add(postId);
+      final response = await supabase
+          .from('posts')
+          .select('*, user:users(*), event:events(*)')
+          .eq('post_id', postId)
+          .single();
 
-        await supabase
-            .from('users')
-            .update({'posts': currentPosts}).eq('user_id', userId);
+      if (response.isEmpty) {
+        return null;
+      }
+
+      return PostModel.fromJson(response as Map<String, dynamic>);
+    } catch (error) {
+      debugPrint("Erreur lors de la récupération du post : $error");
+      return null;
+    }
+  }
+
+  /// Récupérer tous les posts disponibles
+  Future<List<PostModel>> getAllPosts() async {
+    try {
+      final response = await supabase
+          .from('posts')
+          .select('*, user:users!posts_posted_by_fkey(*), event:events(*)')
+          .order('posted_at', ascending: false);
+
+      if ((response as List).isEmpty) {
+        return [];
+      }
+
+      print("Event: ${response.first['event'] as Map<String, dynamic>}");
+      print("User: ${response.first['user']}");
+      print("Posted by: ${response.first['media_url']}");
+
+      List<PostModel> posts = [];
+      for (var postData in response) {
+        final likes = await getPostLikes(postData['id'] as String);
+        postData['likes'] = likes;
+        final post = PostModel.fromJson(postData);
+        posts.add(post);
+      }
+      return posts;
+    } catch (error) {
+      debugPrint("Erreur lors de la récupération des posts : $error");
+      return [];
+    }
+  }
+
+  // Recuperer les likes d'un post
+  Future<List<String>> getPostLikes(String postId) async {
+    try {
+      final response = await supabase
+          .from('post_likes')
+          .select('user_id')
+          .eq('post_id', postId);
+
+      if (response.isEmpty) {
+        return [];
+      }
+
+      return (response as List)
+          .map((likeData) => likeData['user_id'] as String)
+          .toList();
+    } catch (error) {
+      debugPrint("Erreur lors de la récupération des likes : $error");
+      return [];
+    }
+  }
+
+  /// Mettre à jour un post
+  Future<void> updatePost(String postId, Map<String, dynamic> updates) async {
+    try {
+      final response =
+          await supabase.from('posts').update(updates).eq('post_id', postId);
+
+      if (response.error != null) {
+        debugPrint(
+            "Erreur lors de la mise à jour du post : ${response.error!.message}");
+      } else {
+        debugPrint("Post mis à jour avec succès !");
       }
     } catch (error) {
-      debugPrint("Erreur lors de l'ajout du post à l'utilisateur: $error");
+      debugPrint("Erreur lors de la mise à jour du post : $error");
+    }
+  }
+
+  /// Supprimer un post
+  Future<void> deletePost(String postId) async {
+    try {
+      final response =
+          await supabase.from('posts').delete().eq('post_id', postId);
+
+      if (response.error != null) {
+        debugPrint(
+            "Erreur lors de la suppression du post : ${response.error!.message}");
+      } else {
+        debugPrint("Post supprimé avec succès !");
+      }
+    } catch (error) {
+      debugPrint("Erreur lors de la suppression du post : $error");
     }
   }
 }

@@ -9,6 +9,8 @@ class SessionManager {
   factory SessionManager() => _instance;
   SessionManager._internal();
 
+  final userId = "a1f6d2db-dc23-4429-95b3-1dcd100eb161";
+
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   static final aesKey = List<int>.generate(32, (index) => index);
 

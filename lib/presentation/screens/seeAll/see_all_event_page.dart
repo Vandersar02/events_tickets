@@ -18,12 +18,12 @@ class SeeAllEventsPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(10),
           child: GridView.builder(
             itemCount: events.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 200,
-              childAspectRatio: 0.6,
+              childAspectRatio: 0.65,
               mainAxisSpacing: 10,
               crossAxisSpacing: 5,
             ),
@@ -31,6 +31,7 @@ class SeeAllEventsPage extends StatelessWidget {
               final event = events[index];
               return EventCard(
                 event: event,
+                isFree: title == 'Free Events',
               );
             },
           ),

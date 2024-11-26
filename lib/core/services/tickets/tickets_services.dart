@@ -141,13 +141,16 @@ class TicketsServices {
 
   // Fonction pour obtenir tous les tickets d'un utilisateur
   Future<List<TicketModel>> getUserTickets(String userId,
-      {int limit = 10, int offset = 0}) async {
+      {int limit = 20, int offset = 0}) async {
     try {
       final response = await supabase
           .from('tickets')
-          .select()
+          .select(
+              '*, ticket_type:ticket_type_id(*, event:events!ticket_types_eventId_fkey(*))')
           .eq('user_id', userId)
           .range(offset, offset + limit - 1);
+
+      print(response.first["ticket_type"]);
 
       return response
           .map<TicketModel>((json) => TicketModel.fromJson(json))
@@ -159,10 +162,12 @@ class TicketsServices {
   }
 
   // Fonction pour générer un QR Code pour un ticket
-  Future<String> generateQRCode(String ticketId) async {
+  Future<String> generateQRCode(
+      Map<String, dynamic> dataForEncrypted, String ticketId) async {
     try {
-      String qrCodeData = EncryptionUtils.generateSignedAndEncryptedQrData(
-          ticketId, "secretKey");
+      String qrCodeData =
+          EncryptionUtils.generateSignedAndEncryptedQrDataFromMap(
+              dataForEncrypted, "secretKey");
 
       await supabase
           .from('tickets')

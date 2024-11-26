@@ -17,8 +17,7 @@ Widget ticketEventCard({
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              // TODO: Have to check for img url from event
-              "https://img.freepik.com/free-psd/party-social-media-template_505751-3159.jpg",
+              ticket.ticketTypeId.eventId!.coverImg!,
               height: 80,
               width: 80,
               fit: BoxFit.cover,
@@ -31,7 +30,7 @@ Widget ticketEventCard({
               children: [
                 Text(
                   // TODO: Have to check for the TITLE  event
-                  ticket.ticketTypeId,
+                  ticket.ticketTypeId.eventId!.title.toString(),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -40,13 +39,13 @@ Widget ticketEventCard({
                 const SizedBox(height: 5),
                 Text(
                   // TODO: Have to check for the DATE  event
-                  ticket.orderId,
+                  ticket.ticketTypeId.eventId!.startAt.toString(),
                   style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   // TODO: Have to check for the LOCATION  event
-                  "Delmas 75",
+                  ticket.ticketTypeId.eventId!.address.toString(),
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],

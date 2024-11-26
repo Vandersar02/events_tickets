@@ -1,11 +1,13 @@
 import 'package:events_ticket/core/utils/encryption_utils.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-
-const secretKey = "mySuperSecretKey1234567890123456";
+import 'package:intl/intl.dart';
 
 class QRScannerScreen extends StatefulWidget {
-  const QRScannerScreen({super.key});
+  final EventModel event;
+
+  const QRScannerScreen({super.key, required this.event});
 
   @override
   QRScannerScreenState createState() => QRScannerScreenState();
@@ -13,20 +15,22 @@ class QRScannerScreen extends StatefulWidget {
 
 class QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController controller = MobileScannerController();
-  String? qrCodeData;
+  Map<String, dynamic>? qrCodeData;
   bool isValid = false;
   bool isScanning = true;
-  int scanCount = 0; // Nombre total de scans
-  final List<String> scanHistory = []; // Historique des scans
+  int scanCount = 0;
+  final List<Map<String, String>> scanHistory = []; // Historique structuré
 
   @override
   void initState() {
     super.initState();
+    String secretKey = widget.event.id!.substring(0, 32);
     controller.start();
+
     controller.barcodes.listen((barcodeCapture) {
       if (isScanning) {
         final barcode = barcodeCapture.barcodes.first;
-        final decryptedData = EncryptionUtils.decryptAndVerifyQrDataReal(
+        final decryptedData = EncryptionUtils.decryptAndVerifyQrDataToMap(
           barcode.rawValue,
           secretKey,
         );
@@ -36,13 +40,14 @@ class QRScannerScreenState extends State<QRScannerScreen> {
           isValid = qrCodeData != null;
           isScanning = false;
 
-          // Mise à jour des statistiques
           if (isValid) {
             scanCount++;
-            scanHistory.insert(
-                0, qrCodeData!); // Ajouter au début de l'historique
-            if (scanHistory.length > 5) {
-              scanHistory.removeLast(); // Limiter à 5 scans
+            scanHistory.insert(0, {
+              "data": qrCodeData.toString(),
+              "time": DateFormat('HH:mm:ss').format(DateTime.now()),
+            });
+            if (scanHistory.length > 10) {
+              scanHistory.removeLast();
             }
           }
         });
@@ -73,7 +78,6 @@ class QRScannerScreenState extends State<QRScannerScreen> {
       ),
       body: Column(
         children: [
-          // Section scanner
           Expanded(
             flex: 4,
             child: Stack(
@@ -99,8 +103,6 @@ class QRScannerScreenState extends State<QRScannerScreen> {
               ],
             ),
           ),
-
-          // Section informations et actions
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -116,21 +118,27 @@ class QRScannerScreenState extends State<QRScannerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Informations sur le QR code
-                if (qrCodeData != null)
-                  Text(
-                    isValid
-                        ? 'QR Code valide : $qrCodeData'
-                        : "Le QR Code est invalide ou altéré.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isValid ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
+                if (qrCodeData != null) ...[
+                  const Text(
+                    "Informations extraites du QR Code :",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                const SizedBox(height: 16),
-
-                // Statistiques
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    initialValue: qrCodeData!["name"] ?? "",
+                    decoration: const InputDecoration(labelText: "Nom"),
+                  ),
+                  TextFormField(
+                    initialValue: qrCodeData!["class"] ?? "",
+                    decoration:
+                        const InputDecoration(labelText: "Type de Ticket"),
+                  ),
+                  TextFormField(
+                    initialValue: qrCodeData!["event"] ?? widget.event.title,
+                    decoration: const InputDecoration(labelText: "Événement"),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -150,30 +158,26 @@ class QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // Historique des scans
                 if (scanHistory.isNotEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "Historique des derniers scans :",
+                        "Historique des scans :",
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      ...scanHistory.map((scan) => Text(
-                            "- $scan",
-                            style: const TextStyle(fontSize: 14),
-                          )),
+                      ...scanHistory.map(
+                        (scan) => Text(
+                          "- ${scan["time"]}: ${scan["data"]}",
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
                     ],
                   ),
-
                 const SizedBox(height: 24),
-
-                // Actions (Check-in, Check-out, Rescan)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
