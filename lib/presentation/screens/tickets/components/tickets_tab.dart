@@ -23,10 +23,13 @@ class TicketsTab extends StatelessWidget {
           ticket: ticket,
           buttonText: "View E-Ticket",
           onPressed: () {
+            print(ticket);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const TicketQRCodePage(),
+                builder: (context) => TicketQRCodePage(
+                  ticket: ticket,
+                ),
               ),
             );
           },

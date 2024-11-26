@@ -4,7 +4,7 @@ import 'package:events_ticket/presentation/screens/auth/sign_up_screen.dart';
 import 'package:events_ticket/presentation/screens/auth/user_information.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:events_ticket/presentation/screens/qr_code/ticket_qr_code_page.dart';
+// import 'package:events_ticket/presentation/screens/qr_code/ticket_qr_code_page.dart';
 import 'package:flutter/material.dart';
 
 // Classe contenant les routes de l'application
@@ -51,10 +51,10 @@ class AppRoutes {
         return MaterialPageRoute(
             builder: (_) =>
                 const UserInformationScreen()); // Route pour l'écran de l'information de l'utilisateur
-      case ticket:
-        return MaterialPageRoute(
-            builder: (_) =>
-                const TicketQRCodePage()); // Route pour l'écran du ticket
+      // case ticket:
+      //   return MaterialPageRoute(
+      //       builder: (_) =>
+      //           const TicketQRCodePage()); // Route pour l'écran du ticket
       case forgetPassword:
         return MaterialPageRoute(
           builder: (_) => ForgotPasswordScreen(),

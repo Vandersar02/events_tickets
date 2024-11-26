@@ -17,6 +17,27 @@ const String checkPaymentUrl =
 final String clientId = dotenv.env['MONCASH_CLIENT_ID']!;
 final String clientSecret = dotenv.env['MONCASH_CLIENT_SECRET']!;
 
+// let's try smt else
+Future<void> letsTry() async {
+  var request = http.MultipartRequest(
+      'POST',
+      Uri.parse(
+          'https://sandbox.moncashbutton.digicelgroup.com/MerChantApi/oauth/token'));
+  request.fields
+      .addAll({'scope': 'read,write', 'grant_type': 'client_credentials'});
+
+  http.StreamedResponse response = await request.send();
+  print(response.statusCode);
+  print(response.reasonPhrase);
+  print(response);
+
+  if (response.statusCode == 200) {
+    print(await response.stream.bytesToString());
+  } else {
+    print(response.reasonPhrase);
+  }
+}
+
 // Function to get access token
 Future<String?> getAccessToken() async {
   try {
@@ -64,6 +85,7 @@ Future<void> initiatePayment(
     'Authorization': 'Bearer $accessToken',
     'Content-Type': 'application/json'
   };
+  print("Headers: $headers");
 
   var body = jsonEncode(
       {"reference": reference, "account": account, "amount": amount});
@@ -74,8 +96,10 @@ Future<void> initiatePayment(
     body: body,
   );
 
+  print("Response status code: ${response.statusCode}");
+  print("Response body: ${response.body}");
+
   if (response.statusCode == 201) {
-    // Initiate Payment usually returns 201
     var data = jsonDecode(response.body);
     print("Paiement initié avec succès : $data");
   } else {

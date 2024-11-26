@@ -3,63 +3,69 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'dart:convert';
 
 class EncryptionUtils {
-// Function to decrypt and verify the signed data
-  static String? decryptAndVerifyQrDataReal(
+  // Fonction pour générer des données signées et chiffrées à partir d'un dictionnaire
+  static String generateSignedAndEncryptedQrDataFromMap(
+      Map<String, dynamic> data, String secretKey) {
+    // Convertir le dictionnaire en JSON
+    String jsonData = jsonEncode(data);
+
+    // Générer une signature en utilisant SHA-256
+    var bytes = utf8.encode(jsonData + secretKey);
+    var signature = sha256.convert(bytes).toString();
+
+    // Chiffrer les données avec AES
+    final key = encrypt.Key.fromUtf8(secretKey);
+    final iv = encrypt.IV.fromSecureRandom(16); // Génère un IV aléatoire
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    // Combiner les données JSON avec la signature
+    final combinedData = "$jsonData|signature=$signature";
+    final encrypted = encrypter.encrypt(combinedData, iv: iv);
+
+    // Retourner la combinaison de l'IV et des données chiffrées
+    return iv.base64 + encrypted.base64;
+  }
+
+  // Fonction pour déchiffrer et vérifier les données chiffrées en tant que dictionnaire
+  static Map<String, dynamic>? decryptAndVerifyQrDataToMap(
       String? encryptedData, String secretKey) {
     try {
-      // Step 1: Extract IV and encrypted data
-      final ivData = encryptedData!
-          .substring(0, 24); // Assume que l'IV fait 16 octets encodés en base64
-      final encryptedDataWithoutIv =
-          encryptedData.substring(24); // Le reste est le message chiffré
+      if (encryptedData == null || encryptedData.length < 24) {
+        throw Exception("Invalid encrypted data format");
+      }
+
+      // Extraire l'IV et les données chiffrées
+      final ivData = encryptedData.substring(0, 24);
+      final encryptedDataWithoutIv = encryptedData.substring(24);
 
       final iv = encrypt.IV.fromBase64(ivData);
       final key = encrypt.Key.fromUtf8(secretKey);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
-      // Step 2: Decrypt the data
+      // Déchiffrer les données
       final decrypted = encrypter.decrypt64(encryptedDataWithoutIv, iv: iv);
 
-      // Step 3: Separate ticketData and signature
+      // Séparer les données et la signature
       final parts = decrypted.split("|signature=");
       if (parts.length != 2) {
-        return null; // Invalid data format
+        throw Exception("Invalid data format");
       }
-      final ticketData = parts[0];
+      final jsonData = parts[0];
       final providedSignature = parts[1];
 
-      // Step 4: Recalculate and verify the signature
-      var bytes =
-          utf8.encode(ticketData + secretKey); // Combine data and secret key
-      var recalculatedSignature =
-          sha256.convert(bytes).toString(); // Generate SHA-256 hash
+      // Vérifier la signature
+      var bytes = utf8.encode(jsonData + secretKey);
+      var recalculatedSignature = sha256.convert(bytes).toString();
 
-      if (providedSignature == recalculatedSignature) {
-        return ticketData; // Data is valid
-      } else {
-        return null; // Signature mismatch, data might be corrupted or tampered with
+      if (providedSignature != recalculatedSignature) {
+        throw Exception("Signature mismatch");
       }
+
+      // Convertir les données JSON en dictionnaire
+      return jsonDecode(jsonData);
     } catch (e) {
       print("Decryption or verification failed: $e");
       return null;
     }
-  }
-
-  static String generateSignedAndEncryptedQrData(
-      String ticketData, String secretKey) {
-    // Step 1: Create a signature using SHA-256
-    var bytes = utf8.encode(ticketData + secretKey);
-    var signature = sha256.convert(bytes).toString(); // Generate SHA-256 hash
-
-    // Step 2: Encrypt the data with AES
-    final key = encrypt.Key.fromUtf8(secretKey);
-    final iv = encrypt.IV.fromSecureRandom(16); // Génère un IV aléatoire
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-    // Combine ticketData with the signature
-    final combinedData = "$ticketData|signature=$signature";
-    final encrypted = encrypter.encrypt(combinedData, iv: iv);
-
-    return iv.base64 + encrypted.base64; // Return IV + encrypted data
   }
 }

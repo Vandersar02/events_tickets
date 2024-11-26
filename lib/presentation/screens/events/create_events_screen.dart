@@ -1,5 +1,11 @@
 import 'dart:io';
-
+import 'package:events_ticket/core/services/auth/users_manager.dart';
+import 'package:events_ticket/core/services/events/events_services.dart';
+import 'package:events_ticket/core/services/preferences/preferences_services.dart';
+import 'package:events_ticket/data/models/event_model.dart';
+import 'package:events_ticket/data/models/preference_model.dart';
+import 'package:events_ticket/data/models/ticket_types_model.dart';
+import 'package:events_ticket/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -14,18 +20,104 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   // Controllers for each field
   final TextEditingController titleController = TextEditingController();
   final TextEditingController eventTypeController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
+  // final TextEditingController locationController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController aboutController = TextEditingController();
   final TextEditingController vipPriceController = TextEditingController();
   final TextEditingController economyPriceController = TextEditingController();
 
+  // Organizer
+  final userId = SessionManager().userId;
+
   DateTime? startDate;
   DateTime? endDate;
   DateTime? ticketDeadline;
 
+  // Ticket list
+  final List<Map<String, dynamic>> tickets = [];
+
+  // Method to add a ticket
+  void _addTicket() {
+    setState(() {
+      tickets.add({
+        'type': '',
+        'price': 0.0,
+        'nAvailable': 0,
+        'currency': 'USD', // Default currency
+      });
+    });
+  }
+
+  // Method to remove a ticket
+  void _removeTicket(int index) {
+    setState(() {
+      tickets.removeAt(index);
+    });
+  }
+
+  // Placeholder method for saving to database
+  Future<void> _saveEventToDatabase() async {
+    try {
+      // Validate ticket entries
+      if (tickets.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one ticket!')),
+        );
+        return;
+      }
+
+      // Convert tickets to TicketType objects
+      final ticketTypes = tickets.map((ticket) {
+        return TicketTypesModel(
+          id: '', // Generated later
+          eventId: EventModel(
+              title: "",
+              startAt: DateTime.now(),
+              endAt: DateTime.now()), // Generated later
+          type: ticket['type'],
+          price: ticket['price'],
+          nAvailable: ticket['nAvailable'],
+          nSold: 0, // Default value
+          currency: ticket['currency'],
+        );
+      }).toList();
+
+      // Get event type ID
+      final preferenceId = await PreferencesServices()
+          .getPreferenceByTitle(eventTypeController.text);
+      final id = preferenceId!.id;
+
+      // Create the event object
+      final EventModel eventData = EventModel(
+        eventTypeFromDB: PreferencesModel(id: id),
+        coverImg: _selectedImage?.path,
+        address: addressController.text,
+        about: aboutController.text,
+        organizerIdFromDB: UserModel(userId: userId),
+        isAvailable: true,
+        title: titleController.text,
+        deadline: ticketDeadline,
+        startAt: startDate!,
+        endAt: endDate!,
+        ticketTypes: ticketTypes,
+      );
+
+      // Save the event
+      await EventsServices().createEvent(eventData);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event created successfully!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create event: $e')),
+      );
+    }
+  }
+
   // Dropdown Options
-  final List<String> payoutMethods = ["Bank Transfer", "Mobile Payment"];
+  final List<String> payoutMethods = ["virtual", "cash", "card"];
   String? selectedPayoutMethod;
 
   // Image picker variables
@@ -40,39 +132,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
-    }
-  }
-
-  // Placeholder method for saving to database
-  Future<void> _saveEventToDatabase() async {
-    // // Build an event object from the form fields
-    // final Map<String, dynamic> eventData = {
-    //   'title': titleController.text,
-    //   'event_type': eventTypeController.text,
-    //   'address': addressController.text,
-    //   'about': aboutController.text,
-    //   'start_at': startDate?.toIso8601String(),
-    //   'end_at': endDate?.toIso8601String(),
-    //   'deadline': ticketDeadline?.toIso8601String(),
-    //   'vip_price': double.tryParse(vipPriceController.text),
-    //   'economy_price': double.tryParse(economyPriceController.text),
-    //   'payout_method': selectedPayoutMethod,
-    //   'is_available': true,
-    //   'organizer_id': "12345", // Replace with actual user/organizer ID
-    //   'cover_img': _selectedImage?.path, // Add image path
-    // };
-
-    // Call save event function from database service
-    try {
-      // await saveEventToSupabase(eventData);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Event created successfully!')),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create event: $e')),
-      );
     }
   }
 
@@ -170,20 +229,33 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
 
-            _buildTextField(controller: titleController, label: "Event Name"),
-            _buildTextField(
+            _buildTextFields(controller: titleController, label: "Event Name"),
+            _buildTextFields(
                 controller: eventTypeController, label: "Event Type"),
-            _buildTextField(
-              controller: locationController,
-              label: "Add Location",
-              hintText: "e.g., City, Venue",
-            ),
-            _buildTextField(
+            // _buildTextFields(
+            //   controller: locationController,
+            //   label: "Add Location",
+            //   hintText: "e.g., City, Venue",
+            // ),
+            _buildTextFields(
               controller: addressController,
               label: "Add Location Details",
               hintText: "e.g., Full Address",
             ),
 
+            const SizedBox(height: 12),
+            _buildTextFields(
+              controller: aboutController,
+              label: "About Event",
+              isMultiLine: true,
+            ),
+            _buildDropdownField(
+              label: "Payout Method",
+              value: selectedPayoutMethod,
+              items: payoutMethods,
+              onChanged: (value) =>
+                  setState(() => selectedPayoutMethod = value),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -205,30 +277,27 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildTextField(
-              controller: aboutController,
-              label: "About Event",
-              isMultiLine: true,
-            ),
 
-            // Tickets and Payment Section
-            const Text('Tickets and Payment',
+            const Text('Tickets',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            _buildTextField(
-                controller: vipPriceController,
-                label: "Ticket Price for VIP",
-                inputType: TextInputType.number),
-            _buildTextField(
-                controller: economyPriceController,
-                label: "Ticket Price for Economy",
-                inputType: TextInputType.number),
-            _buildDropdownField(
-              label: "Payout Method",
-              value: selectedPayoutMethod,
-              items: payoutMethods,
-              onChanged: (value) =>
-                  setState(() => selectedPayoutMethod = value),
+
+            // List of tickets
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tickets.length,
+              itemBuilder: (context, index) {
+                final ticket = tickets[index];
+                return _buildTicketFields(ticket, index);
+              },
+            ),
+
+            // Add ticket button
+            TextButton.icon(
+              onPressed: _addTicket,
+              icon: const Icon(Icons.add),
+              label: const Text("Add Ticket"),
             ),
 
             const SizedBox(height: 24),
@@ -253,7 +322,74 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
+  Widget _buildTicketFields(Map<String, dynamic> ticket, int index) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextField(
+              label: "Ticket Type",
+              hintText: "e.g., VIP, Economy",
+              onChanged: (value) => ticket['type'] = value,
+            ),
+            _buildTextField(
+              label: "Price",
+              hintText: "e.g., 50.0",
+              inputType: TextInputType.number,
+              onChanged: (value) =>
+                  ticket['price'] = double.tryParse(value) ?? 0.0,
+            ),
+            _buildTextField(
+              label: "Number Available",
+              hintText: "e.g., 100",
+              inputType: TextInputType.number,
+              onChanged: (value) =>
+                  ticket['nAvailable'] = int.tryParse(value) ?? 0,
+            ),
+            _buildTextField(
+              label: "Currency",
+              hintText: "e.g., USD",
+              onChanged: (value) => ticket['currency'] = value,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _removeTicket(index),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTextField({
+    required String label,
+    String? hintText,
+    TextInputType inputType = TextInputType.text,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        keyboardType: inputType,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextFields({
     required TextEditingController controller,
     required String label,
     String? hintText,
@@ -315,4 +451,30 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           Text(date != null ? "${date.day}/${date.month}/${date.year}" : label),
     );
   }
+}
+
+void _showPaymentDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Paiement"),
+      content: const Text(
+        "Votre event a été créé avec succès !",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // Close the dialog
+          },
+          child: const Text("Annuler"),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text("Confirmer"),
+        ),
+      ],
+    ),
+  );
 }

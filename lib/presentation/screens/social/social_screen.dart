@@ -1,4 +1,8 @@
+import 'package:events_ticket/core/services/auth/users_manager.dart';
+import 'package:events_ticket/core/services/post/post_services.dart';
+import 'package:events_ticket/data/models/post_model.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SocialScreen extends StatelessWidget {
   const SocialScreen({super.key});
@@ -25,40 +29,104 @@ class SocialScreen extends StatelessWidget {
   }
 }
 
-// Nouveau widget séparé pour la liste des posts
+final supabase = Supabase.instance.client;
+final userId = SessionManager().userId;
+
 class SocialPostList extends StatelessWidget {
   const SocialPostList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 10, // Exemple : 10 éléments
-      itemBuilder: (context, index) {
-        return buildPostCard(
-          userName: index % 2 == 0 ? "Thanh Pham" : "Bruno From Happy New Year",
-          timeAgo: index % 2 == 0 ? "2 hours ago" : "1 day ago",
-          profilePictureUrl: index % 2 == 0
-              ? "https://img.freepik.com/free-vector/professional-tiktok-profile-picture_742173-5866.jpg"
-              : "https://img.freepik.com/free-photo/front-view-man-party-suit-bow-tie_23-2148331839.jpg",
-          imageUrl: index % 2 == 0
-              ? "https://img.freepik.com/free-psd/party-social-media-template_505751-3159.jpg"
-              : "https://img.freepik.com/free-photo/front-view-man-party-suit-bow-tie_23-2148331839.jpg",
-          likes: 125,
-          comments: 20,
-        );
+    return FutureBuilder<List<PostModel>>(
+      future: PostServices().getAllPosts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(
+              child: Text("Erreur lors du chargement des posts"));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("Aucun post disponible"));
+        } else {
+          final posts = snapshot.data!;
+          return ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
+              return PostCard(
+                userName: post.user?.name ?? "Utilisateur inconnu",
+                timeAgo:
+                    "${post.createdAt?.difference(DateTime.now()).inHours.abs()} heures",
+                profilePictureUrl: post.user?.profilePictureUrl ??
+                    "https://via.placeholder.com/150",
+                imageUrl: post.mediaUrl ?? "",
+                event: post.event?.title ?? "",
+                likes: post.likes,
+                comments: 0,
+                postedBy: post.user!.name!,
+                currentUserId: userId,
+              );
+            },
+          );
+        }
       },
     );
   }
+}
 
-  // Ajout de la méthode buildPostCard ici
-  Widget buildPostCard({
-    required String userName,
-    required String timeAgo,
-    required String imageUrl,
-    required String profilePictureUrl,
-    required int likes,
-    required int comments,
-  }) {
+class PostCard extends StatefulWidget {
+  final String userName;
+  final String timeAgo;
+  final String imageUrl;
+  final String profilePictureUrl;
+  final String event;
+  final List<String> likes; // Liste des IDs des utilisateurs qui ont aimé
+  final int comments;
+  final String postedBy;
+  final String currentUserId; // L'ID de l'utilisateur actuel
+
+  const PostCard({
+    super.key,
+    required this.userName,
+    required this.timeAgo,
+    required this.imageUrl,
+    required this.profilePictureUrl,
+    required this.event,
+    required this.likes,
+    required this.comments,
+    required this.postedBy,
+    required this.currentUserId,
+  });
+
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  late bool isLiked;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialiser l'état selon la présence de l'utilisateur actuel dans la liste des likes
+    isLiked = widget.likes.contains(widget.currentUserId);
+  }
+
+  void toggleLike() {
+    setState(() {
+      if (isLiked) {
+        widget.likes.remove(widget.currentUserId);
+      } else {
+        widget.likes.add(widget.currentUserId);
+      }
+      isLiked = !isLiked;
+    });
+
+    // TODO : Ajouter une requête pour mettre à jour les likes dans la base de données.
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -68,16 +136,36 @@ class SocialPostList extends StatelessWidget {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: NetworkImage(profilePictureUrl),
+              backgroundImage: NetworkImage(widget.profilePictureUrl),
               radius: 24,
             ),
-            title: Text(userName,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(timeAgo),
+            title: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "${widget.postedBy.split(" ")[0]} ",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  const TextSpan(
+                    text: "FROM ", // 'FROM' en majuscules et en gras
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextSpan(
+                    text: widget.event,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            subtitle: Text(widget.timeAgo),
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(imageUrl,
+            child: Image.network(widget.imageUrl,
                 height: 200, width: double.infinity, fit: BoxFit.cover),
           ),
           Padding(
@@ -88,22 +176,25 @@ class SocialPostList extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () {},
+                      icon: Icon(
+                        isLiked
+                            ? Icons.favorite
+                            : Icons.favorite_border, // Changer l'icône
+                        color: isLiked
+                            ? Colors.red
+                            : Colors.grey, // Changer la couleur
+                      ),
+                      onPressed: toggleLike, // Gérer l'événement
                     ),
                     const SizedBox(width: 8),
-                    Text(comments.toString(),
+                    Text(widget.likes.length.toString(),
                         style: const TextStyle(fontSize: 14)),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 20),
                     const Icon(Icons.comment),
                     const SizedBox(width: 8),
-                    Text(likes.toString(),
+                    Text(widget.comments.toString(),
                         style: const TextStyle(fontSize: 14)),
                   ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {},
                 ),
               ],
             ),
@@ -113,30 +204,3 @@ class SocialPostList extends StatelessWidget {
     );
   }
 }
-
-
-// FutureBuilder<List<Post>>(
-//   future: fetchPosts("popular"), // Replace "popular" with the selected tab's category
-//   builder: (context, snapshot) {
-//     if (snapshot.connectionState == ConnectionState.waiting) {
-//       return const Center(child: CircularProgressIndicator());
-//     } else if (snapshot.hasError) {
-//       return const Center(child: Text("Failed to load posts"));
-//     } else {
-//       final posts = snapshot.data!;
-//       return ListView.builder(
-//         itemCount: posts.length,
-//         itemBuilder: (context, index) {
-//           final post = posts[index];
-//           return buildPostCard(
-//             userName: post.userName,
-//             timeAgo: post.timeAgo,
-//             imageUrl: post.imageUrl,
-//             likes: post.likes,
-//             comments: post.comments,
-//           );
-//         },
-//       );
-//     }
-//   },
-// );

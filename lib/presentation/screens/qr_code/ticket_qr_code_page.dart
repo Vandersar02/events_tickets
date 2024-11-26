@@ -1,23 +1,36 @@
 import 'package:events_ticket/core/utils/encryption_utils.dart';
+import 'package:events_ticket/data/models/ticket_model.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'dart:io';
-
-// Secret Key for encryption (should be kept secret) 32 characters for AES-256
-const secretKey = "mySuperSecretKey1234567890123456";
 
 class TicketQRCodePage extends StatelessWidget {
-  const TicketQRCodePage({super.key});
+  final TicketModel ticket;
+  const TicketQRCodePage({super.key, required this.ticket});
 
   @override
   Widget build(BuildContext context) {
-    // Example ticket data
-    String qrCodeData = "event_id=12345|user_id=67890|ticket_type_id=abcd";
+    String eventIdForKey = ticket.ticketTypeId.eventId!.id.toString();
+
+    // Secret Key for encryption (should be kept secret) 32 characters for AES-256
+    String secretKey = eventIdForKey.substring(0, 32);
+    print("The key: $secretKey");
+
+    // Example ticket data (should be replaced with the actual ticket data)
+    Map<String, dynamic> qrCodeData = {
+      "event_id": ticket.ticketTypeId.eventId!.id,
+      "user_id": ticket.userId,
+      "ticket_type_id": ticket.ticketTypeId.id,
+      "order_id": ticket.orderId,
+      "state": ticket.state,
+      "payment_method": ticket.paymentMethod,
+    };
+    // String qrCodeData = "event_id=12345|user_id=67890|ticket_type_id=abcd";
 
     // Generate the secure QR data
     String secureQrData =
-        EncryptionUtils.generateSignedAndEncryptedQrData(qrCodeData, secretKey);
+        EncryptionUtils.generateSignedAndEncryptedQrDataFromMap(
+            qrCodeData, secretKey);
 
     // Function to pick image or video
     Future<void> pickMedia(BuildContext context) async {

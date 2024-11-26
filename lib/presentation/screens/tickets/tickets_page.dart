@@ -1,4 +1,7 @@
+import 'package:events_ticket/core/services/tickets/tickets_services.dart';
+import 'package:events_ticket/data/models/event_model.dart';
 import 'package:events_ticket/data/models/ticket_model.dart';
+// import 'package:events_ticket/data/models/ticket_types_model.dart';
 import 'package:events_ticket/presentation/screens/tickets/components/tickets_tab.dart';
 import 'package:flutter/material.dart';
 
@@ -11,32 +14,21 @@ class TicketsPage extends StatefulWidget {
 
 class _TicketsPageState extends State<TicketsPage> {
   // Exemple de liste de tickets dynamique
-  final List<TicketModel> tickets = [
-    TicketModel(
-      id: "3129bdkjpw8sboiusn8nnklsoi2ps74",
-      ticketTypeId: "Pol Party",
-      orderId: "Sun 11/24/2024",
-      state: "pending",
-      paymentMethod: "Virtual",
-      createdAt: DateTime.now(),
-    ),
-    TicketModel(
-      id: "3129bdkjpw8sboiusn8nnklsoi2ps74",
-      ticketTypeId: "Pol Party",
-      orderId: "Pol Party",
-      state: "completed",
-      paymentMethod: "Virtual",
-      createdAt: DateTime.now(),
-    ),
-    TicketModel(
-      id: "3129bdkjpw8sboiusn8nnklsoi2ps74",
-      ticketTypeId: "Pol Party",
-      orderId: "Pol Party",
-      state: "cancelled",
-      paymentMethod: "Virtual",
-      createdAt: DateTime.now(),
-    ),
-  ];
+  final List<TicketModel> tickets = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTickets();
+  }
+
+  void fetchTickets() async {
+    final response = await TicketsServices().getUserTickets(userId);
+    setState(() {
+      tickets.clear();
+      tickets.addAll(response);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

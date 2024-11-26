@@ -1,4 +1,7 @@
+import 'package:events_ticket/core/services/auth/user_services.dart';
+import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/data/models/event_model.dart';
+import 'package:events_ticket/data/models/user_model.dart';
 import 'package:events_ticket/presentation/screens/about/about_us.dart';
 import 'package:events_ticket/presentation/screens/contact/contact_us.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
@@ -18,6 +21,21 @@ class SideBar extends StatefulWidget {
 }
 
 final supabase = Supabase.instance.client;
+final userId = SessionManager().userId;
+
+final List<String> sidebarMenus = [
+  "Home",
+  "Organizer",
+  "Settings",
+];
+
+final List<String> sidebarMenus2 = [
+  "Contact Us",
+  "About Us",
+];
+
+late List<EventModel> organizerEvents = [];
+UserModel? userInfo;
 
 class _SideBarState extends State<SideBar> {
   String selectedSideMenu = sidebarMenus.first;
@@ -26,18 +44,21 @@ class _SideBarState extends State<SideBar> {
   final Map<String, WidgetBuilder> _menuPages = {
     "Home": (context) => const EntryPoint(),
     "Organizer": (context) => EventManagementPage(
-          events: events,
+          events: organizerEvents,
         ),
     "Settings": (context) => const SettingsPage(),
     "Contact Us": (context) => const ContactUsPage(),
     "About Us": (context) => const AboutUsPage(),
   };
 
-  void _navigateTo(String menu) {
+  Future<void> _navigateTo(String menu) async {
     final pageBuilder = _menuPages[menu];
     if (pageBuilder != null) {
-      Navigator.push(
-        context,
+      if (menu == "Organizer") {
+        organizerEvents = await fetchOrganizerEvents(userId);
+      }
+
+      Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               pageBuilder(context),
@@ -56,6 +77,16 @@ class _SideBarState extends State<SideBar> {
         ),
       );
     }
+  }
+
+  Future<void> fetchUser() async {
+    userInfo = await UserServices().getUserData(userId);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUser();
   }
 
   @override
@@ -81,15 +112,14 @@ class _SideBarState extends State<SideBar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InfoCard(
-                name: supabase.auth.currentUser?.userMetadata!['name'] ??
-                    "John Doe",
-                bio: supabase.auth.currentUser?.userMetadata!['bio'] ??
-                    "Simple User",
+                user: userInfo!,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ProfilePage(),
+                      builder: (context) => ProfilePage(
+                        user: userInfo!,
+                      ),
                     ),
                   );
                 },
@@ -139,16 +169,3 @@ class _SideBarState extends State<SideBar> {
     );
   }
 }
-
-final List<String> sidebarMenus = [
-  "Home",
-  "Organizer",
-  "Settings",
-];
-
-final List<String> sidebarMenus2 = [
-  "Contact Us",
-  "About Us",
-];
-
-final List<EventModel> events = [];

@@ -1,7 +1,7 @@
+import 'package:events_ticket/data/models/event_model.dart';
+import 'package:events_ticket/presentation/screens/home/components/validate_booking_event.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:events_ticket/core/services/payment/mon_cash_services.dart';
-import 'package:events_ticket/data/models/event_model.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final EventModel? event;
@@ -18,7 +18,6 @@ class EventDetailsPage extends StatelessWidget {
         DateFormat('EEE, MMM d, yyyy h:mm a').format(event!.startAt);
     final endDateFormatted =
         DateFormat('EEE, MMM d, yyyy h:mm a').format(event!.endAt);
-    // final createdAtFormatted = DateFormat('EEE, MMM d, yyyy').format(event.createdAt);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +32,7 @@ class EventDetailsPage extends StatelessWidget {
             // Event Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
+              child: Image.network(
                 event!.coverImg ?? "https://via.placeholder.com/150",
                 height: 200,
                 width: double.infinity,
@@ -44,7 +43,7 @@ class EventDetailsPage extends StatelessWidget {
 
             // Event Title
             Text(
-              event!.title,
+              event!.title.toString(),
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -52,9 +51,9 @@ class EventDetailsPage extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Event Type (Category) Chip
-            if (event!.eventType != null)
+            if (event!.eventTypeFromDB != null)
               Chip(
-                label: Text(event!.eventType!),
+                label: Text(event!.eventTypeFromDB!.title.toString()),
                 backgroundColor: Colors.deepPurple[50],
                 labelStyle: TextStyle(color: Colors.deepPurple[700]),
               ),
@@ -104,55 +103,30 @@ class EventDetailsPage extends StatelessWidget {
               style: TextStyle(color: Colors.grey[700]),
             ),
             const SizedBox(height: 16),
-
-            // Event Availability
-            Text(
-              event!.isAvailable
-                  ? "This event is currently available for registration."
-                  : "This event is no longer available.",
-              style: TextStyle(
-                color: event!.isAvailable ? Colors.green : Colors.redAccent,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Organizer Info
             Row(
               children: [
                 const Icon(Icons.person, color: Colors.deepPurple),
                 const SizedBox(width: 8),
                 Text(
-                  "Organized by: ${event!.organizerId}",
+                  "Organized by: ${event!.organizerIdFromDB!.name}",
                   style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 60),
 
             // Ticket Purchase Button
             Center(
               child: ElevatedButton(
-                onPressed: event!.isAvailable
-                    ? () async {
-                        // Payment Logic with MonCash
-                        final accessToken = await getAccessToken();
-                        if (accessToken != null) {
-                          // Assume ticket price is dynamic or fixed, for now $100
-                          await initiatePayment(
-                              "336216631", "50936973307", 100.0);
-                          await confirmPayment(
-                              "336216631", "50936973307", 100.0);
-                          await checkPaymentStatus(reference: "336216631");
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Failed to retrieve access token'),
-                            ),
-                          );
-                        }
-                      }
-                    : null, // Disable button if not available
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ValidateBookingEventScreen(
+                      event: event,
+                    ),
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       event!.isAvailable ? Colors.deepPurple : Colors.grey,
@@ -163,7 +137,7 @@ class EventDetailsPage extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  event!.isAvailable ? "Register Now" : "Unavailable",
+                  event!.isAvailable ? "Book Now" : "Unavailable",
                   style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),

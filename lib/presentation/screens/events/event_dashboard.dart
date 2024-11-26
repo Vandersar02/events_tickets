@@ -13,7 +13,7 @@ class EventDashboardPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(event.title),
+        title: Text(event.title.toString()),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -32,7 +32,7 @@ class EventDashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              event.title,
+              event.title.toString(),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
@@ -54,7 +54,7 @@ class EventDashboardPage extends StatelessWidget {
 
             // Category and Event Summary
             Text(
-              'Category: ${event.eventType}',
+              'Category: ${event.eventTypeFromDB!.title}',
               style: const TextStyle(fontSize: 16, color: Colors.black87),
             ),
             const SizedBox(height: 10),

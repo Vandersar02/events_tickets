@@ -22,6 +22,11 @@ void main() async {
     url: "",
     anonKey: "",
   );
+  await Supabase.initialize(
+    url: "https://lwmdduywrqgmpenrouox.supabase.co",
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bWRkdXl3cnFnbXBlbnJvdW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4NzM0ODAsImV4cCI6MjA0NzQ0OTQ4MH0.JO-8P-0qlXX4FPRHvu7N5jfkIew2imxo5lyyopTFNBA",
+  );
 
   FlutterNativeSplash.remove();
 
@@ -58,10 +63,12 @@ class AuthWrapper extends StatelessWidget {
 
   Future<bool> _getHasSeenOnboarding() async {
     return await SessionManager().hasSeenOnboarding();
+    // return true;
   }
 
   Future<bool> _getIsUserLoggedIn() async {
     return await SessionManager().getPreference("user_id") != null;
+    // return true;
   }
 
   @override
@@ -82,7 +89,7 @@ class AuthWrapper extends StatelessWidget {
           } else if (hasSeenOnboarding) {
             return const SignInScreen(); // User has seen onboarding, navigate to login
           } else {
-            return const SignInScreen(); // User hasn't seen onboarding, navigate to onboarding
+            return const OnboardingScreen(); // User hasn't seen onboarding, navigate to onboarding
           }
         } else {
           return const Center(child: Text("Erreur lors de la vérification"));

@@ -73,14 +73,17 @@ class PreferencesServices {
     }
   }
 
-  // Fetch all preferences
+// Fetch all preferences
   Future<List<PreferencesModel>> getAllPreferences() async {
     try {
       final response =
           await supabase.from('preferences').select('id, title, icon');
+
+      // Vérifiez si la réponse contient des données
       if (response.isNotEmpty) {
         return (response as List<dynamic>)
-            .map((data) => PreferencesModel.fromMap(data))
+            .map((data) =>
+                PreferencesModel.fromMap(data as Map<String, dynamic>))
             .toList();
       } else {
         return [];
@@ -97,7 +100,6 @@ class PreferencesServices {
       print("User ID is empty.");
       return [];
     }
-
     try {
       final response = await supabase
           .from('user_preferences')

@@ -1,22 +1,22 @@
 class UserModel {
   final String userId;
-  final String name;
-  final String email;
+  final String? name;
+  final String? email;
   final String profilePictureUrl;
   final DateTime? dateOfBirth;
   final String? gender;
-  final String phoneNumber;
+  final String? phoneNumber;
   final DateTime? lastActive;
   final DateTime createdAt;
 
   UserModel({
     required this.userId,
-    required this.name,
-    required this.email,
+    this.name,
+    this.email,
     this.profilePictureUrl = '',
     this.dateOfBirth,
     this.gender,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.lastActive,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -32,7 +32,7 @@ class UserModel {
           ? DateTime.parse(json['date_of_birth'])
           : null,
       gender: json['gender'] as String?,
-      phoneNumber: json['phone_number'] as String,
+      phoneNumber: json['phone_number'] as String?,
       lastActive: json['last_active'] != null
           ? DateTime.parse(json['last_active'])
           : null,
