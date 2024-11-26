@@ -22,11 +22,6 @@ void main() async {
     url: "",
     anonKey: "",
   );
-  await Supabase.initialize(
-    url: "https://lwmdduywrqgmpenrouox.supabase.co",
-    anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bWRkdXl3cnFnbXBlbnJvdW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4NzM0ODAsImV4cCI6MjA0NzQ0OTQ4MH0.JO-8P-0qlXX4FPRHvu7N5jfkIew2imxo5lyyopTFNBA",
-  );
 
   FlutterNativeSplash.remove();
 
