@@ -1,12 +1,14 @@
 import 'package:events_ticket/core/services/auth/user_services.dart';
 import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/data/models/user_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepository {
-  final String webClientId = '';
-  final String iosClientId = '';
+  final String webClientId = dotenv.get("webClientId");
+  final String iosClientId = dotenv.get("iosClientId");
+
   final supabase = Supabase.instance.client;
   User? currentUser;
   String? errorMessage;
@@ -100,8 +102,8 @@ class AuthRepository {
       }
 
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
       final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
 
       if (idToken == null || accessToken == null) {
         print(

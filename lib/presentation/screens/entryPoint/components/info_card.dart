@@ -10,7 +10,7 @@ class InfoCard extends StatelessWidget {
   });
 
   final VoidCallback onTap;
-  final UserModel user;
+  final UserModel? user;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class InfoCard extends StatelessWidget {
           ),
         ),
         title: Text(
-          user.name ?? "John Doe",
+          user?.name ?? "John Doe",
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,

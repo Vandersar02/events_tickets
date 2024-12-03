@@ -3,9 +3,9 @@ import 'package:events_ticket/data/providers/theme_providers.dart';
 import 'package:events_ticket/presentation/screens/auth/sign_in_screen.dart';
 import 'package:events_ticket/presentation/screens/entryPoint/entry_point.dart';
 import 'package:events_ticket/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,9 +18,18 @@ void main() async {
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
 
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: ".env");
+    print("Environment variables loaded successfully.");
+  } catch (e) {
+    print("Error loading .env file: $e");
+  }
+
   await Supabase.initialize(
-    url: "",
-    anonKey: "",
+    url: dotenv.get('SUPABASE_URL', fallback: 'Supabase URL not set'),
+    anonKey:
+        dotenv.get('SUPABASE_ANON_KEY', fallback: 'Supabase anon key not set'),
   );
 
   FlutterNativeSplash.remove();
@@ -57,13 +66,13 @@ class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   Future<bool> _getHasSeenOnboarding() async {
-    return await SessionManager().hasSeenOnboarding();
-    // return true;
+    // return await SessionManager().hasSeenOnboarding();
+    return true;
   }
 
   Future<bool> _getIsUserLoggedIn() async {
-    return await SessionManager().getPreference("user_id") != null;
-    // return true;
+    // return await SessionManager().getPreference("user_id") != null;
+    return true;
   }
 
   @override

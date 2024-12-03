@@ -112,7 +112,7 @@ class _SideBarState extends State<SideBar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InfoCard(
-                user: userInfo!,
+                user: userInfo,
                 onTap: () {
                   Navigator.push(
                     context,

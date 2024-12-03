@@ -14,8 +14,8 @@ const String checkPaymentUrl =
     'https://sandbox.moncashbutton.digicelgroup.com/MerChantApi/V1/CheckPayment';
 
 // Récupérer les identifiants MonCash du fichier .env
-final String clientId = dotenv.env['MONCASH_CLIENT_ID']!;
-final String clientSecret = dotenv.env['MONCASH_CLIENT_SECRET']!;
+final String clientId = dotenv.get("MONCASH_CLIENT_ID");
+final String clientSecret = dotenv.get("MONCASH_CLIENT_SECRET");
 
 // let's try smt else
 Future<void> letsTry() async {

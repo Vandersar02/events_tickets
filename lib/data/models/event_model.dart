@@ -34,10 +34,13 @@ Future<List<EventModel>> fetchFreeEvents() async {
   try {
     // Fetch recommended events
     final eventsList = await fetchRecommendedEvents();
+    print(eventsList.map((event) => event.title).toList());
 
     // Filter events where at least one ticket has a price of 0
     final freeEvents = eventsList
-        .where((event) => event.ticketTypes.any((ticket) => ticket.price == 0))
+        .where((event) =>
+            event.ticketTypes.any((ticket) => ticket.price == 0) ||
+            event.ticketTypes.isEmpty)
         .toList();
     return freeEvents;
   } catch (error) {
