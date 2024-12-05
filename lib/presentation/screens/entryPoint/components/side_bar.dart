@@ -21,7 +21,7 @@ class SideBar extends StatefulWidget {
 }
 
 final supabase = Supabase.instance.client;
-final userId = SessionManager().userId;
+final userId = SessionManager().getPreference("user_id").toString();
 
 final List<String> sidebarMenus = [
   "Home",

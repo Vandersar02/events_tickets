@@ -4,6 +4,7 @@ import 'package:events_ticket/core/services/auth/users_manager.dart';
 import 'package:events_ticket/core/services/preferences/preferences_services.dart';
 import 'package:events_ticket/data/models/preference_model.dart';
 import 'package:events_ticket/data/models/user_model.dart';
+import 'package:events_ticket/data/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -16,15 +17,15 @@ class ProfilePage extends StatefulWidget {
   ProfilePageState createState() => ProfilePageState();
 }
 
-final userId = SessionManager().userId;
+final userId = SessionManager().getPreference("user_id").toString();
 
 class ProfilePageState extends State<ProfilePage> {
-  // Controllers pour les informations personnelles
+  // Controllers for personal information
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController _dateOfBirthController = TextEditingController();
-  String? selectedGender; // Dropdown pour le genre
+  String? selectedGender; // Dropdown for gender
   List<String> genders = ["Male", "Female", "Unspecified"];
 
   File? _selectedImage;
@@ -48,9 +49,7 @@ class ProfilePageState extends State<ProfilePage> {
     final fetchedPreferences = await PreferencesServices().getAllPreferences();
     final fetchedUserPreferences =
         await PreferencesServices().getUserPreferences(userId);
-    // final fetchedUser = await UserServices().getUserData(userId);
 
-    // Set initial values
     setState(() {
       preferences = fetchedPreferences;
       selectedPreferenceIds = fetchedUserPreferences.map((p) => p.id).toList();
@@ -65,6 +64,11 @@ class ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  Future<void> _signOut() async {
+    await AuthRepository().signOut();
+    Navigator.of(context).popAndPushNamed('/login');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +80,13 @@ class ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign Out',
+            onPressed: _signOut,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -83,7 +94,7 @@ class ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Profil
+              // Profile Section
               Center(
                 child: GestureDetector(
                   onTap: _pickImage,
@@ -106,7 +117,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               const Divider(),
 
-              // Nom
+              // Name
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -128,7 +139,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Téléphone
+              // Phone Number
               TextField(
                 controller: phoneController,
                 decoration: const InputDecoration(
@@ -139,7 +150,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Date de naissance
+              // Date of Birth
               TextField(
                 controller: _dateOfBirthController,
                 readOnly: true,
@@ -163,7 +174,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Genre
+              // Gender
               DropdownButtonFormField<String>(
                 value: selectedGender,
                 decoration: const InputDecoration(
@@ -185,7 +196,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
 
-              // Section Préférences
+              // Preferences Section
               const Text(
                 "Preferences",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -224,7 +235,7 @@ class ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 32),
 
-              // Bouton de sauvegarde
+              // Save Button
               Center(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.save),
@@ -234,7 +245,7 @@ class ProfilePageState extends State<ProfilePage> {
                       // Update user data
                       await UserServices().updateUserData(userId, userInfo!);
 
-                      // Sauvegarde des préférences
+                      // Save preferences
                       await PreferencesServices()
                           .updateUserPreferences(userId, selectedPreferenceIds);
 
@@ -255,6 +266,20 @@ class ProfilePageState extends State<ProfilePage> {
                   },
                 ),
               ),
+
+              // const SizedBox(height: 20),
+
+              // // Sign Out Button
+              // Center(
+              //   child: ElevatedButton.icon(
+              //     icon: const Icon(Icons.logout),
+              //     label: const Text("Sign Out"),
+              //     onPressed: _signOut,
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.red,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

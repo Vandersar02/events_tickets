@@ -15,17 +15,53 @@ class SignUpScreen extends StatefulWidget {
 final supabase = Supabase.instance.client;
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  late final StreamSubscription<AuthState> _userSubscription;
   final _formKey = GlobalKey<FormState>();
+  late final StreamSubscription<AuthState> _userSubscription;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
   bool _redirecting = false;
   bool _obscureText = true;
   bool isLoading = false;
-  String? errorMessage = AuthRepository().errorMessage ?? '';
+  String? errorMessage = '';
+
+  // Initialisation de l'authentification à l'état
+  @override
+  void initState() {
+    super.initState();
+    _userSubscription = supabase.auth.onAuthStateChange.listen(
+      (data) {
+        if (_redirecting) return;
+        final session = data.session;
+        if (session != null) {
+          _redirecting = true;
+          Future.delayed(Duration.zero, () {
+            if (mounted) {
+              // Navigate to the entry point screen
+              Navigator.of(context).pushReplacementNamed("/userInformation");
+            }
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            context.showSnackBar(error.message, isError: true);
+            errorMessage = error.message;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _userSubscription.cancel();
+    super.dispose();
+  }
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
@@ -35,27 +71,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _emailController.text,
           _passwordController.text,
         );
-        _clearFields();
+        if (mounted) _clearFields();
       } catch (e) {
-        setState(() => context.showSnackBar(e.toString(), isError: true));
+        if (mounted) {
+          setState(() => context.showSnackBar(e.toString(), isError: true));
+        }
       } finally {
-        setState(() => isLoading = false);
+        if (mounted) setState(() => isLoading = false);
       }
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    _signInWithProvider(AuthRepository().signInWithGoogle);
-  }
-
-  Future<void> _signInWithProvider(Future<void> Function() signInMethod) async {
     setState(() => isLoading = true);
     try {
-      await signInMethod();
+      await AuthRepository().signInWithGoogle();
     } catch (e) {
-      setState(() => context.showSnackBar(e.toString(), isError: true));
+      if (mounted) {
+        setState(() => context.showSnackBar(e.toString(), isError: true));
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -63,27 +99,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.clear();
     _passwordController.clear();
     _confirmPasswordController.clear();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _userSubscription = supabase.auth.onAuthStateChange.listen((data) {
-      print(data.session);
-      if (_redirecting) return;
-      if (data.session != null) {
-        _redirecting = true;
-        Navigator.of(context).pushReplacementNamed("/user-information");
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _userSubscription.cancel();
-    super.dispose();
   }
 
   @override

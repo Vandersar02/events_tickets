@@ -7,7 +7,7 @@ class UserModel {
   final String? gender;
   final String? phoneNumber;
   final DateTime? lastActive;
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   UserModel({
     required this.userId,
@@ -18,8 +18,8 @@ class UserModel {
     this.gender,
     this.phoneNumber,
     this.lastActive,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    this.createdAt,
+  });
 
   // Conversion de JSON en objet UserModel
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -47,11 +47,11 @@ class UserModel {
       'name': name,
       'email': email,
       'profile_picture_url': profilePictureUrl,
-      'date_of_birth': dateOfBirth?.toIso8601String(),
-      'gender': gender,
+      // 'date_of_birth': dateOfBirth,
+      'gender': 'Unspecified',
       'phone_number': phoneNumber,
-      'last_active': lastActive?.toIso8601String(),
-      'created_at': createdAt.toIso8601String(),
+      'last_active': DateTime.now().toIso8601String(),
+      'created_at': DateTime.now().toIso8601String(),
     };
   }
 }

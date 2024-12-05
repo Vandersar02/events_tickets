@@ -33,10 +33,19 @@ class _HomePageState extends State<HomePage> {
       {List<EventModel> events = const []}) {
     setState(() {
       if (selectedCategory == "All") {
-        recommendedEvents = events; // Afficher tous les événements
+        recommendedEvents = recommendedEvents;
+        freeEvents = freeEvents;
+        newestEvents = newestEvents;
       } else {
-        recommendedEvents = events.where((event) {
-          // TODO: we' ll have to give th true eventype
+        recommendedEvents = recommendedEvents.where((event) {
+          return event.eventTypeFromDB!.title == selectedCategory;
+        }).toList();
+
+        freeEvents = freeEvents.where((event) {
+          return event.eventTypeFromDB!.title == selectedCategory;
+        }).toList();
+
+        newestEvents = newestEvents.where((event) {
           return event.eventTypeFromDB!.title == selectedCategory;
         }).toList();
       }

@@ -7,7 +7,7 @@ import 'package:events_ticket/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final String userId = SessionManager().userId;
+final String userId = SessionManager().getPreference("user_id").toString();
 final supabase = Supabase.instance.client;
 
 Future<List<PreferencesModel>> preferencesResponse() async =>

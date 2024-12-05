@@ -27,7 +27,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController economyPriceController = TextEditingController();
 
   // Organizer
-  final userId = SessionManager().userId;
+  final userId = SessionManager().getPreference("user_id").toString();
 
   DateTime? startDate;
   DateTime? endDate;

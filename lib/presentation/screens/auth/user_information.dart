@@ -15,9 +15,7 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _birthDateController = TextEditingController();
 
-  // Todo: Get userId from SessionManager
-  // final userId = SessionManager().getPreference("user_id").toString();
-  final String userId = SessionManager().userId;
+  final String userId = SessionManager().getPreference("user_id").toString();
 
   Future<List<PreferencesModel>> preferencesResponse() async =>
       await PreferencesServices().getUserPreferences(userId);
@@ -41,16 +39,16 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   }
 
   void fetchData() {
-    // availableInterests = (preferencesResponse() as List<dynamic>)
-    //     .map((data) => PreferencesModel.fromMap(data))
-    //     .toList();
-    availableInterests = [
-      PreferencesModel(id: "", title: "Art"),
-      PreferencesModel(id: "", title: "Music"),
-      PreferencesModel(id: "", title: "Sports"),
-      PreferencesModel(id: "", title: "Party"),
-      PreferencesModel(id: "", title: "Movies"),
-    ];
+    availableInterests = (preferencesResponse() as List<dynamic>)
+        .map((data) => PreferencesModel.fromMap(data))
+        .toList();
+    // availableInterests = [
+    //   PreferencesModel(id: "", title: "Art"),
+    //   PreferencesModel(id: "", title: "Music"),
+    //   PreferencesModel(id: "", title: "Sports"),
+    //   PreferencesModel(id: "", title: "Party"),
+    //   PreferencesModel(id: "", title: "Movies"),
+    // ];
   }
 
   @override
@@ -143,7 +141,8 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                 spacing: 10,
                 children: availableInterests.map((interest) {
                   return ChoiceChip(
-                    label: Text(interest.title.toString()),
+                    label: Text(
+                        "${interest.icon.toString()} ${interest.title.toString()}"),
                     selected: interests.contains(interest),
                     onSelected: (selected) {
                       setState(() {

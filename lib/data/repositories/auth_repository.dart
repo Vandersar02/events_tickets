@@ -17,13 +17,17 @@ class AuthRepository {
     //  Todo: check if it's really the correct logic to get the info
     final userModel = UserModel(
       userId: currentUser!.id,
-      name:
-          currentUser.userMetadata?['name'] ?? currentUser.email?.split('@')[0],
+      name: currentUser.userMetadata?['full_name'] ??
+          currentUser.userMetadata?['name'] ??
+          currentUser.email?.split('@')[0],
       email: currentUser.email.toString(),
-      profilePictureUrl: currentUser.userMetadata?['picture'] ?? '',
-      dateOfBirth: currentUser.userMetadata?['avatar_url'] ?? '',
+      profilePictureUrl: currentUser.userMetadata?['picture'] ??
+          currentUser.userMetadata?['avatar_url'] ??
+          '',
+      // dateOfBirth: currentUser.userMetadata?['birthdate'] ?? '',
       gender: currentUser.userMetadata?['gender'] ?? '',
-      phoneNumber: currentUser.phone ?? '',
+      phoneNumber:
+          currentUser.userMetadata?['phone_number'] ?? currentUser.phone ?? '',
       lastActive: DateTime.now(),
       createdAt: DateTime.now(),
     );
@@ -125,21 +129,21 @@ class AuthRepository {
         print("User exists: $userExists");
 
         if (isSignIn && !userExists) {
-          print("User doesn't exist");
+          print("User doesn't exist so user should be created first");
           errorMessage = 'Aucun compte associé à cette adresse Google.';
           await supabase.auth.signOut();
           return;
         }
 
         if (!isSignIn && userExists) {
-          print("User already exists");
+          print("User already exists so let's log him out");
           errorMessage = 'Un compte existe déjà avec cet email Google.';
           await supabase.auth.signOut();
           return;
         }
 
         if (!userExists) {
-          print("User doesn't exist");
+          print("User doesn't exist so let's create it");
           createUserInDb(currentUser!);
         }
         print("The User Metadata is: ${currentUser?.userMetadata}");

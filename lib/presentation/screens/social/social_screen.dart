@@ -30,7 +30,7 @@ class SocialScreen extends StatelessWidget {
 }
 
 final supabase = Supabase.instance.client;
-final userId = SessionManager().userId;
+final userId = SessionManager().getPreference("user_id");
 
 class SocialPostList extends StatelessWidget {
   const SocialPostList({super.key});
@@ -64,7 +64,7 @@ class SocialPostList extends StatelessWidget {
                 likes: post.likes,
                 comments: 0,
                 postedBy: post.user!.name!,
-                currentUserId: userId,
+                currentUserId: userId.toString(),
               );
             },
           );
