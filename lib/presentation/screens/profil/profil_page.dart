@@ -17,9 +17,8 @@ class ProfilePage extends StatefulWidget {
   ProfilePageState createState() => ProfilePageState();
 }
 
-final userId = SessionManager().getPreference("user_id").toString();
-
 class ProfilePageState extends State<ProfilePage> {
+  String? userId;
   // Controllers for personal information
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -34,6 +33,14 @@ class ProfilePageState extends State<ProfilePage> {
   List<String> selectedPreferenceIds = [];
   UserModel? userInfo;
 
+  Future<String> getUserUuid() async {
+    final userId = await SessionManager().getPreference("user_id");
+    if (userId == null || userId.isEmpty) {
+      throw Exception("User ID not found");
+    }
+    return userId;
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -46,9 +53,10 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchData() async {
+    userId = await getUserUuid();
     final fetchedPreferences = await PreferencesServices().getAllPreferences();
     final fetchedUserPreferences =
-        await PreferencesServices().getUserPreferences(userId);
+        await PreferencesServices().getUserPreferences(userId!);
 
     setState(() {
       preferences = fetchedPreferences;
@@ -243,11 +251,11 @@ class ProfilePageState extends State<ProfilePage> {
                   onPressed: () async {
                     try {
                       // Update user data
-                      await UserServices().updateUserData(userId, userInfo!);
+                      await UserServices().updateUserData(userId!, userInfo!);
 
                       // Save preferences
-                      await PreferencesServices()
-                          .updateUserPreferences(userId, selectedPreferenceIds);
+                      await PreferencesServices().updateUserPreferences(
+                          userId!, selectedPreferenceIds);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

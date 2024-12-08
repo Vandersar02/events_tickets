@@ -15,12 +15,10 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _birthDateController = TextEditingController();
 
-  final String userId = SessionManager().getPreference("user_id").toString();
-
-  Future<List<PreferencesModel>> preferencesResponse() async =>
-      await PreferencesServices().getUserPreferences(userId);
-
-  bool isLoading = false;
+  String? userUuid;
+  bool isLoading =
+      true; // Par défaut, l'écran affiche un indicateur de chargement
+  bool isSaving = false; // Indicateur pour le bouton de sauvegarde
 
   String? fullName;
   DateTime? dateOfBirth;
@@ -28,187 +26,207 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   String? language;
   String? phoneNumber;
   List<PreferencesModel> interests = [];
-
   List<PreferencesModel> availableInterests = [];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    fetchData();
+    _fetchUserId();
+    _initialize();
   }
 
-  void fetchData() {
-    availableInterests = (preferencesResponse() as List<dynamic>)
-        .map((data) => PreferencesModel.fromMap(data))
-        .toList();
-    // availableInterests = [
-    //   PreferencesModel(id: "", title: "Art"),
-    //   PreferencesModel(id: "", title: "Music"),
-    //   PreferencesModel(id: "", title: "Sports"),
-    //   PreferencesModel(id: "", title: "Party"),
-    //   PreferencesModel(id: "", title: "Movies"),
-    // ];
+  /// Initialisation des données utilisateur et préférences
+  Future<void> _initialize() async {
+    try {
+      // Charger les préférences
+      availableInterests = await PreferencesServices().getAllPreferences();
+
+      setState(() {
+        isLoading = false; // Le chargement est terminé
+      });
+    } catch (error) {
+      debugPrint("Error during initialization: $error");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchUserId() async {
+    final fetchUserId = await SessionManager().getPreference("user_id");
+
+    if (mounted) {
+      setState(() {
+        userUuid = fetchUserId.toString();
+        if (userUuid != null) {
+          print("User UUID fetched: $userUuid");
+        } else {
+          print("User UUID is null");
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Personal Information"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              // Nom complet
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Full name'),
-                onChanged: (value) => fullName = value,
-                validator: (value) =>
-                    value!.isEmpty ? "Enter your full name" : null,
+      appBar: AppBar(title: const Text("Personal Information")),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    _buildTextField(
+                      label: "Full name",
+                      onChanged: (value) => fullName = value,
+                      validator: (value) =>
+                          value!.isEmpty ? "Enter your full name" : null,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDateField(),
+                    const SizedBox(height: 16),
+                    _buildDropdownField(
+                      label: "Gender",
+                      value: gender,
+                      items: ['Male', 'Female', 'Unspecified'],
+                      onChanged: (value) => gender = value,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      label: "Phone number (for payments)",
+                      keyboardType: TextInputType.phone,
+                      onChanged: (value) => phoneNumber = value,
+                      validator: (value) =>
+                          value!.isEmpty ? "Enter your phone number" : null,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Select your interests"),
+                    Wrap(
+                      spacing: 10,
+                      children: availableInterests.map((interest) {
+                        return ChoiceChip(
+                          label: Text(
+                              "${interest.icon ?? 'icon'} ${interest.title ?? 'text'}"),
+                          selected: interests.contains(interest),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                interests.add(interest);
+                              } else {
+                                interests.remove(interest);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: isSaving ? null : _saveUserData,
+                      child: isSaving
+                          ? const CircularProgressIndicator()
+                          : const Text("Save"),
+                    ),
+                  ],
+                ),
               ),
-
-              // Date de naissance
-              TextFormField(
-                controller: _birthDateController,
-                readOnly: true,
-                decoration: const InputDecoration(labelText: 'Birth Date'),
-                validator: (value) =>
-                    value!.isEmpty ? "Enter your birth date" : null,
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      dateOfBirth = pickedDate;
-                      // Mettre à jour le texte du contrôleur
-                      _birthDateController.text =
-                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-                    });
-                  }
-                },
-              ),
-
-              // Genre
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Gender'),
-                validator: (value) =>
-                    value == null ? 'Please select a gender' : null,
-                items: ['Male', 'Female', 'Unspecified'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) => gender = value,
-              ),
-
-              // Langue préférée
-              DropdownButtonFormField<String>(
-                decoration:
-                    const InputDecoration(labelText: 'Preferred language'),
-                items: ['Français', 'English', 'Espagnol'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) => language = value,
-              ),
-
-              // Numéro de téléphone
-              TextFormField(
-                decoration: const InputDecoration(
-                    labelText: 'Phone number (for payments)'),
-                keyboardType: TextInputType.phone,
-                onChanged: (value) => phoneNumber = value,
-                validator: (value) =>
-                    value!.isEmpty ? "Enter your phone number" : null,
-              ),
-
-              const SizedBox(height: 20),
-
-              // Intérêts et préférences événementielles
-              const Text("Select your interests"),
-              Wrap(
-                spacing: 10,
-                children: availableInterests.map((interest) {
-                  return ChoiceChip(
-                    label: Text(
-                        "${interest.icon.toString()} ${interest.title.toString()}"),
-                    selected: interests.contains(interest),
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          interests.add(interest);
-                        } else {
-                          interests.remove(interest);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-
-              const Divider(),
-
-              const SizedBox(height: 20),
-
-              // Bouton de soumission
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() => isLoading = true);
-
-                    print("UserId: $userId");
-                    print("Info saved for user $fullName ");
-                    print(interests);
-
-                    await UserServices()
-                        .updateUserField(userId, 'name', fullName ?? '');
-                    await UserServices()
-                        .updateUserField(userId, 'gender', gender ?? '');
-                    await UserServices().updateUserField(
-                        userId, 'date_of_birth', dateOfBirth ?? '');
-                    await UserServices()
-                        .updateUserField(userId, 'language', language ?? '');
-                    await UserServices().updateUserField(
-                        userId, 'phone_number', phoneNumber ?? '');
-
-                    // Obtenez l'ID des préférences sélectionnées
-                    final selectedPreferenceIds =
-                        interests.map((interest) => interest.id).toList();
-
-                    // Appel à la fonction de mise à jour des préférences
-                    await PreferencesServices()
-                        .updateUserPreferences(userId, selectedPreferenceIds);
-
-                    if (mounted) {
-                      setState(() => isLoading = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Preferences updated successfully!')),
-                      );
-                      // Save user data in SessionManager
-                      SessionManager().savePreference("user_id", userId);
-                      // Navigate to the entry point screen
-                      Navigator.of(context).popAndPushNamed('/entryPoint');
-                    }
-                  }
-                },
-                child: isLoading ? const Text("Saving...") : const Text("Save"),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required Function(String?) onChanged,
+    String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      keyboardType: keyboardType,
+      onChanged: onChanged,
+      validator: validator,
+      decoration: InputDecoration(labelText: label),
+    );
+  }
+
+  Widget _buildDateField() {
+    return TextFormField(
+      controller: _birthDateController,
+      readOnly: true,
+      decoration: const InputDecoration(labelText: 'Birth Date'),
+      validator: (value) => value!.isEmpty ? "Enter your birth date" : null,
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
+        );
+        if (pickedDate != null) {
+          setState(() {
+            print(pickedDate);
+            dateOfBirth = pickedDate;
+            _birthDateController.text =
+                "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(labelText: label),
+      value: value,
+      items: items
+          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+          .toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Future<void> _saveUserData() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => isSaving = true);
+      try {
+        print(dateOfBirth!.toIso8601String());
+        await UserServices().updateUserField(userUuid!, 'name', fullName ?? '');
+        await UserServices().updateUserField(userUuid!, 'gender', gender ?? '');
+        await UserServices().updateUserField(
+            userUuid!, 'date_of_birth', dateOfBirth!.toIso8601String());
+        await UserServices()
+            .updateUserField(userUuid!, 'phone_number', phoneNumber ?? '');
+
+        final selectedPreferenceIds = interests.map((i) => i.id).toList();
+        await PreferencesServices()
+            .updateUserPreferences(userUuid!, selectedPreferenceIds);
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Preferences updated successfully!"),
+          backgroundColor: Colors.green,
+        ));
+        await SessionManager().savePreference("isInfoUpdated", true);
+        print("Passed through the if statement ");
+        Navigator.of(context).popAndPushNamed("/entryPoint");
+      } catch (error) {
+        debugPrint("Error saving user data: $error");
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Error saving data."),
+          backgroundColor: Colors.red,
+        ));
+      } finally {
+        setState(() => isSaving = false);
+      }
+    }
   }
 }

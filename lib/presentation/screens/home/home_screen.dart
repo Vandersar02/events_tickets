@@ -17,76 +17,79 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final supabase = Supabase.instance.client;
 
-  late List<EventModel> newestEvents = [];
-  late List<EventModel> recommendedEvents = [];
-  late List<EventModel> freeEvents = [];
+  List<EventModel> newestEvents = [];
+  List<EventModel> recommendedEvents = [];
+  List<EventModel> freeEvents = [];
   List<EventModel> upcomingEvents = [];
-
-  List<PreferencesModel?> userPreferences = [
+  List<PreferencesModel> userPreferences = [
     PreferencesModel(id: "", title: "All")
   ];
 
+  String selectedCategory = "All";
   bool isLoading = false;
-  var selectedCategory = "All";
-
-  void filterEventsByCategory(String selectedCategory,
-      {List<EventModel> events = const []}) {
-    setState(() {
-      if (selectedCategory == "All") {
-        recommendedEvents = recommendedEvents;
-        freeEvents = freeEvents;
-        newestEvents = newestEvents;
-      } else {
-        recommendedEvents = recommendedEvents.where((event) {
-          return event.eventTypeFromDB!.title == selectedCategory;
-        }).toList();
-
-        freeEvents = freeEvents.where((event) {
-          return event.eventTypeFromDB!.title == selectedCategory;
-        }).toList();
-
-        newestEvents = newestEvents.where((event) {
-          return event.eventTypeFromDB!.title == selectedCategory;
-        }).toList();
-      }
-    });
-  }
-
-  // Fetch data from the backend
-  Future<void> fetchData() async {
-    isLoading = true;
-
-    try {
-      // recommendedEvents = freeEvents = newestEvents = events;
-
-      recommendedEvents = await fetchRecommendedEvents();
-      freeEvents = await fetchFreeEvents();
-      newestEvents = await fetchNewestEvents();
-      userPreferences = await preferencesResponse();
-
-      // Populate user preferences dynamically
-      final eventTypes = recommendedEvents
-          .map((event) => event.eventTypeFromDB?.title ?? "Unknown")
-          .toSet()
-          .toList();
-      userPreferences = [
-        PreferencesModel(id: "", title: "All"),
-        ...eventTypes.map((type) => PreferencesModel(id: "", title: type))
-      ];
-
-      filterEventsByCategory(selectedCategory, events: recommendedEvents);
-      // Default recommended events
-    } catch (error) {
-      debugPrint("Erreur lors de la récupération des données : $error");
-    } finally {
-      isLoading = false;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     fetchData();
+  }
+
+  Future<void> fetchData() async {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      recommendedEvents = await fetchRecommendedEvents();
+      freeEvents = await fetchFreeEvents();
+      newestEvents = await fetchNewestEvents();
+      userPreferences = await preferencesResponse();
+
+      final eventTypes = recommendedEvents
+          .map((event) => event.eventTypeFromDB?.title ?? "Unknown")
+          .toSet()
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          userPreferences = [
+            PreferencesModel(id: "", title: "All"),
+            ...eventTypes.map((type) => PreferencesModel(id: "", title: type))
+          ];
+        });
+      }
+
+      filterEventsByCategory(selectedCategory);
+    } catch (error) {
+      if (mounted) {
+        debugPrint("Erreur lors de la récupération des données : $error");
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void filterEventsByCategory(String selectedCategory) {
+    setState(() {
+      if (selectedCategory == "All") {
+        return;
+      }
+      recommendedEvents = recommendedEvents
+          .where((event) => event.eventTypeFromDB?.title == selectedCategory)
+          .toList();
+      freeEvents = freeEvents
+          .where((event) => event.eventTypeFromDB?.title == selectedCategory)
+          .toList();
+      newestEvents = newestEvents
+          .where((event) => event.eventTypeFromDB?.title == selectedCategory)
+          .toList();
+    });
   }
 
   @override
@@ -198,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                                 (category) => Padding(
                                   padding: const EdgeInsets.only(right: 10),
                                   child: ChoiceChip(
-                                    label: Text(category!.title.toString()),
+                                    label: Text(category.title.toString()),
                                     selected:
                                         category.title == selectedCategory,
                                     onSelected: (bool selected) async {

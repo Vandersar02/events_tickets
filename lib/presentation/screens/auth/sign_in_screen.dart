@@ -30,11 +30,19 @@ class _SignInScreenState extends State<SignInScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+    } on AuthException catch (error) {
+      if (mounted) context.showSnackBar(error.message, isError: true);
     } catch (e) {
-      setState(() => context.showSnackBar(e.toString(), isError: true));
+      if (mounted) {
+        context.showSnackBar(e.toString(), isError: true);
+      }
     } finally {
-      setState(() => isLoading = false);
-      _clearFields();
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        _clearFields();
+      }
     }
   }
 
@@ -73,13 +81,16 @@ class _SignInScreenState extends State<SignInScreen> {
         if (_redirecting) return;
         final session = data.session;
         if (session != null) {
-          _redirecting = true;
-          Future.delayed(Duration.zero, () {
+          final userUuid = supabase.auth.currentUser?.id;
+          if (userUuid != null) {
+            debugPrint(
+                "Session detected, initializing user with ID signInScreen: $userUuid");
             if (mounted) {
-              // Navigate to the entry point screen
-              Navigator.of(context).pushReplacementNamed("/entryPoint");
+              Navigator.of(context).popAndPushNamed("/userInformation");
             }
-          });
+          } else {
+            debugPrint("User ID is null, redirecting failed.");
+          }
         }
       },
       onError: (error) {

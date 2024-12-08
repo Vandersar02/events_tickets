@@ -38,7 +38,7 @@ class PostModel {
     return {
       'id': postId,
       'media_url': mediaUrl,
-      'posted_by': userId,
+      'posted_by': user!.userId,
       'posted_at': createdAt?.toIso8601String(),
     };
   }

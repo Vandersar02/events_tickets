@@ -30,10 +30,27 @@ class SocialScreen extends StatelessWidget {
 }
 
 final supabase = Supabase.instance.client;
-final userId = SessionManager().getPreference("user_id");
 
-class SocialPostList extends StatelessWidget {
+class SocialPostList extends StatefulWidget {
   const SocialPostList({super.key});
+
+  @override
+  State<SocialPostList> createState() => _SocialPostListState();
+}
+
+class _SocialPostListState extends State<SocialPostList> {
+  String? userId;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchUserId();
+  }
+
+  Future<void> fetchUserId() async {
+    userId = await SessionManager().getPreference("user_id");
+  }
 
   @override
   Widget build(BuildContext context) {

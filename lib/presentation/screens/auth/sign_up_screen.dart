@@ -21,7 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool _redirecting = false;
+  // bool _redirecting = false;
   bool _obscureText = true;
   bool isLoading = false;
   String? errorMessage = '';
@@ -31,25 +31,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     super.initState();
     _userSubscription = supabase.auth.onAuthStateChange.listen(
-      (data) {
-        if (_redirecting) return;
+      (data) async {
         final session = data.session;
         if (session != null) {
-          _redirecting = true;
-          Future.delayed(Duration.zero, () {
+          final userUuid = supabase.auth.currentUser?.id;
+          if (userUuid != null) {
+            debugPrint(
+                "Session detected, initializing user with ID signUpScreen: $userUuid");
             if (mounted) {
-              // Navigate to the entry point screen
-              Navigator.of(context).pushReplacementNamed("/userInformation");
+              Navigator.of(context).popAndPushNamed("/userInformation");
             }
-          });
+          } else {
+            debugPrint("User ID is null, redirecting failed.");
+          }
         }
       },
       onError: (error) {
         if (mounted) {
-          setState(() {
-            context.showSnackBar(error.message, isError: true);
-            errorMessage = error.message;
-          });
+          context.showSnackBar(error.message, isError: true);
+          setState(() => errorMessage = error.message);
         }
       },
     );
@@ -57,8 +57,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
     _userSubscription.cancel();
     super.dispose();
   }

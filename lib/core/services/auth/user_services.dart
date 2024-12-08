@@ -15,7 +15,7 @@ class UserServices {
     }
   }
 
-  /// Met à jour les données de l'utilisateur
+  // Met à jour les données de l'utilisateur
   Future<void> updateUserField(
       String userId, String fieldName, dynamic value) async {
     try {

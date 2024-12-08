@@ -23,7 +23,9 @@ class _TicketsPageState extends State<TicketsPage> {
   }
 
   void fetchTickets() async {
-    final response = await TicketsServices().getUserTickets(userId);
+    final userUuid = await getUserUuid();
+
+    final response = await TicketsServices().getUserTickets(userUuid);
     setState(() {
       tickets.clear();
       tickets.addAll(response);

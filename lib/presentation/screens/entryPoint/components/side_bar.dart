@@ -21,7 +21,7 @@ class SideBar extends StatefulWidget {
 }
 
 final supabase = Supabase.instance.client;
-final userId = SessionManager().getPreference("user_id").toString();
+String? userUuid;
 
 final List<String> sidebarMenus = [
   "Home",
@@ -55,7 +55,18 @@ class _SideBarState extends State<SideBar> {
     final pageBuilder = _menuPages[menu];
     if (pageBuilder != null) {
       if (menu == "Organizer") {
-        organizerEvents = await fetchOrganizerEvents(userId);
+        try {
+          organizerEvents = await fetchOrganizerEvents(userUuid!);
+          if (organizerEvents.isEmpty) {
+            debugPrint("No events created yet by the user");
+          }
+        } catch (e) {
+          debugPrint("Error fetching organizer events: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to fetch organizer events.")),
+          );
+          return;
+        }
       }
 
       Navigator.of(context).push(
@@ -79,14 +90,48 @@ class _SideBarState extends State<SideBar> {
     }
   }
 
-  Future<void> fetchUser() async {
-    userInfo = await UserServices().getUserData(userId);
-  }
-
   @override
   void initState() {
     super.initState();
-    fetchUser();
+    fetchUserId().then((_) {
+      if (userUuid != null) {
+        fetchUser();
+      } else {
+        debugPrint("User ID is null in initState; skipping fetchUser.");
+      }
+    });
+  }
+
+  Future<void> fetchUserId() async {
+    final fetchUserId = await SessionManager().getPreference("user_id");
+    if (fetchUserId != null) {
+      debugPrint("User UUID fetched: $fetchUserId");
+    } else {
+      debugPrint("User UUID is null; make sure it's saved after login.");
+    }
+    if (mounted) {
+      setState(() {
+        userUuid = fetchUserId;
+      });
+    }
+  }
+
+  Future<void> fetchUser() async {
+    if (userUuid == null) {
+      debugPrint("fetchUser skipped: userUuid is null.");
+      return;
+    }
+    try {
+      final fetchedUser = await UserServices().getUserData(userUuid!);
+      if (mounted) {
+        setState(() {
+          userInfo = fetchedUser;
+          debugPrint("User info loaded: ${userInfo!.name}");
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user: $e");
+    }
   }
 
   @override
@@ -114,16 +159,23 @@ class _SideBarState extends State<SideBar> {
               InfoCard(
                 user: userInfo,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfilePage(
-                        user: userInfo!,
+                  if (userInfo != null) {
+                    print("Email: ${userInfo!.email}");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(user: userInfo),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("User information is not available.")),
+                    );
+                  }
                 },
               ),
+
               Padding(
                 padding: const EdgeInsets.only(left: 24, top: 32, bottom: 16),
                 child: Text(

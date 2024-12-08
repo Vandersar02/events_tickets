@@ -36,7 +36,7 @@ class EventsServices {
   }
 
   Future<List<EventModel>> fetchEventsWithDetails(
-      List<String> preferenceIds) async {
+      List<String> preferenceIds, String userId) async {
     try {
       // Fetch events with related details
       final response = await supabase
@@ -45,6 +45,7 @@ class EventsServices {
               '*, event_type: preferences(*), organizer:users!events_organizer_id_fkey(*)')
           .inFilter('event_type', preferenceIds)
           .eq('is_available', true)
+          .neq('organizer_id', userId)
           .order('start_at', ascending: true);
 
       if (response.isEmpty) {

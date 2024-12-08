@@ -14,31 +14,46 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Extraire prénom et nom
+    final fullName = user?.name ?? "John Doe";
+    final nameParts = fullName.split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : "John";
+    final lastName =
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "Doe";
+
     return GestureDetector(
       onTap: onTap,
       child: ListTile(
-        leading: const CircleAvatar(
+        leading: CircleAvatar(
           backgroundColor: Colors.white24,
           radius: 24,
-          child: Icon(
-            CupertinoIcons.person,
-            color: Colors.white,
-            size: 28,
-          ),
+          backgroundImage: user?.profilePictureUrl != null &&
+                  user!.profilePictureUrl.isNotEmpty
+              ? NetworkImage(user!.profilePictureUrl) as ImageProvider
+              : null,
+          child:
+              user?.profilePictureUrl == null || user!.profilePictureUrl.isEmpty
+                  ? const Icon(
+                      CupertinoIcons.person,
+                      color: Colors.white,
+                      size: 28,
+                    )
+                  : null,
         ),
         title: Text(
-          user?.name ?? "John Doe",
+          lastName,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: const Text(
-          "Simple User",
-          style: TextStyle(
+        subtitle: Text(
+          firstName,
+          style: const TextStyle(
             color: Colors.white,
-            fontSize: 12,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

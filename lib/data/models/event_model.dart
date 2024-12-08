@@ -7,21 +7,33 @@ import 'package:events_ticket/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final String userId = SessionManager().getPreference("user_id").toString();
+Future<String> getUserUuid() async {
+  final userId = await SessionManager().getPreference("user_id");
+  if (userId == null || userId.isEmpty) {
+    throw Exception("User ID not found");
+  }
+  return userId;
+}
+
 final supabase = Supabase.instance.client;
 
-Future<List<PreferencesModel>> preferencesResponse() async =>
-    await PreferencesServices().getUserPreferences(userId);
+Future<List<PreferencesModel>> preferencesResponse() async {
+  final userUuid = await getUserUuid();
+
+  return await PreferencesServices().getUserPreferences(userUuid);
+}
 
 Future<List<EventModel>> fetchRecommendedEvents() async {
+  final userUuid = await getUserUuid();
+
   try {
     final List<PreferencesModel> preferences = await preferencesResponse();
     if (preferences.isEmpty) {
-      debugPrint("Aucune préférence trouvée pour l'utilisateur $userId.");
+      debugPrint("Aucune préférence trouvée pour l'utilisateur $userUuid");
       return [];
     }
-    final eventsResponse = await EventsServices()
-        .fetchEventsWithDetails(preferences.map((e) => e.id).toList());
+    final eventsResponse = await EventsServices().fetchEventsWithDetails(
+        preferences.map((e) => e.id).toList(), userUuid);
     return eventsResponse;
   } catch (error) {
     debugPrint(

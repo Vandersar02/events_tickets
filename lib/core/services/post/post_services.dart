@@ -64,10 +64,6 @@ class PostServices {
         return [];
       }
 
-      print("Event: ${response.first['event'] as Map<String, dynamic>}");
-      print("User: ${response.first['user']}");
-      print("Posted by: ${response.first['media_url']}");
-
       List<PostModel> posts = [];
       for (var postData in response) {
         final likes = await getPostLikes(postData['id'] as String);

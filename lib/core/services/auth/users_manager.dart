@@ -51,4 +51,8 @@ class SessionManager {
   Future<bool> hasSeenOnboarding() async {
     return await getPreference(_hasSeenOnboardingKey) ?? false;
   }
+
+  Future<bool> isInfoUpdated() async {
+    return await getPreference("isInfoUpdated") ?? false;
+  }
 }

@@ -146,7 +146,6 @@ class AuthRepository {
           print("User doesn't exist so let's create it");
           createUserInDb(currentUser!);
         }
-        print("The User Metadata is: ${currentUser?.userMetadata}");
         await SessionManager().savePreference("user_id", currentUser!.id);
       }
     } catch (e) {
@@ -161,9 +160,15 @@ class AuthRepository {
       await supabase.auth.signOut();
       await SessionManager().removePreference("has_seen_onboarding");
       await SessionManager().removePreference("user_id");
+      await SessionManager().removePreference("isInfoUpdated");
       currentUser = null;
     } catch (e) {
       errorMessage = 'Erreur lors de la déconnexion : $e';
     }
+  }
+
+  void handleError(String message) {
+    print("Error: $message");
+    errorMessage = message;
   }
 }
