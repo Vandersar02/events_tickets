@@ -5,7 +5,9 @@ import 'package:events_ticket/data/models/preference_model.dart';
 import 'package:flutter/material.dart';
 
 class UserInformationScreen extends StatefulWidget {
-  const UserInformationScreen({super.key});
+  final String? userUuid;
+
+  const UserInformationScreen({super.key, this.userUuid});
 
   @override
   State<UserInformationScreen> createState() => _UserInformationScreenState();
@@ -16,14 +18,12 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   final TextEditingController _birthDateController = TextEditingController();
 
   String? userUuid;
-  bool isLoading =
-      true; // Par défaut, l'écran affiche un indicateur de chargement
-  bool isSaving = false; // Indicateur pour le bouton de sauvegarde
+  bool isLoading = true;
+  bool isSaving = false;
 
   String? fullName;
   DateTime? dateOfBirth;
   String? gender;
-  String? language;
   String? phoneNumber;
   List<PreferencesModel> interests = [];
   List<PreferencesModel> availableInterests = [];
@@ -31,40 +31,39 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserId();
-    _initialize();
+    userUuid = widget.userUuid;
+    debugPrint("Received User UUID: $userUuid");
+    _initializeUser();
   }
 
-  /// Initialisation des données utilisateur et préférences
-  Future<void> _initialize() async {
+  Future<void> _initializeUser() async {
     try {
-      // Charger les préférences
+      // Charger les préférences utilisateur
       availableInterests = await PreferencesServices().getAllPreferences();
 
+      // Charger l'identifiant utilisateur
+      // userUuid = await SessionManager().getPreference("user_id");
+      if (userUuid == null) {
+        debugPrint("Error: userUuid is null. Unable to proceed.");
+        throw Exception("User ID is not available. Please log in again.");
+      }
+      debugPrint("User UUID fetched: $userUuid");
+
       setState(() {
-        isLoading = false; // Le chargement est terminé
+        isLoading = false;
       });
     } catch (error) {
-      debugPrint("Error during initialization: $error");
+      debugPrint("Error initializing user: $error");
       if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error initializing user: $error"),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    }
-  }
-
-  Future<void> _fetchUserId() async {
-    final fetchUserId = await SessionManager().getPreference("user_id");
-
-    if (mounted) {
       setState(() {
-        userUuid = fetchUserId.toString();
-        if (userUuid != null) {
-          print("User UUID fetched: $userUuid");
-        } else {
-          print("User UUID is null");
-        }
+        isLoading = false;
       });
     }
   }
@@ -111,7 +110,7 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                       children: availableInterests.map((interest) {
                         return ChoiceChip(
                           label: Text(
-                              "${interest.icon ?? 'icon'} ${interest.title ?? 'text'}"),
+                              "${interest.icon ?? ''} ${interest.title ?? ''}"),
                           selected: interests.contains(interest),
                           onSelected: (selected) {
                             setState(() {
@@ -169,7 +168,6 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
         );
         if (pickedDate != null) {
           setState(() {
-            print(pickedDate);
             dateOfBirth = pickedDate;
             _birthDateController.text =
                 "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
@@ -197,13 +195,23 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
 
   Future<void> _saveUserData() async {
     if (_formKey.currentState!.validate()) {
+      if (userUuid == null) {
+        debugPrint("Error: Cannot save data because userUuid is null.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("User UUID is missing. Please log in again."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() => isSaving = true);
       try {
-        print(dateOfBirth!.toIso8601String());
         await UserServices().updateUserField(userUuid!, 'name', fullName ?? '');
         await UserServices().updateUserField(userUuid!, 'gender', gender ?? '');
         await UserServices().updateUserField(
-            userUuid!, 'date_of_birth', dateOfBirth!.toIso8601String());
+            userUuid!, 'date_of_birth', dateOfBirth?.toIso8601String() ?? '');
         await UserServices()
             .updateUserField(userUuid!, 'phone_number', phoneNumber ?? '');
 
@@ -216,12 +224,11 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
           backgroundColor: Colors.green,
         ));
         await SessionManager().savePreference("isInfoUpdated", true);
-        print("Passed through the if statement ");
         Navigator.of(context).popAndPushNamed("/entryPoint");
       } catch (error) {
         debugPrint("Error saving user data: $error");
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Error saving data."),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Error saving data: $error"),
           backgroundColor: Colors.red,
         ));
       } finally {

@@ -18,7 +18,6 @@ class _SignInScreenState extends State<SignInScreen> {
   late final StreamSubscription<AuthState> _userSubscription;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _redirecting = false;
   String? errorMessage = AuthRepository().errorMessage ?? '';
   bool isLoading = false;
 
@@ -77,8 +76,7 @@ class _SignInScreenState extends State<SignInScreen> {
   void initState() {
     super.initState();
     _userSubscription = supabase.auth.onAuthStateChange.listen(
-      (data) {
-        if (_redirecting) return;
+      (data) async {
         final session = data.session;
         if (session != null) {
           final userUuid = supabase.auth.currentUser?.id;
@@ -86,7 +84,7 @@ class _SignInScreenState extends State<SignInScreen> {
             debugPrint(
                 "Session detected, initializing user with ID signInScreen: $userUuid");
             if (mounted) {
-              Navigator.of(context).popAndPushNamed("/userInformation");
+              Navigator.of(context).popAndPushNamed("/entrypoint");
             }
           } else {
             debugPrint("User ID is null, redirecting failed.");
@@ -95,10 +93,8 @@ class _SignInScreenState extends State<SignInScreen> {
       },
       onError: (error) {
         if (mounted) {
-          setState(() {
-            context.showSnackBar(error.message, isError: true);
-            errorMessage = error.message;
-          });
+          context.showSnackBar(error.message, isError: true);
+          setState(() => errorMessage = error.message);
         }
       },
     );

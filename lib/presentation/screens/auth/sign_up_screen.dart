@@ -39,7 +39,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
             debugPrint(
                 "Session detected, initializing user with ID signUpScreen: $userUuid");
             if (mounted) {
-              Navigator.of(context).popAndPushNamed("/userInformation");
+              Navigator.of(context).popAndPushNamed(
+                "/userInformation",
+                arguments: userUuid,
+              );
             }
           } else {
             debugPrint("User ID is null, redirecting failed.");
@@ -84,12 +87,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => isLoading = true);
     try {
       await AuthRepository().signInWithGoogle();
-    } catch (e) {
+    } on AuthException catch (error) {
+      if (mounted) context.showSnackBar(error.message, isError: true);
+    } catch (error) {
       if (mounted) {
-        setState(() => context.showSnackBar(e.toString(), isError: true));
+        context.showSnackBar(error.toString(), isError: true);
       }
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 

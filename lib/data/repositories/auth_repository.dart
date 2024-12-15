@@ -147,6 +147,7 @@ class AuthRepository {
           createUserInDb(currentUser!);
         }
         await SessionManager().savePreference("user_id", currentUser!.id);
+        print("Saved user id in session ${currentUser!.id}");
       }
     } catch (e) {
       print("Erreur inattendue lors de la connexion avec Google:: $e");
